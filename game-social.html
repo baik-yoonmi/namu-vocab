@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나무 어휘 레벨업 - 1주차</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAF6EC;
+    --card: #FFFFFF;
+    --primary: #5C8A4A;
+    --primary-dark: #4A7239;
+    --secondary: #E8B547;
+    --secondary-dark: #C99732;
+    --brown: #7A5530;
+    --success: #7FB069;
+    --error: #D8704D;
+    --text: #2E1F12;
+    --text-light: #6B5742;
+    --border: #E5DCC8;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #FAF6EC 0%, #F0E6D0 100%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 20px;
+  }
+
+  #app {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .screen {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 36px 28px;
+    box-shadow: 0 8px 32px rgba(122, 85, 48, 0.12);
+    border: 2px solid var(--border);
+    animation: fadeIn 0.4s ease;
+  }
+
+  [hidden] { display: none !important; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === Start Screen === */
+  .start-header { text-align: center; margin-bottom: 24px; }
+  .logo { font-size: 56px; margin-bottom: 8px; }
+  .title { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+  .subtitle { color: var(--text-light); font-size: 15px; }
+
+  .lesson-info {
+    background: linear-gradient(135deg, #F0E6D0 0%, #E8DCC0 100%);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 20px 0 28px;
+    text-align: center;
+  }
+  .lesson-info .week { font-size: 13px; color: var(--brown); font-weight: 600; }
+  .lesson-info .lesson-title { font-size: 19px; color: var(--text); font-weight: 700; margin-top: 4px; }
+
+  .form-group { margin-bottom: 18px; }
+  .label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--text); font-size: 15px; }
+
+  .input {
+    width: 100%; padding: 14px 16px;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-size: 16px; background: #FFFCF5;
+    font-family: inherit; transition: border-color 0.2s;
+  }
+  .input:focus { outline: none; border-color: var(--primary); }
+
+  .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grade-btn {
+    padding: 14px; border: 2px solid var(--border);
+    background: #FFFCF5; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .grade-btn:hover { border-color: var(--primary); }
+  .grade-btn.selected {
+    background: var(--primary); color: white; border-color: var(--primary);
+  }
+
+  .btn-primary {
+    width: 100%; padding: 16px;
+    background: var(--primary); color: white;
+    border: none; border-radius: 12px;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+  .btn-primary:disabled { background: #B5C4A8; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    padding: 14px; background: white;
+    color: var(--primary); border: 2px solid var(--primary);
+    border-radius: 12px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .btn-secondary:hover { background: #F0F5EC; }
+
+  .btn-text {
+    background: none; border: none; color: var(--text-light);
+    font-size: 14px; cursor: pointer; padding: 8px; font-family: inherit;
+    text-decoration: underline;
+  }
+  .btn-text:hover { color: var(--primary); }
+
+  /* === Quiz Screen === */
+  .quiz-header { margin-bottom: 20px; }
+
+  .round-info {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 12px;
+  }
+  .round-badge {
+    background: var(--secondary); color: var(--brown);
+    padding: 6px 14px; border-radius: 20px;
+    font-weight: 700; font-size: 13px;
+  }
+  .question-counter { color: var(--text-light); font-weight: 600; font-size: 13px; }
+
+  .progress-bar {
+    height: 8px; background: var(--border);
+    border-radius: 4px; overflow: hidden; margin-bottom: 16px;
+  }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, #F5F0E0 0%, #EDE4CB 100%);
+    border-radius: 12px; padding: 10px 6px; text-align: center;
+  }
+  .stat-label { font-size: 11px; color: var(--text-light); font-weight: 600; }
+  .stat-value { font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+  .stat-value.combo { color: var(--secondary-dark); }
+
+  .timer-bar {
+    height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden; margin-bottom: 20px;
+  }
+  .timer-fill {
+    height: 100%; background: var(--primary);
+    transition: width 0.1s linear;
+  }
+  .timer-fill.warning { background: var(--secondary); }
+  .timer-fill.danger { background: var(--error); }
+
+  .question {
+    font-size: 20px; font-weight: 700;
+    color: var(--text); margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .question-context {
+    background: #FFF8E6;
+    border-left: 4px solid var(--secondary);
+    padding: 12px 16px; border-radius: 8px;
+    margin-bottom: 16px; font-size: 14px;
+    color: var(--brown); font-weight: 600;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    padding: 14px 18px; background: #FFFCF5;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-size: 15px; text-align: left; cursor: pointer;
+    transition: all 0.2s; font-family: inherit; color: var(--text);
+    line-height: 1.5;
+  }
+  .option:hover:not(:disabled) { border-color: var(--primary); background: #F5F9F0; }
+  .option.correct {
+    background: #E8F5DC; border-color: var(--success);
+    color: var(--primary-dark); font-weight: 700;
+  }
+  .option.wrong {
+    background: #FDECE7; border-color: var(--error); color: #A04A30;
+  }
+  .option:disabled { cursor: default; }
+
+  .ox-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ox-option {
+    padding: 36px 20px; background: #FFFCF5;
+    border: 2px solid var(--border); border-radius: 16px;
+    font-size: 44px; font-weight: 800; cursor: pointer;
+    transition: all 0.2s; font-family: inherit; color: var(--text-light);
+  }
+  .ox-option:hover:not(:disabled) {
+    border-color: var(--primary); background: #F5F9F0; color: var(--primary);
+  }
+  .ox-option.correct { background: #E8F5DC; border-color: var(--success); color: var(--success); }
+  .ox-option.wrong { background: #FDECE7; border-color: var(--error); color: var(--error); }
+  .ox-option:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 18px; padding: 16px;
+    border-radius: 12px; animation: slideIn 0.3s ease;
+  }
+  .feedback.correct { background: #E8F5DC; border-left: 4px solid var(--success); }
+  .feedback.wrong { background: #FDECE7; border-left: 4px solid var(--error); }
+  .feedback-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .feedback.correct .feedback-title { color: var(--primary-dark); }
+  .feedback.wrong .feedback-title { color: var(--error); }
+  .feedback-explanation { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .next-btn-wrap { margin-top: 16px; }
+
+  /* Combo popup */
+  .combo-display {
+    position: fixed; top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--secondary), #FFB74D);
+    color: white; padding: 16px 32px;
+    border-radius: 20px; font-size: 22px; font-weight: 800;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    z-index: 100; animation: comboPop 1.2s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes comboPop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
+  /* === Result Screen === */
+  .result-header { text-align: center; margin-bottom: 24px; }
+  .result-emoji { font-size: 80px; margin-bottom: 8px; line-height: 1; }
+  .result-grade { font-size: 28px; font-weight: 800; color: var(--primary); }
+  .result-score {
+    font-size: 52px; font-weight: 900;
+    color: var(--secondary-dark); margin: 8px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .result-score-label { font-size: 14px; color: var(--text-light); font-weight: 600; }
+
+  .result-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin: 20px 0;
+  }
+  .result-stat {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 12px 8px; text-align: center;
+  }
+  .result-stat-label { font-size: 12px; color: var(--text-light); font-weight: 600; }
+  .result-stat-value { font-size: 18px; font-weight: 800; color: var(--brown); margin-top: 4px; }
+
+  .round-summary {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 16px; margin-bottom: 20px;
+  }
+  .round-summary h3 {
+    font-size: 15px; margin-bottom: 12px;
+    color: var(--brown); font-weight: 700;
+  }
+  .round-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+  }
+  .round-row:last-child { border-bottom: none; }
+  .round-row strong { color: var(--primary); }
+
+  .wrong-words-section { margin-bottom: 20px; }
+  .wrong-words-section h3 {
+    font-size: 15px; color: var(--error);
+    margin-bottom: 10px; font-weight: 700;
+  }
+  .wrong-word-chip {
+    display: inline-block; background: #FDECE7;
+    color: #A04A30; padding: 6px 12px;
+    border-radius: 16px; margin: 3px;
+    font-weight: 600; font-size: 13px;
+  }
+  .perfect-banner {
+    text-align: center; padding: 16px;
+    background: #E8F5DC; border-radius: 12px;
+    color: var(--primary-dark); font-weight: 700; font-size: 15px;
+  }
+
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .action-full { grid-column: span 2; }
+
+  .submit-status {
+    text-align: center; margin-top: 16px;
+    padding: 10px; border-radius: 8px; font-size: 13px;
+  }
+  .submit-status.sending { background: #FFF8E6; color: var(--brown); }
+  .submit-status.success { background: #E8F5DC; color: var(--primary-dark); }
+  .submit-status.error { background: #FDECE7; color: var(--error); }
+
+  /* === Review Card Screen === */
+  .review-header {
+    text-align: center; margin-bottom: 24px;
+  }
+  .review-header h2 {
+    font-size: 22px; color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .review-header p { color: var(--text-light); font-size: 14px; }
+
+  .review-card {
+    background: linear-gradient(135deg, #FFF8E6 0%, #FFE9B0 100%);
+    border-radius: 20px; padding: 32px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    text-align: center; border: 2px solid var(--secondary);
+    margin-bottom: 16px; min-height: 280px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .review-word {
+    font-size: 36px; font-weight: 800;
+    color: var(--brown); margin-bottom: 16px;
+  }
+  .review-meaning {
+    font-size: 17px; color: var(--text);
+    margin-bottom: 16px; padding: 14px;
+    background: rgba(255,255,255,0.6); border-radius: 12px;
+    font-weight: 600;
+  }
+  .review-example {
+    font-style: italic; color: var(--text-light);
+    padding: 12px; background: rgba(255,255,255,0.4);
+    border-radius: 12px; font-size: 14px;
+  }
+
+  .card-nav {
+    display: flex; justify-content: space-between;
+    align-items: center; margin: 16px 0;
+  }
+  .card-counter { font-weight: 700; color: var(--text-light); font-size: 14px; }
+  .nav-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--primary); color: white;
+    border: none; font-size: 20px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--primary-dark); }
+  .nav-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+  /* === Records Screen === */
+  .records-header { text-align: center; margin-bottom: 20px; }
+  .records-header h2 {
+    font-size: 22px; color: var(--primary); margin-bottom: 4px;
+  }
+  .records-header p { color: var(--text-light); font-size: 14px; }
+
+  .record-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
+  .record-item {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 14px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .record-info { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+  .record-name { font-weight: 700; font-size: 15px; color: var(--text); }
+  .record-score {
+    font-size: 22px; font-weight: 800; color: var(--primary);
+  }
+
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-light);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    .screen { padding: 24px 20px; }
+    .title { font-size: 24px; }
+    .question { font-size: 17px; }
+    .result-score { font-size: 44px; }
+    .result-emoji { font-size: 64px; }
+    .ox-option { padding: 28px 10px; font-size: 36px; }
+    .review-word { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Start Screen ===== -->
+  <div id="start-screen" class="screen">
+    <div class="start-header">
+      <div class="logo">🌳</div>
+      <div class="title">나무 어휘 레벨업</div>
+      <div class="subtitle">사회 어휘 2단계</div>
+    </div>
+
+    <div class="lesson-info">
+      <div class="week" id="display-week">1주차</div>
+      <div class="lesson-title" id="display-lesson">01강 · 오감으로 느끼는 세상</div>
+    </div>
+
+    <div class="form-group">
+      <label class="label" for="name-input">이름</label>
+      <input type="text" id="name-input" class="input" placeholder="이름을 입력해 주세요" maxlength="10">
+    </div>
+
+    <div class="form-group">
+      <label class="label">학년</label>
+      <div class="grade-selector">
+        <button class="grade-btn" data-grade="4">4학년</button>
+        <button class="grade-btn" data-grade="5">5학년</button>
+        <button class="grade-btn" data-grade="6">6학년</button>
+      </div>
+    </div>
+
+    <button id="start-btn" class="btn-primary" disabled>시작하기 🌱</button>
+    <div style="text-align:center; margin-top: 16px;">
+      <button id="view-records-btn" class="btn-text">📊 내 기록 보기</button>
+    </div>
+  </div>
+
+  <!-- ===== Quiz Screen ===== -->
+  <div id="quiz-screen" class="screen" hidden>
+    <div class="quiz-header">
+      <div class="round-info">
+        <div class="round-badge" id="round-badge">🌱 1라운드</div>
+        <div class="question-counter" id="question-counter">1 / 17</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">점수</div>
+          <div class="stat-value" id="score-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">정답</div>
+          <div class="stat-value" id="correct-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">콤보</div>
+          <div class="stat-value combo" id="combo-value">0</div>
+        </div>
+      </div>
+      <div class="timer-bar">
+        <div class="timer-fill" id="timer-fill" style="width: 100%"></div>
+      </div>
+    </div>
+
+    <div class="question-context" id="question-context" hidden></div>
+    <div class="question" id="question-text"></div>
+    <div id="options" class="options"></div>
+
+    <div class="feedback" id="feedback" hidden></div>
+
+    <div class="next-btn-wrap" id="next-btn-wrap" hidden>
+      <button id="next-btn" class="btn-primary">다음 문제 →</button>
+    </div>
+  </div>
+
+  <!-- ===== Result Screen ===== -->
+  <div id="result-screen" class="screen" hidden>
+    <div class="result-header">
+      <div class="result-emoji" id="result-emoji">🌳</div>
+      <div class="result-grade" id="result-grade">큰 나무</div>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-score-label">100점 만점</div>
+    </div>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-label">정답</div>
+        <div class="result-stat-value" id="result-correct">0 / 17</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">소요 시간</div>
+        <div class="result-stat-value" id="result-time">0분</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">최고 콤보</div>
+        <div class="result-stat-value" id="result-combo">0</div>
+      </div>
+    </div>
+
+    <div class="round-summary">
+      <h3>📊 라운드별 점수</h3>
+      <div id="round-breakdown"></div>
+    </div>
+
+    <div class="wrong-words-section" id="wrong-words-section"></div>
+
+    <div class="action-grid">
+      <button id="btn-review-cards" class="btn-secondary">📚 어휘 카드 복습</button>
+      <button id="btn-retry-wrong" class="btn-secondary">🔄 틀린 문제 다시</button>
+      <button id="btn-restart" class="btn-primary action-full">🌱 처음부터 다시 도전</button>
+    </div>
+
+    <div class="submit-status" id="submit-status" hidden></div>
+  </div>
+
+  <!-- ===== Review Card Screen ===== -->
+  <div id="review-screen" class="screen" hidden>
+    <div class="review-header">
+      <h2>📚 어휘 카드 복습</h2>
+      <p>틀린 어휘를 카드로 다시 익혀봐요</p>
+    </div>
+
+    <div class="review-card">
+      <div class="review-word" id="review-word"></div>
+      <div class="review-meaning" id="review-meaning"></div>
+      <div class="review-example" id="review-example"></div>
+    </div>
+
+    <div class="card-nav">
+      <button class="nav-btn" id="prev-card-btn">←</button>
+      <div class="card-counter" id="card-counter">1 / 1</div>
+      <button class="nav-btn" id="next-card-btn">→</button>
+    </div>
+
+    <button id="btn-back-from-review" class="btn-secondary" style="width: 100%; margin-top: 8px;">결과로 돌아가기</button>
+  </div>
+
+  <!-- ===== Records Screen ===== -->
+  <div id="records-screen" class="screen" hidden>
+    <div class="records-header">
+      <h2>📊 내 기록</h2>
+      <p>최근 도전한 점수를 확인해요</p>
+    </div>
+
+    <div class="record-list" id="record-list"></div>
+
+    <button id="btn-back-from-records" class="btn-secondary" style="width: 100%; margin-top: 16px;">처음으로 돌아가기</button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// ⚙️ 설정 - 구글 시트 연동 URL을 여기에 붙여넣으세요
+// ============================================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWIHX6PdiLJDst0w_nPfBbXyyjXL1ZG6765S6M_U4_6Wm_5LY7aW7rf5iAdVeUHG0A/exec';
+
+// ============================================================
+// 📚 전체 주차 어휘 데이터 (1~5주차)
+// ============================================================
+const ALL_LESSONS = {
+  1: { week: '1주차', lesson: '01강 역사와 나라', vocab: [
+    { word: '세우다', meaning: '나라나 기관을 처음 만들다', example: '고조선을 처음으로 세운 사람은 단군이다.' },
+    { word: '이어받다', meaning: '앞 사람의 것을 물려받다', example: '왕위를 이어받은 왕자가 즉위했다.' },
+    { word: '다스리다', meaning: '나라나 집단을 관리하고 이끌다', example: '왕이 백성을 공정하게 다스렸다.' },
+    { word: '뿌리', meaning: '어떤 것이 처음 시작된 근본', example: '우리 문화의 뿌리는 매우 깊다.' },
+    { word: '터전', meaning: '살거나 활동하는 근거지', example: '선조들이 삶의 터전을 가꾸었다.' },
+    { word: '건국', meaning: '나라를 새로 세움', example: '고조선의 건국 신화를 배웠다.' },
+    { word: '도읍', meaning: '나라의 수도, 임금이 머무는 곳', example: '조선은 한양을 도읍으로 정했다.' },
+    { word: '왕권', meaning: '왕이 가진 권력과 권위', example: '왕권을 강화하기 위한 정책을 폈다.' },
+    { word: '개국', meaning: '나라를 처음으로 엶', example: '이성계가 조선을 개국하였다.' },
+    { word: '시조', meaning: '어떤 집안이나 나라를 처음 세운 사람', example: '단군은 고조선의 시조이다.' }
+  ]},
+  2: { week: '2주차', lesson: '02강 왕과 신하', vocab: [
+    { word: '거느리다', meaning: '많은 사람이나 군사를 지휘하다', example: '장군이 군사를 거느리고 출전했다.' },
+    { word: '거스르다', meaning: '윗사람의 뜻이나 명령에 따르지 않다', example: '왕의 명령을 거스른 신하는 벌을 받았다.' },
+    { word: '통치', meaning: '나라나 집단을 다스림', example: '왕의 통치 아래 나라가 안정되었다.' },
+    { word: '신하', meaning: '왕을 섬기며 나라 일을 하는 사람', example: '충성스러운 신하가 왕을 보필했다.' },
+    { word: '권력', meaning: '남을 지배하고 복종시키는 힘', example: '권력을 남용하면 안 된다.' },
+    { word: '세력', meaning: '어떤 집단이 가진 힘의 범위', example: '귀족의 세력이 점점 커졌다.' },
+    { word: '통제', meaning: '일정한 규칙에 따라 단속하고 규제함', example: '국경을 엄격히 통제했다.' },
+    { word: '정비', meaning: '제도나 시설을 잘 갖추어 정돈함', example: '법과 제도를 정비하여 나라를 강하게 했다.' },
+    { word: '주도', meaning: '중심이 되어 이끌어 나감', example: '개혁을 주도한 인물이 역사에 남았다.' },
+    { word: '군주', meaning: '나라를 다스리는 왕이나 황제', example: '군주는 백성을 위해 정치해야 한다.' }
+  ]},
+  3: { week: '3주차', lesson: '03강 문화와 기록', vocab: [
+    { word: '일구다', meaning: '오랜 노력으로 문화나 업적을 만들어내다', example: '조상들이 훌륭한 문화를 일구었다.' },
+    { word: '구전', meaning: '글이 아닌 말로 이야기가 전해 내려오는 것', example: '구전으로 전해지는 옛이야기가 많다.' },
+    { word: '문헌', meaning: '옛날의 사실을 기록한 문서나 책', example: '삼국사기는 중요한 역사 문헌이다.' },
+    { word: '사료', meaning: '역사를 연구하는 데 쓰는 자료', example: '다양한 사료를 통해 역사를 연구한다.' },
+    { word: '세습', meaning: '신분이나 지위를 자식에게 물려줌', example: '왕위는 세습으로 이어졌다.' },
+    { word: '교류', meaning: '문화나 사상 등이 서로 오고 감', example: '삼국은 활발하게 문화 교류를 했다.' },
+    { word: '선진문물', meaning: '발전한 나라의 문화와 기술', example: '중국의 선진문물을 받아들였다.' },
+    { word: '수용', meaning: '다른 나라의 문화나 제도를 받아들임', example: '불교를 수용하여 문화가 발전했다.' },
+    { word: '독자적', meaning: '남에 의지하지 않고 스스로의', example: '독자적인 문자인 한글을 만들었다.' },
+    { word: '유구하다', meaning: '역사나 전통이 매우 오래되다', example: '우리나라는 유구한 역사를 자랑한다.' }
+  ]},
+  4: { week: '4주차', lesson: '04강 전쟁과 외교', vocab: [
+    { word: '함락', meaning: '성이나 요새가 적에게 점령됨', example: '성이 함락되어 백성들이 피난을 떠났다.' },
+    { word: '대항', meaning: '적이나 강한 상대에 맞서 버팀', example: '백성들이 힘을 모아 침략에 대항했다.' },
+    { word: '동맹', meaning: '같은 목적을 위해 서로 돕기로 약속한 것', example: '두 나라가 동맹을 맺었다.' },
+    { word: '연합', meaning: '여러 나라나 세력이 힘을 합침', example: '연합군이 적을 물리쳤다.' },
+    { word: '항복', meaning: '싸움에서 져서 상대에게 복종하는 것', example: '결국 적군이 항복하였다.' },
+    { word: '전략', meaning: '목적을 이루기 위한 큰 계획이나 방법', example: '이순신 장군의 전략이 왜군을 격파했다.' },
+    { word: '외교', meaning: '다른 나라와 관계를 맺고 교류하는 활동', example: '평화로운 외교로 전쟁을 막았다.' },
+    { word: '영토', meaning: '한 나라의 통치권이 미치는 땅', example: '영토를 지키기 위해 많은 희생이 있었다.' },
+    { word: '발판', meaning: '더 높은 단계로 나아가기 위한 기초', example: '무역을 발판으로 나라가 성장했다.' },
+    { word: '회복', meaning: '잃었거나 약해진 것이 원래 상태로 돌아옴', example: '전쟁 후 나라를 회복하는 데 오랜 시간이 걸렸다.' }
+  ]},
+  5: { week: '5주차', lesson: '05강 나라의 변화', vocab: [
+    { word: '성립', meaning: '나라나 제도가 만들어져 이루어짐', example: '새 정부가 성립되었다.' },
+    { word: '개혁', meaning: '낡은 제도나 관습을 새롭게 고침', example: '갑오개혁으로 신분제가 폐지되었다.' },
+    { word: '혁명', meaning: '기존 체제를 뒤엎는 급격한 변화', example: '혁명으로 왕정이 무너졌다.' },
+    { word: '폐지', meaning: '기존의 제도나 법을 없앰', example: '노비 제도가 폐지되었다.' },
+    { word: '천도', meaning: '수도를 다른 곳으로 옮김', example: '백제는 여러 번 천도를 하였다.' },
+    { word: '약화', meaning: '힘이나 세력이 약해짐', example: '외세의 침입으로 왕권이 약화되었다.' },
+    { word: '간섭', meaning: '다른 나라나 사람의 일에 끼어들어 방해함', example: '외국의 내정 간섭에 저항했다.' },
+    { word: '확장', meaning: '영역이나 규모를 더 넓힘', example: '영토를 확장하기 위해 전쟁을 벌였다.' },
+    { word: '진출', meaning: '새로운 지역이나 분야로 뻗어 나감', example: '해외로 진출하여 무역을 활발히 했다.' },
+    { word: '신분', meaning: '사회에서 한 사람이 갖는 지위나 등급', example: '조선 시대에는 신분에 따라 생활이 달랐다.' }
+  ]},
+  6: { week: '6주차', lesson: '06강 땅의 모양', vocab: [
+    { word: '굽이치다', meaning: '강이나 길이 구불구불 굽어 흐르다', example: '강이 굽이쳐 흐르며 평야를 만들었다.' },
+    { word: '에워싸다', meaning: '산이나 지형이 사방을 둘러싸다', example: '산이 마을을 에워싸고 있었다.' },
+    { word: '지형', meaning: '땅의 생긴 모양', example: '우리나라 지형은 동쪽이 높고 서쪽이 낮다.' },
+    { word: '산맥', meaning: '산들이 길게 이어진 줄기', example: '태백산맥은 우리나라 대표 산맥이다.' },
+    { word: '평야', meaning: '넓고 평평한 땅', example: '호남평야는 쌀 생산량이 많다.' },
+    { word: '분지', meaning: '산으로 둘러싸인 오목한 지역', example: '대구는 분지 지형이라 여름이 덥다.' },
+    { word: '해안', meaning: '바다와 육지가 맞닿은 곳', example: '해안가에는 어촌이 많다.' },
+    { word: '내륙', meaning: '바다에서 멀리 떨어진 육지 안쪽', example: '내륙 지방은 해산물이 귀하다.' },
+    { word: '하구', meaning: '강이 바다로 흘러 들어가는 어귀', example: '강 하구에 갯벌이 발달해 있다.' },
+    { word: '지대', meaning: '높이나 특성에 따라 나뉜 땅의 구역', example: '고지대는 기온이 낮아 농작물이 다르다.' }
+  ]},
+  7: { week: '7주차', lesson: '07강 날씨와 기후', vocab: [
+    { word: '좌우하다', meaning: '어떤 것에 큰 영향을 미쳐 결정짓다', example: '기후가 농업을 좌우한다.' },
+    { word: '기후', meaning: '한 지역의 평균적인 날씨 특성', example: '우리나라는 사계절이 뚜렷한 기후이다.' },
+    { word: '강수량', meaning: '비나 눈이 내린 양', example: '여름에는 강수량이 집중된다.' },
+    { word: '기온', meaning: '공기의 온도', example: '겨울 기온이 영하로 내려간다.' },
+    { word: '온대', meaning: '열대와 냉대 사이의 온화한 기후대', example: '우리나라는 온대 기후에 속한다.' },
+    { word: '냉대', meaning: '기온이 낮고 겨울이 긴 기후대', example: '시베리아는 냉대 기후 지역이다.' },
+    { word: '계절풍', meaning: '계절에 따라 방향이 바뀌는 바람', example: '계절풍의 영향으로 여름에 비가 많이 온다.' },
+    { word: '기상', meaning: '비·바람·구름 등 대기의 상태', example: '기상 예보를 보고 우산을 챙겼다.' },
+    { word: '온난화', meaning: '지구의 온도가 점점 높아지는 현상', example: '지구 온난화로 빙하가 녹고 있다.' },
+    { word: '편서풍', meaning: '중위도 지방에서 서쪽에서 동쪽으로 부는 바람', example: '편서풍의 영향으로 서쪽에서 날씨가 온다.' }
+  ]},
+  8: { week: '8주차', lesson: '08강 자원과 환경', vocab: [
+    { word: '자원', meaning: '자연에서 얻는 재료나 에너지', example: '석유는 중요한 에너지 자원이다.' },
+    { word: '고갈', meaning: '자원이 다 소비되어 없어짐', example: '석유 고갈에 대비해 대체에너지를 개발한다.' },
+    { word: '개발', meaning: '자원이나 토지를 이용 가능하게 만듦', example: '새로운 에너지 자원을 개발했다.' },
+    { word: '생태계', meaning: '생물과 환경이 서로 영향을 주고받는 체계', example: '생태계가 파괴되면 생물이 사라진다.' },
+    { word: '매장량', meaning: '땅속에 묻혀 있는 자원의 양', example: '이 지역의 석유 매장량이 풍부하다.' },
+    { word: '재생에너지', meaning: '햇빛·바람 등 자연에서 계속 얻을 수 있는 에너지', example: '태양광은 대표적인 재생에너지이다.' },
+    { word: '지하자원', meaning: '땅속에 있는 석탄·석유 등의 자원', example: '지하자원이 풍부한 나라가 경제적으로 유리하다.' },
+    { word: '훼손', meaning: '자연이나 물건이 상하고 망가짐', example: '무분별한 개발로 자연이 훼손되었다.' },
+    { word: '분포', meaning: '일정한 범위에 흩어져 있는 상태', example: '석탄은 주로 강원도 지역에 분포한다.' },
+    { word: '지속가능', meaning: '환경을 해치지 않으면서 계속할 수 있는 것', example: '지속가능한 발전을 위해 노력해야 한다.' }
+  ]},
+  9: { week: '9주차', lesson: '09강 도시와 인구', vocab: [
+    { word: '도시화', meaning: '농촌이 도시의 성격을 갖게 되는 현상', example: '산업화로 급격한 도시화가 일어났다.' },
+    { word: '이촌향도', meaning: '농촌을 떠나 도시로 이동하는 현상', example: '이촌향도 현상으로 농촌 인구가 줄었다.' },
+    { word: '과밀', meaning: '사람이나 시설이 너무 많이 모여 있는 것', example: '서울은 인구 과밀 지역이다.' },
+    { word: '낙후', meaning: '발전이 뒤처지거나 뒤떨어진 것', example: '낙후된 지역에 대한 지원이 필요하다.' },
+    { word: '격차', meaning: '수준이나 크기의 차이', example: '도시와 농촌의 소득 격차가 크다.' },
+    { word: '균형', meaning: '어느 한쪽으로 치우치지 않고 고르게 이루어진 것', example: '지역 균형 발전이 중요한 과제이다.' },
+    { word: '집중', meaning: '한 곳으로 모이는 것', example: '인구가 수도권에 집중되어 있다.' },
+    { word: '특산물', meaning: '특정 지역에서만 나는 산물', example: '제주도의 특산물은 감귤이다.' },
+    { word: '도심', meaning: '도시의 중심부', example: '도심에는 회사와 상업 시설이 많다.' },
+    { word: '수도권', meaning: '수도를 중심으로 한 주변 지역', example: '수도권에 인구의 절반이 살고 있다.' }
+  ]},
+  10: { week: '10주차', lesson: '10강 나라와 세계', vocab: [
+    { word: '국제', meaning: '여러 나라 사이의 관계', example: '국제 사회에서 협력이 중요하다.' },
+    { word: '협약', meaning: '서로 조건을 정해 맺는 약속', example: '기후 변화 협약을 체결했다.' },
+    { word: '분쟁', meaning: '나라나 집단 사이의 갈등과 싸움', example: '영토 분쟁이 끊이지 않는다.' },
+    { word: '영향력', meaning: '다른 것에 작용하여 변화를 일으키는 힘', example: '미국은 세계적인 영향력을 가진 나라이다.' },
+    { word: '의존', meaning: '다른 것에 기대어 살아가는 것', example: '에너지를 수입에 의존하고 있다.' },
+    { word: '고립', meaning: '다른 것과 연결이 끊겨 혼자 남겨지는 것', example: '국제 사회에서 고립되면 어려움을 겪는다.' },
+    { word: '패권', meaning: '어떤 분야에서 으뜸이 되는 권력이나 권위', example: '강대국 간의 패권 경쟁이 심화되었다.' },
+    { word: '분단', meaning: '하나이던 것이 나뉘어 갈라짐', example: '우리나라는 분단된 상태이다.' },
+    { word: '체제', meaning: '나라나 사회를 운영하는 방식이나 구조', example: '민주주의 체제를 지키기 위해 노력한다.' },
+    { word: '자주', meaning: '다른 나라에 기대지 않고 스스로 결정하는 것', example: '자주 국방을 위해 군사력을 키웠다.' }
+  ]},
+  11: { week: '11주차', lesson: '11강 민주주의와 정치', vocab: [
+    { word: '참정권', meaning: '국민이 정치에 참여할 수 있는 권리', example: '모든 성인에게 참정권이 주어진다.' },
+    { word: '삼권분립', meaning: '입법·행정·사법의 세 권력을 분리하는 제도', example: '삼권분립으로 권력 남용을 막는다.' },
+    { word: '입법', meaning: '법을 만드는 것', example: '국회는 입법 기관이다.' },
+    { word: '행정', meaning: '국가의 사무를 처리하는 것', example: '정부가 행정을 담당한다.' },
+    { word: '사법', meaning: '법에 따라 재판을 하는 것', example: '법원이 사법권을 행사한다.' },
+    { word: '선거', meaning: '투표로 대표를 뽑는 것', example: '선거로 대통령을 선출한다.' },
+    { word: '여론', meaning: '사회 문제에 대한 많은 사람들의 의견', example: '여론을 무시하면 정치를 잘 할 수 없다.' },
+    { word: '표결', meaning: '투표로 의견을 결정하는 것', example: '국회에서 표결로 법안을 통과시켰다.' },
+    { word: '공론화', meaning: '어떤 문제를 공개적으로 사회에서 논의하게 됨', example: '환경 문제가 공론화되었다.' },
+    { word: '대의', meaning: '국민을 대신하여 의견을 전달하고 결정하는 것', example: '대의 민주주의는 대표를 뽑아 결정을 맡긴다.' }
+  ]},
+  12: { week: '12주차', lesson: '12강 법과 권리', vocab: [
+    { word: '기본권', meaning: '헌법이 보장하는 국민의 기본적인 권리', example: '교육받을 권리는 기본권이다.' },
+    { word: '헌법', meaning: '나라의 최고 법', example: '헌법은 모든 법의 기본이 된다.' },
+    { word: '준수', meaning: '규칙이나 법을 지키는 것', example: '교통 법규를 준수해야 한다.' },
+    { word: '제재', meaning: '규칙을 어긴 것에 처벌이나 불이익을 주는 것', example: '규칙을 어기면 제재를 받는다.' },
+    { word: '침해', meaning: '다른 사람의 권리나 재산을 침범하여 해를 끼침', example: '개인 정보를 침해하면 안 된다.' },
+    { word: '보장', meaning: '어떤 것이 틀림없이 이루어지도록 책임지는 것', example: '헌법이 국민의 권리를 보장한다.' },
+    { word: '규범', meaning: '사람들이 지켜야 할 행동의 기준', example: '도덕과 법은 사회 규범이다.' },
+    { word: '위반', meaning: '법이나 규칙을 어기는 것', example: '신호 위반은 교통 법규 위반이다.' },
+    { word: '적용', meaning: '법이나 규칙을 실제 상황에 사용하는 것', example: '법을 공정하게 적용해야 한다.' },
+    { word: '공익', meaning: '사회 전체의 이익', example: '공익을 위한 봉사 활동을 했다.' }
+  ]},
+  13: { week: '13주차', lesson: '13강 인권과 평등', vocab: [
+    { word: '인권', meaning: '사람이라면 누구나 갖는 기본적인 권리', example: '인권은 누구에게나 존중받아야 한다.' },
+    { word: '차별', meaning: '다름을 이유로 불공평하게 대우하는 것', example: '성별이나 인종으로 차별하면 안 된다.' },
+    { word: '존엄', meaning: '인간이 갖는 최고의 가치와 품위', example: '인간의 존엄성은 어떤 상황에도 지켜져야 한다.' },
+    { word: '소수자', meaning: '사회에서 수가 적거나 약한 위치에 있는 사람들', example: '소수자의 권리를 보호해야 한다.' },
+    { word: '관용', meaning: '다른 것을 너그럽게 받아들이는 태도', example: '서로 다름을 관용으로 받아들여야 한다.' },
+    { word: '억압', meaning: '힘으로 누르고 자유를 빼앗는 것', example: '억압에 저항한 독립운동가들을 기억한다.' },
+    { word: '연대', meaning: '여러 사람이 같은 목적으로 뭉치는 것', example: '노동자들이 연대하여 권리를 찾았다.' },
+    { word: '보편적', meaning: '모든 것에 두루 해당하는 것', example: '인권은 보편적인 가치이다.' },
+    { word: '옹호', meaning: '어떤 사람이나 의견을 지지하고 보호하는 것', example: '인권 단체가 피해자를 옹호했다.' },
+    { word: '인식', meaning: '어떤 것을 알고 이해하는 것', example: '인권에 대한 인식이 높아졌다.' }
+  ]},
+  14: { week: '14주차', lesson: '14강 함께 사는 사회', vocab: [
+    { word: '공존', meaning: '서로 다른 것들이 함께 살아가는 것', example: '다양한 문화가 공존하는 사회가 아름답다.' },
+    { word: '타협', meaning: '서로 양보하여 합의에 이르는 것', example: '갈등을 타협으로 해결했다.' },
+    { word: '다문화', meaning: '여러 문화가 함께 존재하는 것', example: '다문화 가정이 늘어나고 있다.' },
+    { word: '통합', meaning: '여러 것을 하나로 합치는 것', example: '사회 통합을 위해 노력해야 한다.' },
+    { word: '양극화', meaning: '두 개의 극단으로 갈리는 현상', example: '빈부 양극화 문제가 심각하다.' },
+    { word: '복지', meaning: '국민의 행복한 생활을 위한 제도와 시설', example: '복지 제도가 잘 갖춰진 나라에서 살고 싶다.' },
+    { word: '여건', meaning: '어떤 일을 하기 위한 주변 상황이나 조건', example: '교육 여건이 좋아졌다.' },
+    { word: '협의', meaning: '여러 사람이 모여 의논하는 것', example: '협의를 통해 문제를 해결했다.' },
+    { word: '제도적', meaning: '제도로 정해진 방식이나 틀', example: '제도적 장치를 마련해야 한다.' },
+    { word: '과제', meaning: '해결해야 할 문제나 목표', example: '환경 문제는 우리 모두의 과제이다.' }
+  ]},
+  15: { week: '15주차', lesson: '15강 경제 기초', vocab: [
+    { word: '희소성', meaning: '인간의 욕구에 비해 자원이 부족한 상태', example: '희소성 때문에 선택을 해야 한다.' },
+    { word: '선택', meaning: '여러 대안 중 하나를 고르는 것', example: '합리적인 선택이 중요하다.' },
+    { word: '기회비용', meaning: '어떤 것을 선택함으로써 포기한 것의 가치', example: '공부를 선택하면 놀이가 기회비용이다.' },
+    { word: '수요', meaning: '소비자가 상품을 사고자 하는 욕구', example: '가격이 오르면 수요가 줄어든다.' },
+    { word: '공급', meaning: '생산자가 상품을 팔고자 하는 욕구', example: '공급이 늘면 가격이 내려간다.' },
+    { word: '소득', meaning: '일을 하거나 재산을 통해 얻는 돈', example: '소득이 늘어 생활이 나아졌다.' },
+    { word: '지출', meaning: '목적에 따라 돈을 쓰는 것', example: '수입보다 지출이 많으면 적자가 난다.' },
+    { word: '부족', meaning: '필요한 것에 비해 양이 모자란 것', example: '자원이 부족하여 수입에 의존한다.' },
+    { word: '합리적', meaning: '이치에 맞고 논리적인 것', example: '합리적인 소비 습관을 길러야 한다.' },
+    { word: '경제', meaning: '재화와 서비스를 생산·분배·소비하는 활동', example: '경제가 발전하면 국민 생활이 나아진다.' }
+  ]},
+  16: { week: '16주차', lesson: '16강 생산과 소비', vocab: [
+    { word: '생산', meaning: '재화나 서비스를 만들어내는 것', example: '공장에서 물건을 생산한다.' },
+    { word: '소비', meaning: '재화나 서비스를 사용하는 것', example: '현명한 소비가 경제를 살린다.' },
+    { word: '분업', meaning: '일을 나누어 각자 맡은 것을 하는 것', example: '분업으로 생산 효율이 높아졌다.' },
+    { word: '특화', meaning: '잘할 수 있는 분야에 집중하는 것', example: '나라마다 특화된 산업이 있다.' },
+    { word: '유통', meaning: '상품이 생산자에서 소비자까지 이동하는 과정', example: '유통 단계가 줄면 가격이 내려간다.' },
+    { word: '부가가치', meaning: '생산 과정에서 새로 만들어지는 가치', example: '기술력이 높으면 부가가치가 커진다.' },
+    { word: '원자재', meaning: '물건을 만드는 데 쓰이는 기본 재료', example: '원자재 가격이 오르면 물가가 오른다.' },
+    { word: '제조', meaning: '원료를 가공하여 물건을 만드는 것', example: '자동차를 제조하는 공장이다.' },
+    { word: '효율', meaning: '투입 대비 최대의 성과를 내는 것', example: '기계화로 생산 효율이 높아졌다.' },
+    { word: '잉여', meaning: '필요 이상으로 남는 것', example: '잉여 생산물을 수출한다.' }
+  ]},
+  17: { week: '17주차', lesson: '17강 시장과 가격', vocab: [
+    { word: '시장', meaning: '상품을 사고파는 거래가 이루어지는 곳', example: '전통 시장에서 물건을 샀다.' },
+    { word: '가격', meaning: '상품의 값', example: '수요와 공급에 따라 가격이 결정된다.' },
+    { word: '균형가격', meaning: '수요와 공급이 일치하는 가격', example: '균형가격에서 시장이 안정된다.' },
+    { word: '독점', meaning: '한 기업이 시장 전체를 혼자 지배하는 것', example: '독점 기업은 가격을 마음대로 올릴 수 있다.' },
+    { word: '경쟁', meaning: '같은 목표를 위해 서로 앞서려는 것', example: '기업 간 경쟁이 상품을 발전시킨다.' },
+    { word: '인플레이션', meaning: '물가가 지속적으로 오르는 현상', example: '인플레이션으로 돈의 가치가 떨어진다.' },
+    { word: '물가', meaning: '전반적인 상품 가격의 수준', example: '물가가 오르면 생활이 힘들어진다.' },
+    { word: '거래', meaning: '물건이나 서비스를 사고파는 것', example: '공정한 거래가 이루어져야 한다.' },
+    { word: '수익', meaning: '사업이나 투자로 얻는 이익', example: '투자로 수익을 얻었다.' },
+    { word: '손실', meaning: '사업이나 투자에서 생기는 손해', example: '잘못된 투자로 손실이 발생했다.' }
+  ]},
+  18: { week: '18주차', lesson: '18강 무역과 교류', vocab: [
+    { word: '교역', meaning: '나라와 나라 사이에 물건을 사고파는 것', example: '실크로드를 통해 교역이 활발했다.' },
+    { word: '무역', meaning: '나라 사이에 상품을 사고파는 경제 활동', example: '우리나라는 무역에 의존하는 경제이다.' },
+    { word: '수출', meaning: '국내 상품을 다른 나라에 파는 것', example: '반도체를 수출하여 외화를 벌었다.' },
+    { word: '수입', meaning: '다른 나라 상품을 국내로 사들이는 것', example: '에너지를 해외에서 수입한다.' },
+    { word: '관세', meaning: '수입 상품에 부과하는 세금', example: '관세를 높이면 수입이 줄어든다.' },
+    { word: '환율', meaning: '서로 다른 나라 돈의 교환 비율', example: '환율이 오르면 수출에 유리하다.' },
+    { word: '흑자', meaning: '수출이 수입보다 많아 이익이 남는 것', example: '무역 흑자가 커졌다.' },
+    { word: '적자', meaning: '수입이 수출보다 많아 손해가 나는 것', example: '무역 적자가 계속되면 경제에 문제가 생긴다.' },
+    { word: '보호무역', meaning: '자국 산업을 보호하기 위해 수입을 제한하는 것', example: '보호무역으로 국내 산업을 지킨다.' },
+    { word: '자유무역', meaning: '관세 없이 자유롭게 교역하는 것', example: '자유무역 협정으로 교역이 늘었다.' }
+  ]},
+  19: { week: '19주차', lesson: '19강 직업과 노동', vocab: [
+    { word: '직업', meaning: '생계를 위해 지속적으로 하는 일', example: '미래에 어떤 직업을 가질지 생각해보았다.' },
+    { word: '노동', meaning: '생산을 위해 몸이나 정신을 쓰는 것', example: '공정한 노동에 대한 보상이 필요하다.' },
+    { word: '임금', meaning: '노동에 대한 대가로 받는 돈', example: '최저 임금이 인상되었다.' },
+    { word: '실업', meaning: '일할 의지가 있지만 일자리가 없는 상태', example: '실업률이 높으면 사회 문제가 생긴다.' },
+    { word: '고용', meaning: '일할 사람을 채용하는 것', example: '기업이 고용을 늘려 일자리가 생겼다.' },
+    { word: '취업', meaning: '직업을 얻는 것', example: '취업을 위해 열심히 준비했다.' },
+    { word: '노동권', meaning: '일할 권리와 노동 조건에 관한 권리', example: '노동권을 보장받아야 한다.' },
+    { word: '전문직', meaning: '특별한 지식과 기술이 필요한 직업', example: '의사·변호사는 대표적인 전문직이다.' },
+    { word: '종사하다', meaning: '어떤 일을 직업으로 삼아 하다', example: '교육 분야에 종사하고 싶다.' },
+    { word: '숙련', meaning: '기술이나 일에 능숙해진 것', example: '숙련된 기술자가 되기 위해 오래 훈련했다.' }
+  ]},
+  20: { week: '20주차', lesson: '20강 금융과 경제생활', vocab: [
+    { word: '금융', meaning: '돈을 운용하고 관리하는 경제 활동', example: '금융 기관에서 대출을 받았다.' },
+    { word: '저축', meaning: '소득 중 일부를 모아두는 것', example: '미래를 위해 저축하는 습관이 중요하다.' },
+    { word: '투자', meaning: '미래 이익을 위해 돈을 쓰는 것', example: '주식에 투자하여 수익을 냈다.' },
+    { word: '이자', meaning: '돈을 빌린 대가로 추가로 지급하는 돈', example: '은행에서 돈을 빌리면 이자를 내야 한다.' },
+    { word: '세금', meaning: '국가 운영을 위해 국민이 내는 돈', example: '세금으로 도로와 학교를 만든다.' },
+    { word: '예산', meaning: '미리 계획한 수입과 지출', example: '국가 예산을 어떻게 쓸지 결정한다.' },
+    { word: '부채', meaning: '빚, 갚아야 할 돈', example: '부채가 늘면 경제적으로 어려워진다.' },
+    { word: '자산', meaning: '개인이나 기업이 가진 재산', example: '집과 자동차는 중요한 자산이다.' },
+    { word: '신용', meaning: '빚을 갚을 능력과 믿음', example: '신용이 좋으면 대출받기 쉽다.' },
+    { word: '보험', meaning: '위험에 대비해 미리 보험료를 내고 사고 발생 시 보험금을 받는 제도', example: '건강보험으로 병원비를 아낄 수 있다.' }
+  ]}
+};
+
+
+// URL 파라미터로 주차 결정
+const weekNum = parseInt(new URLSearchParams(window.location.search).get('week')) || 1;
+const LESSON = ALL_LESSONS[weekNum] || ALL_LESSONS[1];
+
+// ============================================================
+// ❓ 문제 데이터 — 주차별 자동 생성
+// ============================================================
+const ALL_QUESTIONS = {
+  1: [
+    {round:1,type:'multiple',word:'건국',question:"'건국'의 뜻으로 알맞은 것은?",options:['나라의 수도를 옮김','나라를 새로 세움','왕이 가진 권력','앞 사람의 것을 물려받음'],correct:1,example:'예문: 고조선의 건국 신화를 배웠다.'},
+    {round:1,type:'multiple',word:'도읍',question:"'도읍'의 뜻으로 알맞은 것은?",options:['나라를 처음으로 엶','나라의 수도, 임금이 머무는 곳','어떤 집안을 처음 세운 사람','살거나 활동하는 근거지'],correct:1,example:'예문: 조선은 한양을 도읍으로 정했다.'},
+    {round:1,type:'multiple',word:'왕권',question:"'왕권'의 뜻으로 알맞은 것은?",options:['나라를 새로 세움','어떤 것이 처음 시작된 근본','왕이 가진 권력과 권위','앞 사람의 것을 물려받음'],correct:2,example:'예문: 왕권을 강화하기 위한 정책을 폈다.'},
+    {round:1,type:'multiple',word:'시조',question:"'시조'의 뜻으로 알맞은 것은?",options:['나라나 기관을 처음 만들다','어떤 집안이나 나라를 처음 세운 사람','살거나 활동하는 근거지','나라의 수도'],correct:1,example:'예문: 단군은 고조선의 시조이다.'},
+    {round:1,type:'multiple',word:'터전',question:"'터전'의 뜻으로 알맞은 것은?",options:['살거나 활동하는 근거지','나라를 새로 세움','어떤 것이 처음 시작된 근본','앞 사람의 것을 물려받음'],correct:0,example:'예문: 선조들이 삶의 터전을 가꾸었다.'},
+    {round:2,type:'multiple',word:'세우다',context:'보기 · 세우다 / 이어받다 / 다스리다 / 뿌리 / 개국',question:'고조선을 처음으로 _______사람은 단군이다.',options:['세운','이어받은','다스린','개국한'],correct:0,example:"'세우다'는 나라나 기관을 처음 만드는 것이에요."},
+    {round:2,type:'multiple',word:'이어받다',context:'보기 · 세우다 / 이어받다 / 다스리다 / 뿌리 / 개국',question:'왕위를 _______왕자가 즉위했다.',options:['세운','이어받은','다스린','개국한'],correct:1,example:"'이어받다'는 앞 사람의 것을 물려받는 것이에요."},
+    {round:2,type:'multiple',word:'다스리다',context:'보기 · 세우다 / 이어받다 / 다스리다 / 뿌리 / 개국',question:'왕이 백성을 공정하게 _______.',options:['세웠다','이어받았다','다스렸다','개국했다'],correct:2,example:"'다스리다'는 나라나 집단을 관리하고 이끄는 것이에요."},
+    {round:2,type:'multiple',word:'뿌리',context:'보기 · 세우다 / 이어받다 / 다스리다 / 뿌리 / 개국',question:'우리 문화의 _______는 매우 깊다.',options:['세움','이어받음','다스림','뿌리'],correct:3,example:"'뿌리'는 어떤 것이 처음 시작된 근본이에요."},
+    {round:2,type:'multiple',word:'개국',context:'보기 · 세우다 / 이어받다 / 다스리다 / 뿌리 / 개국',question:'이성계가 조선을 _______하였다.',options:['세웠','이어받았','다스렸','개국'],correct:3,example:"'개국'은 나라를 처음으로 여는 것이에요."},
+    {round:3,type:'multiple',word:'건국',question:"'건국'과 '개국'은 어떤 관계인가요?",options:['나라를 세우거나 여는 비슷한 뜻이다','건국은 수도를 옮기는 것이다','개국은 왕권을 강화하는 것이다','둘은 전혀 다른 뜻이다','건국은 외교, 개국은 전쟁이다'],correct:0,example:"'건국'과 '개국' 모두 나라를 새로 만들거나 여는 뜻으로 비슷해요."},
+    {round:3,type:'multiple',word:'왕권',question:'왕권이 강화되면 나타나는 현상으로 알맞은 것은?',options:['신하의 권력이 커진다','백성이 정치에 더 참여한다','왕의 명령이 더 잘 지켜진다','민주주의가 발전한다','세금이 줄어든다'],correct:2,example:"'왕권'이 강화되면 왕의 결정권이 커져 명령이 잘 지켜져요."},
+    {round:4,type:'ox',word:'건국',question:"'건국'은 나라를 새로 세우는 것이다.",correct:true,example:'예: 고조선의 건국 신화를 배웠다.'},
+    {round:4,type:'ox',word:'도읍',question:"'도읍'은 나라의 수도로 임금이 머무는 곳이다.",correct:true,example:'예: 조선은 한양을 도읍으로 정했다.'},
+    {round:4,type:'ox',word:'시조',question:"'시조'는 어떤 나라나 집안을 가장 마지막에 이끈 사람이다.",correct:false,example:"'시조'는 처음 세운 사람이에요."},
+    {round:4,type:'ox',word:'왕권',question:'왕권이 약해지면 신하의 세력이 커질 수 있다.',correct:true,example:"왕권이 약해지면 상대적으로 신하의 힘이 강해질 수 있어요."},
+    {round:4,type:'ox',word:'터전',question:"'터전'은 살거나 활동하는 근거지를 말한다.",correct:true,example:'예: 선조들이 삶의 터전을 가꾸었다.'}
+  ],
+  2: [
+    {round:1,type:'multiple',word:'통치',question:"'통치'의 뜻으로 알맞은 것은?",options:['나라나 집단을 다스림','왕을 섬기며 나라 일을 하는 사람','어떤 집단이 가진 힘의 범위','중심이 되어 이끌어 나감'],correct:0,example:'예문: 왕의 통치 아래 나라가 안정되었다.'},
+    {round:1,type:'multiple',word:'신하',question:"'신하'의 뜻으로 알맞은 것은?",options:['나라를 다스리는 왕이나 황제','왕을 섬기며 나라 일을 하는 사람','남을 지배하고 복종시키는 힘','일정한 규칙에 따라 단속하고 규제함'],correct:1,example:'예문: 충성스러운 신하가 왕을 보필했다.'},
+    {round:1,type:'multiple',word:'권력',question:"'권력'의 뜻으로 알맞은 것은?",options:['제도나 시설을 잘 갖추어 정돈함','어떤 집단이 가진 힘의 범위','남을 지배하고 복종시키는 힘','중심이 되어 이끌어 나감'],correct:2,example:'예문: 권력을 남용하면 안 된다.'},
+    {round:1,type:'multiple',word:'군주',question:"'군주'의 뜻으로 알맞은 것은?",options:['왕을 섬기며 나라 일을 하는 사람','나라를 다스리는 왕이나 황제','어떤 집단이 가진 힘의 범위','일정한 규칙에 따라 단속함'],correct:1,example:'예문: 군주는 백성을 위해 정치해야 한다.'},
+    {round:1,type:'multiple',word:'주도',question:"'주도'의 뜻으로 알맞은 것은?",options:['제도나 시설을 잘 갖추어 정돈함','중심이 되어 이끌어 나감','일정한 규칙에 따라 단속함','어떤 집단이 가진 힘의 범위'],correct:1,example:'예문: 개혁을 주도한 인물이 역사에 남았다.'},
+    {round:2,type:'multiple',word:'거느리다',context:'보기 · 거느리다 / 거스르다 / 통제 / 정비 / 세력',question:'장군이 군사를 _______고 출전했다.',options:['거느리','거스르','통제하','정비하'],correct:0,example:"'거느리다'는 많은 사람이나 군사를 지휘하는 것이에요."},
+    {round:2,type:'multiple',word:'거스르다',context:'보기 · 거느리다 / 거스르다 / 통제 / 정비 / 세력',question:'왕의 명령을 _______신하는 벌을 받았다.',options:['거느린','거스른','통제한','정비한'],correct:1,example:"'거스르다'는 윗사람의 뜻이나 명령에 따르지 않는 것이에요."},
+    {round:2,type:'multiple',word:'통제',context:'보기 · 거느리다 / 거스르다 / 통제 / 정비 / 세력',question:'국경을 엄격히 _______했다.',options:['거느리','거스르','통제','정비'],correct:2,example:"'통제'는 일정한 규칙에 따라 단속하고 규제하는 것이에요."},
+    {round:2,type:'multiple',word:'정비',context:'보기 · 거느리다 / 거스르다 / 통제 / 정비 / 세력',question:'법과 제도를 _______하여 나라를 강하게 했다.',options:['거느리','거스르','통제','정비'],correct:3,example:"'정비'는 제도나 시설을 잘 갖추어 정돈하는 것이에요."},
+    {round:2,type:'multiple',word:'세력',context:'보기 · 통치 / 신하 / 권력 / 세력 / 군주',question:'귀족의 _______이 점점 커졌다.',options:['통치','신하','권력','세력'],correct:3,example:"'세력'은 어떤 집단이 가진 힘의 범위예요."},
+    {round:3,type:'multiple',word:'권력',question:"'권력'과 '세력'의 차이로 알맞은 것은?",options:['권력은 개인이 남을 지배하는 힘, 세력은 집단이 가진 힘의 범위','둘은 같은 뜻이다','세력이 더 강한 힘이다','권력은 군주만 가질 수 있다','세력은 신하만 가질 수 있다'],correct:0,example:"'권력'은 개인적 지배의 힘, '세력'은 집단의 힘의 범위예요."},
+    {round:3,type:'multiple',word:'통치',question:'왕의 권력 남용을 막기 위한 방법으로 알맞은 것은?',options:['왕권을 더 강화한다','신하를 없앤다','권력을 여러 기관이 나누어 가진다','군사력을 키운다','세금을 높인다'],correct:2,example:"권력을 분리하면 한 사람이 모든 것을 마음대로 할 수 없어요."},
+    {round:4,type:'ox',word:'통치',question:"'통치'는 나라나 집단을 다스리는 것이다.",correct:true,example:'예: 왕의 통치 아래 나라가 안정되었다.'},
+    {round:4,type:'ox',word:'신하',question:"'신하'는 왕보다 높은 지위에 있는 사람이다.",correct:false,example:"'신하'는 왕을 섬기며 나라 일을 하는 사람이에요. 왕보다 아래예요."},
+    {round:4,type:'ox',word:'거스르다',question:"'거스르다'는 윗사람의 뜻에 따르지 않는 것이다.",correct:true,example:'예: 왕의 명령을 거스른 신하는 벌을 받았다.'},
+    {round:4,type:'ox',word:'군주',question:"'군주'와 '신하'는 같은 뜻이다.",correct:false,example:"'군주'는 나라를 다스리는 왕, '신하'는 왕을 섬기는 사람으로 달라요."},
+    {round:4,type:'ox',word:'주도',question:"'주도'는 중심이 되어 이끌어 나가는 것이다.",correct:true,example:'예: 개혁을 주도한 인물이 역사에 남았다.'}
+  ],
+  3: [
+    {round:1,type:'multiple',word:'문헌',question:"'문헌'의 뜻으로 알맞은 것은?",options:['옛날의 사실을 기록한 문서나 책','역사를 연구하는 데 쓰는 자료','글이 아닌 말로 이야기가 전해 내려오는 것','발전한 나라의 문화와 기술'],correct:0,example:'예문: 삼국사기는 중요한 역사 문헌이다.'},
+    {round:1,type:'multiple',word:'사료',question:"'사료'의 뜻으로 알맞은 것은?",options:['옛날의 사실을 기록한 문서나 책','역사를 연구하는 데 쓰는 자료','다른 나라의 문화나 제도를 받아들임','남에 의지하지 않고 스스로의'],correct:1,example:'예문: 다양한 사료를 통해 역사를 연구한다.'},
+    {round:1,type:'multiple',word:'교류',question:"'교류'의 뜻으로 알맞은 것은?",options:['글이 아닌 말로 전해지는 것','신분이나 지위를 자식에게 물려줌','문화나 사상 등이 서로 오고 감','다른 나라의 문화를 받아들임'],correct:2,example:'예문: 삼국은 활발하게 문화 교류를 했다.'},
+    {round:1,type:'multiple',word:'독자적',question:"'독자적'의 뜻으로 알맞은 것은?",options:['역사나 전통이 매우 오래됨','남에 의지하지 않고 스스로의','다른 나라의 문화나 제도를 받아들임','신분이나 지위를 자식에게 물려줌'],correct:1,example:'예문: 독자적인 문자인 한글을 만들었다.'},
+    {round:1,type:'multiple',word:'유구하다',question:"'유구하다'의 뜻으로 알맞은 것은?",options:['역사나 전통이 매우 오래되다','다른 나라의 문화나 제도를 받아들이다','남에 의지하지 않고 스스로이다','신분이나 지위를 자식에게 물려주다'],correct:0,example:'예문: 우리나라는 유구한 역사를 자랑한다.'},
+    {round:2,type:'multiple',word:'구전',context:'보기 · 일구다 / 구전 / 세습 / 수용 / 선진문물',question:'글이 아닌 말로 이야기가 _______으로 전해졌다.',options:['일구어','구전','세습','수용'],correct:1,example:"'구전'은 글이 아닌 말로 이야기가 전해 내려오는 것이에요."},
+    {round:2,type:'multiple',word:'세습',context:'보기 · 일구다 / 구전 / 세습 / 수용 / 선진문물',question:'왕위는 _______으로 이어졌다.',options:['일구어','구전','세습','수용'],correct:2,example:"'세습'은 신분이나 지위를 자식에게 물려주는 것이에요."},
+    {round:2,type:'multiple',word:'수용',context:'보기 · 일구다 / 구전 / 세습 / 수용 / 선진문물',question:'불교를 _______하여 문화가 발전했다.',options:['일구어','구전하여','세습하여','수용하여'],correct:3,example:"'수용'은 다른 나라의 문화나 제도를 받아들이는 것이에요."},
+    {round:2,type:'multiple',word:'일구다',context:'보기 · 일구다 / 구전 / 세습 / 수용 / 선진문물',question:'조상들이 훌륭한 문화를 _______었다.',options:['일구','구전하','세습하','수용하'],correct:0,example:"'일구다'는 오랜 노력으로 문화나 업적을 만들어내는 것이에요."},
+    {round:2,type:'multiple',word:'선진문물',context:'보기 · 문헌 / 사료 / 교류 / 독자적 / 선진문물',question:'중국의 _______을 받아들였다.',options:['문헌','사료','교류','선진문물'],correct:3,example:"'선진문물'은 발전한 나라의 문화와 기술이에요."},
+    {round:3,type:'multiple',word:'문헌',question:"역사 연구에서 '문헌'과 '사료'의 관계로 알맞은 것은?",options:['문헌은 사료의 한 종류이다','사료는 문헌보다 오래된 것이다','둘은 완전히 다른 뜻이다','문헌은 말로 전해지는 것이다','사료는 그림만 포함한다'],correct:0,example:"'사료'는 역사 연구에 쓰는 자료 전체, '문헌'은 그 중 기록된 문서예요."},
+    {round:3,type:'multiple',word:'독자적',question:"우리나라가 '독자적'인 문화를 만든 예로 알맞은 것은?",options:['중국 문자를 그대로 사용했다','한글을 새로 만들었다','일본의 제도를 그대로 받아들였다','외래 문화만 사용했다','중국 음악을 그대로 연주했다'],correct:1,example:"한글은 우리나라가 독자적으로 만든 문자예요."},
+    {round:4,type:'ox',word:'문헌',question:"'문헌'은 옛날의 사실을 기록한 문서나 책이다.",correct:true,example:'예: 삼국사기는 중요한 역사 문헌이다.'},
+    {round:4,type:'ox',word:'구전',question:"'구전'은 글로 기록된 이야기가 전해지는 것이다.",correct:false,example:"'구전'은 글이 아닌 말로 이야기가 전해지는 것이에요."},
+    {round:4,type:'ox',word:'교류',question:"'교류'는 문화나 사상 등이 서로 오고 가는 것이다.",correct:true,example:'예: 삼국은 활발하게 문화 교류를 했다.'},
+    {round:4,type:'ox',word:'세습',question:"'세습'은 신분이나 지위를 자식에게 물려주는 것이다.",correct:true,example:'예: 왕위는 세습으로 이어졌다.'},
+    {round:4,type:'ox',word:'유구하다',question:"'유구하다'는 역사나 전통이 매우 짧다는 뜻이다.",correct:false,example:"'유구하다'는 역사나 전통이 매우 오래됐다는 뜻이에요."}
+  ],
+  4: [
+    {round:1,type:'multiple',word:'동맹',question:"'동맹'의 뜻으로 알맞은 것은?",options:['싸움에서 져서 상대에게 복종하는 것','여러 나라나 세력이 힘을 합침','같은 목적을 위해 서로 돕기로 약속한 것','성이나 요새가 적에게 점령됨'],correct:2,example:'예문: 두 나라가 동맹을 맺었다.'},
+    {round:1,type:'multiple',word:'외교',question:"'외교'의 뜻으로 알맞은 것은?",options:['다른 나라와 관계를 맺고 교류하는 활동','싸움에서 져서 상대에게 복종하는 것','한 나라의 통치권이 미치는 땅','목적을 이루기 위한 큰 계획이나 방법'],correct:0,example:'예문: 평화로운 외교로 전쟁을 막았다.'},
+    {round:1,type:'multiple',word:'영토',question:"'영토'의 뜻으로 알맞은 것은?",options:['목적을 이루기 위한 큰 계획이나 방법','더 높은 단계로 나아가기 위한 기초','한 나라의 통치권이 미치는 땅','잃었거나 약해진 것이 원래 상태로 돌아옴'],correct:2,example:'예문: 영토를 지키기 위해 많은 희생이 있었다.'},
+    {round:1,type:'multiple',word:'항복',question:"'항복'의 뜻으로 알맞은 것은?",options:['적이나 강한 상대에 맞서 버팀','싸움에서 져서 상대에게 복종하는 것','여러 나라나 세력이 힘을 합침','성이나 요새가 적에게 점령됨'],correct:1,example:'예문: 결국 적군이 항복하였다.'},
+    {round:1,type:'multiple',word:'전략',question:"'전략'의 뜻으로 알맞은 것은?",options:['목적을 이루기 위한 큰 계획이나 방법','잃었거나 약해진 것이 원래 상태로 돌아옴','더 높은 단계로 나아가기 위한 기초','다른 나라와 관계를 맺고 교류하는 활동'],correct:0,example:'예문: 이순신 장군의 전략이 왜군을 격파했다.'},
+    {round:2,type:'multiple',word:'함락',context:'보기 · 함락 / 대항 / 동맹 / 연합 / 항복',question:'성이 _______되어 백성들이 피난을 떠났다.',options:['함락','대항','동맹','연합'],correct:0,example:"'함락'은 성이나 요새가 적에게 점령되는 것이에요."},
+    {round:2,type:'multiple',word:'대항',context:'보기 · 함락 / 대항 / 동맹 / 연합 / 항복',question:'백성들이 힘을 모아 침략에 _______했다.',options:['함락','대항','동맹','연합'],correct:1,example:"'대항'은 적이나 강한 상대에 맞서 버티는 것이에요."},
+    {round:2,type:'multiple',word:'연합',context:'보기 · 함락 / 대항 / 동맹 / 연합 / 항복',question:'_______군이 적을 물리쳤다.',options:['함락','대항','동맹','연합'],correct:3,example:"'연합'은 여러 나라나 세력이 힘을 합치는 것이에요."},
+    {round:2,type:'multiple',word:'회복',context:'보기 · 전략 / 외교 / 영토 / 발판 / 회복',question:'전쟁 후 나라를 _______하는 데 오랜 시간이 걸렸다.',options:['전략','외교','영토','회복'],correct:3,example:"'회복'은 잃었거나 약해진 것이 원래 상태로 돌아오는 것이에요."},
+    {round:2,type:'multiple',word:'발판',context:'보기 · 전략 / 외교 / 영토 / 발판 / 회복',question:'무역을 _______으로 나라가 성장했다.',options:['전략','외교','발판','회복'],correct:2,example:"'발판'은 더 높은 단계로 나아가기 위한 기초예요."},
+    {round:3,type:'multiple',word:'동맹',question:"'동맹'과 '연합'의 차이로 알맞은 것은?",options:['동맹은 약속을 맺는 것, 연합은 실제로 힘을 합치는 것','둘은 같은 뜻이다','연합이 더 약한 관계이다','동맹은 적국과 맺는 것이다','연합은 한 나라만 가능하다'],correct:0,example:"'동맹'은 서로 돕기로 약속한 것, '연합'은 실제로 힘을 합치는 것이에요."},
+    {round:3,type:'multiple',word:'외교',question:'전쟁 없이 문제를 해결하는 방법은?',options:['항복','함락','외교 협상','군사 공격','영토 침략'],correct:2,example:"'외교'는 다른 나라와 대화로 관계를 맺고 문제를 해결하는 활동이에요."},
+    {round:4,type:'ox',word:'동맹',question:"'동맹'은 같은 목적을 위해 서로 돕기로 약속한 것이다.",correct:true,example:'예: 두 나라가 동맹을 맺었다.'},
+    {round:4,type:'ox',word:'항복',question:"'항복'은 싸움에서 이겨 적을 복종시키는 것이다.",correct:false,example:"'항복'은 싸움에서 져서 상대에게 복종하는 것이에요."},
+    {round:4,type:'ox',word:'영토',question:"'영토'는 한 나라의 통치권이 미치는 땅이다.",correct:true,example:'예: 영토를 지키기 위해 많은 희생이 있었다.'},
+    {round:4,type:'ox',word:'외교',question:"'외교'와 '전쟁'은 같은 방법이다.",correct:false,example:"'외교'는 대화로, '전쟁'은 무력으로 문제를 해결하는 것이에요."},
+    {round:4,type:'ox',word:'전략',question:"'전략'은 목적을 이루기 위한 큰 계획이나 방법이다.",correct:true,example:'예: 이순신 장군의 전략이 왜군을 격파했다.'}
+  ],
+  5: [
+    {round:1,type:'multiple',word:'개혁',question:"'개혁'의 뜻으로 알맞은 것은?",options:['기존 체제를 뒤엎는 급격한 변화','낡은 제도나 관습을 새롭게 고침','수도를 다른 곳으로 옮김','기존의 제도나 법을 없앰'],correct:1,example:'예문: 갑오개혁으로 신분제가 폐지되었다.'},
+    {round:1,type:'multiple',word:'혁명',question:"'혁명'의 뜻으로 알맞은 것은?",options:['낡은 제도나 관습을 새롭게 고침','기존 체제를 뒤엎는 급격한 변화','힘이나 세력이 약해짐','다른 나라의 일에 끼어들어 방해함'],correct:1,example:'예문: 혁명으로 왕정이 무너졌다.'},
+    {round:1,type:'multiple',word:'폐지',question:"'폐지'의 뜻으로 알맞은 것은?",options:['기존의 제도나 법을 없앰','수도를 다른 곳으로 옮김','영역이나 규모를 더 넓힘','나라나 제도가 만들어져 이루어짐'],correct:0,example:'예문: 노비 제도가 폐지되었다.'},
+    {round:1,type:'multiple',word:'간섭',question:"'간섭'의 뜻으로 알맞은 것은?",options:['힘이나 세력이 약해짐','새로운 지역이나 분야로 뻗어 나감','다른 나라나 사람의 일에 끼어들어 방해함','영역이나 규모를 더 넓힘'],correct:2,example:'예문: 외국의 내정 간섭에 저항했다.'},
+    {round:1,type:'multiple',word:'신분',question:"'신분'의 뜻으로 알맞은 것은?",options:['사회에서 한 사람이 갖는 지위나 등급','힘이나 세력이 약해짐','수도를 다른 곳으로 옮김','나라나 제도가 만들어져 이루어짐'],correct:0,example:'예문: 조선 시대에는 신분에 따라 생활이 달랐다.'},
+    {round:2,type:'multiple',word:'성립',context:'보기 · 성립 / 개혁 / 혁명 / 폐지 / 천도',question:'새 정부가 _______되었다.',options:['성립','개혁','혁명','폐지'],correct:0,example:"'성립'은 나라나 제도가 만들어져 이루어지는 것이에요."},
+    {round:2,type:'multiple',word:'천도',context:'보기 · 성립 / 개혁 / 혁명 / 폐지 / 천도',question:'백제는 여러 번 _______를 하였다.',options:['성립','개혁','혁명','천도'],correct:3,example:"'천도'는 수도를 다른 곳으로 옮기는 것이에요."},
+    {round:2,type:'multiple',word:'약화',context:'보기 · 약화 / 간섭 / 확장 / 진출 / 신분',question:'외세의 침입으로 왕권이 _______되었다.',options:['약화','간섭','확장','진출'],correct:0,example:"'약화'는 힘이나 세력이 약해지는 것이에요."},
+    {round:2,type:'multiple',word:'확장',context:'보기 · 약화 / 간섭 / 확장 / 진출 / 신분',question:'영토를 _______하기 위해 전쟁을 벌였다.',options:['약화','간섭','확장','진출'],correct:2,example:"'확장'은 영역이나 규모를 더 넓히는 것이에요."},
+    {round:2,type:'multiple',word:'진출',context:'보기 · 약화 / 간섭 / 확장 / 진출 / 신분',question:'해외로 _______하여 무역을 활발히 했다.',options:['약화','간섭','확장','진출'],correct:3,example:"'진출'은 새로운 지역이나 분야로 뻗어 나가는 것이에요."},
+    {round:3,type:'multiple',word:'개혁',question:"'개혁'과 '혁명'의 차이로 알맞은 것은?",options:['개혁은 점진적 변화, 혁명은 급격한 체제 전환','둘은 같은 뜻이다','혁명이 더 작은 변화이다','개혁은 나쁜 것이다','혁명은 항상 좋은 결과를 낳는다'],correct:0,example:"'개혁'은 제도를 고치는 것, '혁명'은 체제 자체를 뒤엎는 급격한 변화예요."},
+    {round:3,type:'multiple',word:'신분',question:'조선 시대 신분 제도에서 가장 높은 신분은?',options:['상민','천민','중인','양반','노비'],correct:3,example:"조선 시대 신분은 양반-중인-상민-천민 순이었어요."},
+    {round:4,type:'ox',word:'개혁',question:"'개혁'은 낡은 제도나 관습을 새롭게 고치는 것이다.",correct:true,example:'예: 갑오개혁으로 신분제가 폐지되었다.'},
+    {round:4,type:'ox',word:'혁명',question:"'혁명'은 기존 체제를 뒤엎는 급격한 변화이다.",correct:true,example:'예: 혁명으로 왕정이 무너졌다.'},
+    {round:4,type:'ox',word:'폐지',question:"'폐지'는 기존의 제도나 법을 새롭게 개선하는 것이다.",correct:false,example:"'폐지'는 기존의 제도나 법을 없애는 것이에요."},
+    {round:4,type:'ox',word:'간섭',question:"'간섭'은 다른 사람의 일에 끼어들어 방해하는 것이다.",correct:true,example:'예: 외국의 내정 간섭에 저항했다.'},
+    {round:4,type:'ox',word:'천도',question:"'천도'는 수도를 다른 곳으로 옮기는 것이다.",correct:true,example:'예: 백제는 여러 번 천도를 하였다.'}
+  ],
+  6: [
+    {round:1,type:'multiple',word:'지형',question:"'지형'의 뜻으로 알맞은 것은?",options:['산들이 길게 이어진 줄기','땅의 생긴 모양','넓고 평평한 땅','바다와 육지가 맞닿은 곳'],correct:1,example:'예문: 우리나라 지형은 동쪽이 높고 서쪽이 낮다.'},
+    {round:1,type:'multiple',word:'산맥',question:"'산맥'의 뜻으로 알맞은 것은?",options:['산들이 길게 이어진 줄기','산으로 둘러싸인 오목한 지역','바다와 육지가 맞닿은 곳','강이 바다로 흘러 들어가는 어귀'],correct:0,example:'예문: 태백산맥은 우리나라 대표 산맥이다.'},
+    {round:1,type:'multiple',word:'평야',question:"'평야'의 뜻으로 알맞은 것은?",options:['산으로 둘러싸인 오목한 지역','넓고 평평한 땅','바다와 육지가 맞닿은 곳','강이 바다로 흘러 들어가는 어귀'],correct:1,example:'예문: 호남평야는 쌀 생산량이 많다.'},
+    {round:1,type:'multiple',word:'분지',question:"'분지'의 뜻으로 알맞은 것은?",options:['산들이 길게 이어진 줄기','넓고 평평한 땅','산으로 둘러싸인 오목한 지역','바다에서 멀리 떨어진 육지 안쪽'],correct:2,example:'예문: 대구는 분지 지형이라 여름이 덥다.'},
+    {round:1,type:'multiple',word:'해안',question:"'해안'의 뜻으로 알맞은 것은?",options:['바다와 육지가 맞닿은 곳','강이 바다로 흘러 들어가는 어귀','바다에서 멀리 떨어진 육지 안쪽','높이나 특성에 따라 나뉜 땅의 구역'],correct:0,example:'예문: 해안가에는 어촌이 많다.'},
+    {round:2,type:'multiple',word:'굽이치다',context:'보기 · 굽이치다 / 에워싸다 / 내륙 / 하구 / 지대',question:'강이 _______어 흐르며 평야를 만들었다.',options:['굽이치','에워싸','내륙이','하구가'],correct:0,example:"'굽이치다'는 강이나 길이 구불구불 굽어 흐르는 것이에요."},
+    {round:2,type:'multiple',word:'에워싸다',context:'보기 · 굽이치다 / 에워싸다 / 내륙 / 하구 / 지대',question:'산이 마을을 _______고 있었다.',options:['굽이치','에워싸','내륙으로','하구로'],correct:1,example:"'에워싸다'는 산이나 지형이 사방을 둘러싸는 것이에요."},
+    {round:2,type:'multiple',word:'내륙',context:'보기 · 굽이치다 / 에워싸다 / 내륙 / 하구 / 지대',question:'_______지방은 해산물이 귀하다.',options:['굽이치는','에워싸인','내륙','하구'],correct:2,example:"'내륙'은 바다에서 멀리 떨어진 육지 안쪽이에요."},
+    {round:2,type:'multiple',word:'하구',context:'보기 · 굽이치다 / 에워싸다 / 내륙 / 하구 / 지대',question:'강 _______에 갯벌이 발달해 있다.',options:['굽이치','에워싸','내륙','하구'],correct:3,example:"'하구'는 강이 바다로 흘러 들어가는 어귀예요."},
+    {round:2,type:'multiple',word:'지대',context:'보기 · 지형 / 산맥 / 평야 / 분지 / 지대',question:'고_______는 기온이 낮아 농작물이 다르다.',options:['지형','산맥','평야','지대'],correct:3,example:"'지대'는 높이나 특성에 따라 나뉜 땅의 구역이에요."},
+    {round:3,type:'multiple',word:'분지',question:"'분지' 지형에 사는 사람들이 겪는 어려움은?",options:['해산물이 부족하다','여름에 특히 덥다','겨울에 눈이 많이 온다','바람이 많이 분다','홍수가 자주 난다'],correct:1,example:"'분지'는 산으로 둘러싸여 바람이 잘 통하지 않아 여름에 특히 더워요."},
+    {round:3,type:'multiple',word:'해안',question:'해안 지역에서 발달하기 좋은 산업은?',options:['광업','어업과 항구','목축업','농업','임업'],correct:1,example:"'해안'은 바다와 맞닿아 있어 어업과 항구 산업이 발달하기 좋아요."},
+    {round:4,type:'ox',word:'지형',question:"'지형'은 땅의 생긴 모양이다.",correct:true,example:'예: 우리나라 지형은 동쪽이 높고 서쪽이 낮다.'},
+    {round:4,type:'ox',word:'평야',question:"'평야'는 산으로 둘러싸인 오목한 지역이다.",correct:false,example:"'평야'는 넓고 평평한 땅이에요. 산으로 둘러싸인 것은 '분지'예요."},
+    {round:4,type:'ox',word:'산맥',question:"'산맥'은 산들이 길게 이어진 줄기이다.",correct:true,example:'예: 태백산맥은 우리나라 대표 산맥이다.'},
+    {round:4,type:'ox',word:'내륙',question:"'내륙'은 바다와 가깝게 있는 땅이다.",correct:false,example:"'내륙'은 바다에서 멀리 떨어진 육지 안쪽이에요."},
+    {round:4,type:'ox',word:'하구',question:"'하구'는 강이 바다로 흘러 들어가는 어귀이다.",correct:true,example:'예: 강 하구에 갯벌이 발달해 있다.'}
+  ],
+  7: [
+    {round:1,type:'multiple',word:'기후',question:"'기후'의 뜻으로 알맞은 것은?",options:['비나 눈이 내린 양','공기의 온도','한 지역의 평균적인 날씨 특성','지구의 온도가 점점 높아지는 현상'],correct:2,example:'예문: 우리나라는 사계절이 뚜렷한 기후이다.'},
+    {round:1,type:'multiple',word:'강수량',question:"'강수량'의 뜻으로 알맞은 것은?",options:['한 지역의 평균적인 날씨 특성','비나 눈이 내린 양','공기의 온도','계절에 따라 방향이 바뀌는 바람'],correct:1,example:'예문: 여름에는 강수량이 집중된다.'},
+    {round:1,type:'multiple',word:'온난화',question:"'온난화'의 뜻으로 알맞은 것은?",options:['기온이 낮고 겨울이 긴 기후대','열대와 냉대 사이의 온화한 기후대','계절에 따라 방향이 바뀌는 바람','지구의 온도가 점점 높아지는 현상'],correct:3,example:'예문: 지구 온난화로 빙하가 녹고 있다.'},
+    {round:1,type:'multiple',word:'계절풍',question:"'계절풍'의 뜻으로 알맞은 것은?",options:['지구의 온도가 점점 높아지는 현상','공기의 온도','계절에 따라 방향이 바뀌는 바람','비나 눈이 내린 양'],correct:2,example:'예문: 계절풍의 영향으로 여름에 비가 많이 온다.'},
+    {round:1,type:'multiple',word:'냉대',question:"'냉대'의 뜻으로 알맞은 것은?",options:['열대와 냉대 사이의 온화한 기후대','기온이 낮고 겨울이 긴 기후대','지구의 온도가 높아지는 현상','계절에 따라 방향이 바뀌는 바람'],correct:1,example:'예문: 시베리아는 냉대 기후 지역이다.'},
+    {round:2,type:'multiple',word:'좌우하다',context:'보기 · 좌우하다 / 기온 / 온대 / 냉대 / 기상',question:'기후가 농업을 _______.',options:['좌우한다','기온이다','온대이다','기상이다'],correct:0,example:"'좌우하다'는 어떤 것에 큰 영향을 미쳐 결정짓는 것이에요."},
+    {round:2,type:'multiple',word:'기온',context:'보기 · 좌우하다 / 기온 / 온대 / 냉대 / 기상',question:'겨울 _______이 영하로 내려간다.',options:['좌우','기온','온대','냉대'],correct:1,example:"'기온'은 공기의 온도예요."},
+    {round:2,type:'multiple',word:'온대',context:'보기 · 좌우하다 / 기온 / 온대 / 냉대 / 기상',question:'우리나라는 _______기후에 속한다.',options:['좌우하는','기온의','온대','냉대'],correct:2,example:"'온대'는 열대와 냉대 사이의 온화한 기후대예요."},
+    {round:2,type:'multiple',word:'기상',context:'보기 · 좌우하다 / 기온 / 온대 / 냉대 / 기상',question:'_______예보를 보고 우산을 챙겼다.',options:['좌우','기온','온대','기상'],correct:3,example:"'기상'은 비·바람·구름 등 대기의 상태예요."},
+    {round:2,type:'multiple',word:'편서풍',context:'보기 · 강수량 / 계절풍 / 온난화 / 편서풍 / 기후',question:'_______의 영향으로 서쪽에서 날씨가 온다.',options:['강수량','계절풍','온난화','편서풍'],correct:3,example:"'편서풍'은 서쪽에서 동쪽으로 부는 바람이에요."},
+    {round:3,type:'multiple',word:'온난화',question:"지구 '온난화'가 계속되면 생기는 문제는?",options:['강수량이 줄어든다','빙하가 녹아 해수면이 높아진다','기온이 낮아진다','냉대 기후가 넓어진다','계절풍이 없어진다'],correct:1,example:"'온난화'로 빙하가 녹으면 해수면이 높아져 해안 지역이 물에 잠길 수 있어요."},
+    {round:3,type:'multiple',word:'기후',question:'우리나라 여름 기후의 특징으로 알맞은 것은?',options:['건조하고 강수량이 적다','고온 다습하고 강수량이 많다','눈이 많이 온다','기온이 매우 낮다','계절풍이 불지 않는다'],correct:1,example:"우리나라 여름은 계절풍의 영향으로 고온 다습해요."},
+    {round:4,type:'ox',word:'기후',question:"'기후'는 한 지역의 평균적인 날씨 특성이다.",correct:true,example:'예: 우리나라는 사계절이 뚜렷한 기후이다.'},
+    {round:4,type:'ox',word:'강수량',question:"'강수량'이 많다는 것은 비나 눈이 많이 내렸다는 뜻이다.",correct:true,example:'예: 여름에는 강수량이 집중된다.'},
+    {round:4,type:'ox',word:'온난화',question:"지구 '온난화'는 지구가 점점 차가워지는 현상이다.",correct:false,example:"'온난화'는 지구 온도가 점점 높아지는 현상이에요."},
+    {round:4,type:'ox',word:'냉대',question:"'냉대' 기후는 기온이 낮고 겨울이 긴 기후이다.",correct:true,example:'예: 시베리아는 냉대 기후 지역이다.'},
+    {round:4,type:'ox',word:'계절풍',question:"'계절풍'은 일 년 내내 같은 방향으로 부는 바람이다.",correct:false,example:"'계절풍'은 계절에 따라 방향이 바뀌는 바람이에요."}
+  ],
+  8: [
+    {round:1,type:'multiple',word:'자원',question:"'자원'의 뜻으로 알맞은 것은?",options:['자연에서 얻는 재료나 에너지','자원이 다 소비되어 없어짐','생물과 환경이 서로 영향을 주고받는 체계','땅속에 묻혀 있는 자원의 양'],correct:0,example:'예문: 석유는 중요한 에너지 자원이다.'},
+    {round:1,type:'multiple',word:'고갈',question:"'고갈'의 뜻으로 알맞은 것은?",options:['자연에서 얻는 재료나 에너지','자원이 다 소비되어 없어짐','환경을 해치지 않으면서 계속할 수 있는 것','일정한 범위에 흩어져 있는 상태'],correct:1,example:'예문: 석유 고갈에 대비해 대체에너지를 개발한다.'},
+    {round:1,type:'multiple',word:'생태계',question:"'생태계'의 뜻으로 알맞은 것은?",options:['땅속에 묻혀 있는 자원의 양','햇빛·바람 등 자연에서 계속 얻을 수 있는 에너지','생물과 환경이 서로 영향을 주고받는 체계','일정한 범위에 흩어져 있는 상태'],correct:2,example:'예문: 생태계가 파괴되면 생물이 사라진다.'},
+    {round:1,type:'multiple',word:'재생에너지',question:"'재생에너지'의 뜻으로 알맞은 것은?",options:['땅속에 있는 석탄·석유 등의 자원','햇빛·바람 등 자연에서 계속 얻을 수 있는 에너지','자원이 다 소비되어 없어짐','자연이나 물건이 상하고 망가짐'],correct:1,example:'예문: 태양광은 대표적인 재생에너지이다.'},
+    {round:1,type:'multiple',word:'훼손',question:"'훼손'의 뜻으로 알맞은 것은?",options:['환경을 해치지 않으면서 계속할 수 있는 것','일정한 범위에 흩어져 있는 상태','자연이나 물건이 상하고 망가짐','생물과 환경이 서로 영향을 주고받는 체계'],correct:2,example:'예문: 무분별한 개발로 자연이 훼손되었다.'},
+    {round:2,type:'multiple',word:'개발',context:'보기 · 자원 / 고갈 / 개발 / 생태계 / 매장량',question:'새로운 에너지 자원을 _______했다.',options:['자원화','고갈','개발','매장'],correct:2,example:"'개발'은 자원이나 토지를 이용 가능하게 만드는 것이에요."},
+    {round:2,type:'multiple',word:'매장량',context:'보기 · 자원 / 고갈 / 개발 / 생태계 / 매장량',question:'이 지역의 석유 _______이 풍부하다.',options:['자원','고갈','개발','매장량'],correct:3,example:"'매장량'은 땅속에 묻혀 있는 자원의 양이에요."},
+    {round:2,type:'multiple',word:'지하자원',context:'보기 · 재생에너지 / 지하자원 / 훼손 / 분포 / 지속가능',question:'_______이 풍부한 나라가 경제적으로 유리하다.',options:['재생에너지','지하자원','훼손','분포'],correct:1,example:"'지하자원'은 땅속에 있는 석탄·석유 등의 자원이에요."},
+    {round:2,type:'multiple',word:'분포',context:'보기 · 재생에너지 / 지하자원 / 훼손 / 분포 / 지속가능',question:'석탄은 주로 강원도 지역에 _______한다.',options:['재생에너지','지하자원','훼손','분포'],correct:3,example:"'분포'는 일정한 범위에 흩어져 있는 상태예요."},
+    {round:2,type:'multiple',word:'지속가능',context:'보기 · 재생에너지 / 지하자원 / 훼손 / 분포 / 지속가능',question:'_______한 발전을 위해 노력해야 한다.',options:['재생에너지적','지하자원적','훼손적','지속가능'],correct:3,example:"'지속가능'은 환경을 해치지 않으면서 계속할 수 있는 것이에요."},
+    {round:3,type:'multiple',word:'재생에너지',question:"'재생에너지'가 중요한 이유는?",options:['석유보다 싸다','자원이 고갈되지 않고 환경을 덜 오염시킨다','사용이 더 편리하다','전통적인 에너지원이다','매장량이 많다'],correct:1,example:"'재생에너지'는 무한히 얻을 수 있고 환경 오염이 적어 중요해요."},
+    {round:3,type:'multiple',word:'생태계',question:"'생태계'가 파괴되면 일어나는 결과로 알맞은 것은?",options:['자원이 더 풍부해진다','생물 다양성이 줄어든다','강수량이 늘어난다','기온이 내려간다','지하자원이 늘어난다'],correct:1,example:"'생태계'가 파괴되면 생물이 사라지고 다양성이 줄어들어요."},
+    {round:4,type:'ox',word:'자원',question:"'자원'은 자연에서 얻는 재료나 에너지이다.",correct:true,example:'예: 석유는 중요한 에너지 자원이다.'},
+    {round:4,type:'ox',word:'고갈',question:"'고갈'은 자원이 점점 늘어나는 것이다.",correct:false,example:"'고갈'은 자원이 다 소비되어 없어지는 것이에요."},
+    {round:4,type:'ox',word:'재생에너지',question:'태양광, 풍력은 대표적인 재생에너지이다.',correct:true,example:"태양광과 풍력은 자연에서 계속 얻을 수 있는 '재생에너지'예요."},
+    {round:4,type:'ox',word:'훼손',question:"'훼손'은 자연을 잘 보호하는 것이다.",correct:false,example:"'훼손'은 자연이나 물건이 상하고 망가지는 것이에요."},
+    {round:4,type:'ox',word:'생태계',question:"'생태계'는 생물과 환경이 서로 영향을 주고받는 체계이다.",correct:true,example:'예: 생태계가 파괴되면 생물이 사라진다.'}
+  ],
+  9: [
+    {round:1,type:'multiple',word:'도시화',question:"'도시화'의 뜻으로 알맞은 것은?",options:['농촌이 도시의 성격을 갖게 되는 현상','농촌을 떠나 도시로 이동하는 현상','사람이나 시설이 너무 많이 모여 있는 것','도시의 중심부'],correct:0,example:'예문: 산업화로 급격한 도시화가 일어났다.'},
+    {round:1,type:'multiple',word:'이촌향도',question:"'이촌향도'의 뜻으로 알맞은 것은?",options:['농촌이 도시의 성격을 갖게 되는 현상','농촌을 떠나 도시로 이동하는 현상','발전이 뒤처지거나 뒤떨어진 것','한 곳으로 모이는 것'],correct:1,example:'예문: 이촌향도 현상으로 농촌 인구가 줄었다.'},
+    {round:1,type:'multiple',word:'격차',question:"'격차'의 뜻으로 알맞은 것은?",options:['어느 한쪽으로 치우치지 않고 고르게 이루어진 것','사람이나 시설이 너무 많이 모여 있는 것','수준이나 크기의 차이','한 곳으로 모이는 것'],correct:2,example:'예문: 도시와 농촌의 소득 격차가 크다.'},
+    {round:1,type:'multiple',word:'균형',question:"'균형'의 뜻으로 알맞은 것은?",options:['어느 한쪽으로 치우치지 않고 고르게 이루어진 것','수준이나 크기의 차이','한 곳으로 모이는 것','발전이 뒤처지거나 뒤떨어진 것'],correct:0,example:'예문: 지역 균형 발전이 중요한 과제이다.'},
+    {round:1,type:'multiple',word:'수도권',question:"'수도권'의 뜻으로 알맞은 것은?",options:['도시의 중심부','특정 지역에서만 나는 산물','수도를 중심으로 한 주변 지역','한 곳으로 모이는 것'],correct:2,example:'예문: 수도권에 인구의 절반이 살고 있다.'},
+    {round:2,type:'multiple',word:'과밀',context:'보기 · 도시화 / 이촌향도 / 과밀 / 낙후 / 격차',question:'서울은 인구 _______지역이다.',options:['도시화','이촌향도','과밀','낙후'],correct:2,example:"'과밀'은 사람이나 시설이 너무 많이 모여 있는 것이에요."},
+    {round:2,type:'multiple',word:'낙후',context:'보기 · 도시화 / 이촌향도 / 과밀 / 낙후 / 격차',question:'_______된 지역에 대한 지원이 필요하다.',options:['도시화','이촌향도','과밀','낙후'],correct:3,example:"'낙후'는 발전이 뒤처지거나 뒤떨어진 것이에요."},
+    {round:2,type:'multiple',word:'집중',context:'보기 · 균형 / 집중 / 특산물 / 도심 / 수도권',question:'인구가 수도권에 _______되어 있다.',options:['균형','집중','특산물','도심'],correct:1,example:"'집중'은 한 곳으로 모이는 것이에요."},
+    {round:2,type:'multiple',word:'특산물',context:'보기 · 균형 / 집중 / 특산물 / 도심 / 수도권',question:'제주도의 _______은 감귤이다.',options:['균형','집중','특산물','도심'],correct:2,example:"'특산물'은 특정 지역에서만 나는 산물이에요."},
+    {round:2,type:'multiple',word:'도심',context:'보기 · 균형 / 집중 / 특산물 / 도심 / 수도권',question:'_______에는 회사와 상업 시설이 많다.',options:['균형','집중','특산물','도심'],correct:3,example:"'도심'은 도시의 중심부예요."},
+    {round:3,type:'multiple',word:'이촌향도',question:"'이촌향도' 현상이 일어나는 원인으로 알맞은 것은?",options:['농촌이 도시보다 소득이 높아서','도시에 일자리와 편의시설이 많아서','농촌의 인구가 너무 많아서','도시가 조용해서','농업이 발전해서'],correct:1,example:"도시에 일자리·학교·병원이 많아 농촌 사람들이 도시로 이동하는 현상이에요."},
+    {round:3,type:'multiple',word:'격차',question:"도시와 농촌의 '격차'를 줄이기 위한 방법은?",options:['도시에 더 많은 시설을 만든다','농촌에 일자리와 인프라를 지원한다','농촌 사람을 모두 도시로 이주시킨다','수도권에 투자를 집중한다','이촌향도를 장려한다'],correct:1,example:"농촌에 투자하고 지원하면 도시와 농촌의 격차를 줄일 수 있어요."},
+    {round:4,type:'ox',word:'도시화',question:"'도시화'는 농촌이 도시의 성격을 갖게 되는 현상이다.",correct:true,example:'예: 산업화로 급격한 도시화가 일어났다.'},
+    {round:4,type:'ox',word:'이촌향도',question:"'이촌향도'는 도시 사람이 농촌으로 이동하는 현상이다.",correct:false,example:"'이촌향도'는 농촌을 떠나 도시로 이동하는 현상이에요."},
+    {round:4,type:'ox',word:'격차',question:"'격차'는 수준이나 크기의 차이이다.",correct:true,example:'예: 도시와 농촌의 소득 격차가 크다.'},
+    {round:4,type:'ox',word:'균형',question:"지역 '균형' 발전은 어느 한쪽에 치우치지 않는 발전이다.",correct:true,example:'예: 지역 균형 발전이 중요한 과제이다.'},
+    {round:4,type:'ox',word:'과밀',question:"'과밀'은 인구나 시설이 적어 조용한 상태이다.",correct:false,example:"'과밀'은 사람이나 시설이 너무 많이 모여 있는 것이에요."}
+  ],
+  10: [
+    {round:1,type:'multiple',word:'분쟁',question:"'분쟁'의 뜻으로 알맞은 것은?",options:['여러 나라 사이의 관계','서로 조건을 정해 맺는 약속','나라나 집단 사이의 갈등과 싸움','다른 것에 기대어 살아가는 것'],correct:2,example:'예문: 영토 분쟁이 끊이지 않는다.'},
+    {round:1,type:'multiple',word:'패권',question:"'패권'의 뜻으로 알맞은 것은?",options:['하나이던 것이 나뉘어 갈라짐','어떤 분야에서 으뜸이 되는 권력이나 권위','다른 것과 연결이 끊겨 혼자 남겨지는 것','나라나 사회를 운영하는 방식이나 구조'],correct:1,example:'예문: 강대국 간의 패권 경쟁이 심화되었다.'},
+    {round:1,type:'multiple',word:'분단',question:"'분단'의 뜻으로 알맞은 것은?",options:['다른 나라에 기대지 않고 스스로 결정하는 것','여러 나라 사이의 관계','나라나 사회를 운영하는 방식이나 구조','하나이던 것이 나뉘어 갈라짐'],correct:3,example:'예문: 우리나라는 분단된 상태이다.'},
+    {round:1,type:'multiple',word:'자주',question:"'자주'의 뜻으로 알맞은 것은?",options:['다른 것에 기대어 살아가는 것','다른 것과 연결이 끊겨 혼자 남겨지는 것','다른 나라에 기대지 않고 스스로 결정하는 것','서로 조건을 정해 맺는 약속'],correct:2,example:'예문: 자주 국방을 위해 군사력을 키웠다.'},
+    {round:1,type:'multiple',word:'협약',question:"'협약'의 뜻으로 알맞은 것은?",options:['서로 조건을 정해 맺는 약속','나라나 집단 사이의 갈등과 싸움','다른 것에 작용하여 변화를 일으키는 힘','나라나 사회를 운영하는 방식이나 구조'],correct:0,example:'예문: 기후 변화 협약을 체결했다.'},
+    {round:2,type:'multiple',word:'국제',context:'보기 · 국제 / 협약 / 분쟁 / 영향력 / 의존',question:'_______사회에서 협력이 중요하다.',options:['국제','협약','분쟁','영향력'],correct:0,example:"'국제'는 여러 나라 사이의 관계예요."},
+    {round:2,type:'multiple',word:'영향력',context:'보기 · 국제 / 협약 / 분쟁 / 영향력 / 의존',question:'미국은 세계적인 _______을 가진 나라이다.',options:['국제','협약','분쟁','영향력'],correct:3,example:"'영향력'은 다른 것에 작용하여 변화를 일으키는 힘이에요."},
+    {round:2,type:'multiple',word:'의존',context:'보기 · 국제 / 협약 / 분쟁 / 영향력 / 의존',question:'에너지를 수입에 _______하고 있다.',options:['국제','협약','분쟁','의존'],correct:3,example:"'의존'은 다른 것에 기대어 살아가는 것이에요."},
+    {round:2,type:'multiple',word:'고립',context:'보기 · 고립 / 패권 / 분단 / 체제 / 자주',question:'국제 사회에서 _______되면 어려움을 겪는다.',options:['고립','패권','분단','체제'],correct:0,example:"'고립'은 다른 것과 연결이 끊겨 혼자 남겨지는 것이에요."},
+    {round:2,type:'multiple',word:'체제',context:'보기 · 고립 / 패권 / 분단 / 체제 / 자주',question:'민주주의 _______를 지키기 위해 노력한다.',options:['고립','패권','분단','체제'],correct:3,example:"'체제'는 나라나 사회를 운영하는 방식이나 구조예요."},
+    {round:3,type:'multiple',word:'분단',question:"우리나라 '분단'의 결과로 나타난 문제가 아닌 것은?",options:['이산가족이 생겼다','군사적 긴장이 계속된다','경제 교류가 어렵다','문화 교류가 활발해졌다','국방비 부담이 크다'],correct:3,example:"분단으로 남북 문화 교류는 오히려 어려워졌어요."},
+    {round:3,type:'multiple',word:'자주',question:"'자주 국방'이 중요한 이유는?",options:['다른 나라에 의존하면 안정적이다','스스로 나라를 지켜야 진정한 독립이 가능하다','군사력이 없어도 된다','동맹이 있으면 자주 국방이 필요 없다','비용이 적게 든다'],correct:1,example:"다른 나라에 의존하지 않고 스스로 나라를 지켜야 진정한 자주가 가능해요."},
+    {round:4,type:'ox',word:'국제',question:"'국제'는 여러 나라 사이의 관계를 말한다.",correct:true,example:'예: 국제 사회에서 협력이 중요하다.'},
+    {round:4,type:'ox',word:'분쟁',question:"'분쟁'은 나라나 집단 사이의 갈등과 싸움이다.",correct:true,example:'예: 영토 분쟁이 끊이지 않는다.'},
+    {round:4,type:'ox',word:'의존',question:"'의존'은 다른 것에 기대지 않고 스스로 결정하는 것이다.",correct:false,example:"'의존'은 다른 것에 기대어 살아가는 것이에요."},
+    {round:4,type:'ox',word:'분단',question:"'분단'은 하나이던 것이 나뉘어 갈라지는 것이다.",correct:true,example:'예: 우리나라는 분단된 상태이다.'},
+    {round:4,type:'ox',word:'패권',question:"'패권'은 어떤 분야에서 으뜸이 되는 권력이나 권위이다.",correct:true,example:'예: 강대국 간의 패권 경쟁이 심화되었다.'}
+  ],
+  11: [
+    {round:1,type:'multiple',word:'삼권분립',question:"'삼권분립'의 뜻으로 알맞은 것은?",options:['국민이 정치에 참여할 수 있는 권리','입법·행정·사법의 세 권력을 분리하는 제도','투표로 대표를 뽑는 것','사회 문제에 대한 많은 사람들의 의견'],correct:1,example:'예문: 삼권분립으로 권력 남용을 막는다.'},
+    {round:1,type:'multiple',word:'입법',question:"'입법'의 뜻으로 알맞은 것은?",options:['법에 따라 재판을 하는 것','국가의 사무를 처리하는 것','법을 만드는 것','투표로 의견을 결정하는 것'],correct:2,example:'예문: 국회는 입법 기관이다.'},
+    {round:1,type:'multiple',word:'선거',question:"'선거'의 뜻으로 알맞은 것은?",options:['어떤 문제를 공개적으로 사회에서 논의하게 됨','사회 문제에 대한 많은 사람들의 의견','국민을 대신하여 의견을 전달하고 결정하는 것','투표로 대표를 뽑는 것'],correct:3,example:'예문: 선거로 대통령을 선출한다.'},
+    {round:1,type:'multiple',word:'여론',question:"'여론'의 뜻으로 알맞은 것은?",options:['투표로 의견을 결정하는 것','사회 문제에 대한 많은 사람들의 의견','국민이 정치에 참여할 수 있는 권리','법을 만드는 것'],correct:1,example:'예문: 여론을 무시하면 정치를 잘 할 수 없다.'},
+    {round:1,type:'multiple',word:'참정권',question:"'참정권'의 뜻으로 알맞은 것은?",options:['국민이 정치에 참여할 수 있는 권리','투표로 대표를 뽑는 것','어떤 문제를 공개적으로 논의하게 됨','법에 따라 재판을 하는 것'],correct:0,example:'예문: 모든 성인에게 참정권이 주어진다.'},
+    {round:2,type:'multiple',word:'행정',context:'보기 · 입법 / 행정 / 사법 / 선거 / 여론',question:'정부가 _______을 담당한다.',options:['입법','행정','사법','선거'],correct:1,example:"'행정'은 국가의 사무를 처리하는 것이에요."},
+    {round:2,type:'multiple',word:'사법',context:'보기 · 입법 / 행정 / 사법 / 선거 / 여론',question:'법원이 _______권을 행사한다.',options:['입법','행정','사법','선거'],correct:2,example:"'사법'은 법에 따라 재판을 하는 것이에요."},
+    {round:2,type:'multiple',word:'표결',context:'보기 · 참정권 / 삼권분립 / 표결 / 공론화 / 대의',question:'국회에서 _______로 법안을 통과시켰다.',options:['참정권','삼권분립','표결','공론화'],correct:2,example:"'표결'은 투표로 의견을 결정하는 것이에요."},
+    {round:2,type:'multiple',word:'공론화',context:'보기 · 참정권 / 삼권분립 / 표결 / 공론화 / 대의',question:'환경 문제가 _______되었다.',options:['참정권','삼권분립','표결','공론화'],correct:3,example:"'공론화'는 어떤 문제를 공개적으로 사회에서 논의하게 되는 것이에요."},
+    {round:2,type:'multiple',word:'대의',context:'보기 · 참정권 / 삼권분립 / 표결 / 공론화 / 대의',question:'_______민주주의는 대표를 뽑아 결정을 맡긴다.',options:['참정권','삼권분립','표결','대의'],correct:3,example:"'대의'는 국민을 대신하여 의견을 전달하고 결정하는 것이에요."},
+    {round:3,type:'multiple',word:'삼권분립',question:"'삼권분립'에서 입법-행정-사법을 맡은 기관이 바르게 연결된 것은?",options:['국회-법원-정부','국회-정부-법원','법원-국회-정부','정부-국회-법원','법원-정부-국회'],correct:1,example:"입법=국회, 행정=정부, 사법=법원이에요."},
+    {round:3,type:'multiple',word:'여론',question:"민주주의 사회에서 '여론'이 중요한 이유는?",options:['정부가 모든 결정을 혼자 해도 되기 때문','국민의 생각이 정치에 반영되어야 하기 때문','여론이 항상 옳기 때문','선거가 필요 없기 때문','여론은 소수의 의견이기 때문'],correct:1,example:"'여론'은 국민 다수의 의견으로, 민주주의에서 정치의 방향을 잡는 데 중요해요."},
+    {round:4,type:'ox',word:'삼권분립',question:"'삼권분립'은 권력을 세 곳으로 나누어 서로 견제하게 하는 제도이다.",correct:true,example:'예: 삼권분립으로 권력 남용을 막는다.'},
+    {round:4,type:'ox',word:'입법',question:"'입법'은 법에 따라 재판을 하는 것이다.",correct:false,example:"'입법'은 법을 만드는 것이에요. 재판하는 것은 '사법'이에요."},
+    {round:4,type:'ox',word:'선거',question:"'선거'는 투표로 대표를 뽑는 것이다.",correct:true,example:'예: 선거로 대통령을 선출한다.'},
+    {round:4,type:'ox',word:'여론',question:"'여론'은 사회 문제에 대한 많은 사람들의 의견이다.",correct:true,example:'예: 여론을 무시하면 정치를 잘 할 수 없다.'},
+    {round:4,type:'ox',word:'참정권',question:"'참정권'은 국민이 경제 활동에 참여할 수 있는 권리이다.",correct:false,example:"'참정권'은 국민이 정치에 참여할 수 있는 권리예요."}
+  ],
+  12: [
+    {round:1,type:'multiple',word:'헌법',question:"'헌법'의 뜻으로 알맞은 것은?",options:['사람들이 지켜야 할 행동의 기준','나라의 최고 법','규칙을 어긴 것에 처벌이나 불이익을 주는 것','다른 사람의 권리를 침범하여 해를 끼침'],correct:1,example:'예문: 헌법은 모든 법의 기본이 된다.'},
+    {round:1,type:'multiple',word:'기본권',question:"'기본권'의 뜻으로 알맞은 것은?",options:['법이나 규칙을 실제 상황에 사용하는 것','헌법이 보장하는 국민의 기본적인 권리','어떤 것이 틀림없이 이루어지도록 책임지는 것','사회 전체의 이익'],correct:1,example:'예문: 교육받을 권리는 기본권이다.'},
+    {round:1,type:'multiple',word:'침해',question:"'침해'의 뜻으로 알맞은 것은?",options:['어떤 것이 틀림없이 이루어지도록 책임지는 것','규칙을 어긴 것에 처벌이나 불이익을 주는 것','다른 사람의 권리나 재산을 침범하여 해를 끼침','사회 전체의 이익'],correct:2,example:'예문: 개인 정보를 침해하면 안 된다.'},
+    {round:1,type:'multiple',word:'공익',question:"'공익'의 뜻으로 알맞은 것은?",options:['사회 전체의 이익','나라의 최고 법','사람들이 지켜야 할 행동의 기준','법이나 규칙을 실제 상황에 사용하는 것'],correct:0,example:'예문: 공익을 위한 봉사 활동을 했다.'},
+    {round:1,type:'multiple',word:'규범',question:"'규범'의 뜻으로 알맞은 것은?",options:['규칙을 어긴 것에 처벌이나 불이익을 주는 것','어떤 것이 틀림없이 이루어지도록 책임지는 것','사람들이 지켜야 할 행동의 기준','나라의 최고 법'],correct:2,example:'예문: 도덕과 법은 사회 규범이다.'},
+    {round:2,type:'multiple',word:'준수',context:'보기 · 준수 / 제재 / 침해 / 보장 / 규범',question:'교통 법규를 _______해야 한다.',options:['준수','제재','침해','보장'],correct:0,example:"'준수'는 규칙이나 법을 지키는 것이에요."},
+    {round:2,type:'multiple',word:'제재',context:'보기 · 준수 / 제재 / 침해 / 보장 / 규범',question:'규칙을 어기면 _______를 받는다.',options:['준수','제재','침해','보장'],correct:1,example:"'제재'는 규칙을 어긴 것에 처벌이나 불이익을 주는 것이에요."},
+    {round:2,type:'multiple',word:'보장',context:'보기 · 준수 / 제재 / 침해 / 보장 / 규범',question:'헌법이 국민의 권리를 _______한다.',options:['준수','제재','침해','보장'],correct:3,example:"'보장'은 어떤 것이 틀림없이 이루어지도록 책임지는 것이에요."},
+    {round:2,type:'multiple',word:'위반',context:'보기 · 헌법 / 기본권 / 위반 / 적용 / 공익',question:'신호 _______은 교통 법규 위반이다.',options:['헌법','기본권','위반','적용'],correct:2,example:"'위반'은 법이나 규칙을 어기는 것이에요."},
+    {round:2,type:'multiple',word:'적용',context:'보기 · 헌법 / 기본권 / 위반 / 적용 / 공익',question:'법을 공정하게 _______해야 한다.',options:['헌법','기본권','위반','적용'],correct:3,example:"'적용'은 법이나 규칙을 실제 상황에 사용하는 것이에요."},
+    {round:3,type:'multiple',word:'헌법',question:"'헌법'이 중요한 이유로 알맞은 것은?",options:['왕의 명령을 기록한 것이기 때문','모든 법의 기본이 되어 국민의 권리를 보장하기 때문','국회의원만 알면 되는 것이기 때문','외국에서 만든 법이기 때문','국민이 직접 투표로 만든 것이기 때문'],correct:1,example:"'헌법'은 나라의 최고 법으로 모든 다른 법의 기본이 돼요."},
+    {round:3,type:'multiple',word:'공익',question:"'공익'을 위한 행동의 예로 알맞은 것은?",options:['자신의 이익만을 위해 행동하는 것','환경 보호를 위해 분리수거를 하는 것','친구에게만 도움을 주는 것','가족만을 위해 봉사하는 것','자신의 재산을 늘리는 것'],correct:1,example:"분리수거는 사회 전체의 이익인 '공익'을 위한 행동이에요."},
+    {round:4,type:'ox',word:'헌법',question:"'헌법'은 나라의 최고 법이다.",correct:true,example:'예: 헌법은 모든 법의 기본이 된다.'},
+    {round:4,type:'ox',word:'침해',question:"'침해'는 다른 사람의 권리나 재산을 침범하여 해를 끼치는 것이다.",correct:true,example:'예: 개인 정보를 침해하면 안 된다.'},
+    {round:4,type:'ox',word:'준수',question:"법을 '준수'하는 것은 법을 어기는 것이다.",correct:false,example:"'준수'는 규칙이나 법을 지키는 것이에요."},
+    {round:4,type:'ox',word:'기본권',question:"'기본권'은 헌법이 보장하는 국민의 기본적인 권리이다.",correct:true,example:'예: 교육받을 권리는 기본권이다.'},
+    {round:4,type:'ox',word:'규범',question:"도덕과 법은 사회 '규범'이다.",correct:true,example:'예: 도덕과 법은 사회 규범이다.'}
+  ],
+  13: [
+    {round:1,type:'multiple',word:'인권',question:"'인권'의 뜻으로 알맞은 것은?",options:['사람이라면 누구나 갖는 기본적인 권리','다름을 이유로 불공평하게 대우하는 것','인간이 갖는 최고의 가치와 품위','모든 것에 두루 해당하는 것'],correct:0,example:'예문: 인권은 누구에게나 존중받아야 한다.'},
+    {round:1,type:'multiple',word:'차별',question:"'차별'의 뜻으로 알맞은 것은?",options:['다름을 이유로 불공평하게 대우하는 것','인간이 갖는 최고의 가치와 품위','힘으로 누르고 자유를 빼앗는 것','여러 사람이 같은 목적으로 뭉치는 것'],correct:0,example:'예문: 성별이나 인종으로 차별하면 안 된다.'},
+    {round:1,type:'multiple',word:'존엄',question:"'존엄'의 뜻으로 알맞은 것은?",options:['힘으로 누르고 자유를 빼앗는 것','인간이 갖는 최고의 가치와 품위','여러 사람이 같은 목적으로 뭉치는 것','어떤 것을 알고 이해하는 것'],correct:1,example:'예문: 인간의 존엄성은 어떤 상황에도 지켜져야 한다.'},
+    {round:1,type:'multiple',word:'억압',question:"'억압'의 뜻으로 알맞은 것은?",options:['다른 것을 너그럽게 받아들이는 태도','힘으로 누르고 자유를 빼앗는 것','어떤 사람이나 의견을 지지하고 보호하는 것','모든 것에 두루 해당하는 것'],correct:1,example:'예문: 억압에 저항한 독립운동가들을 기억한다.'},
+    {round:1,type:'multiple',word:'보편적',question:"'보편적'의 뜻으로 알맞은 것은?",options:['사회에서 수가 적거나 약한 위치에 있는 것','모든 것에 두루 해당하는 것','어떤 것을 알고 이해하는 것','여러 사람이 같은 목적으로 뭉치는 것'],correct:1,example:'예문: 인권은 보편적인 가치이다.'},
+    {round:2,type:'multiple',word:'소수자',context:'보기 · 인권 / 차별 / 소수자 / 관용 / 억압',question:'_______의 권리를 보호해야 한다.',options:['인권','차별','소수자','관용'],correct:2,example:"'소수자'는 사회에서 수가 적거나 약한 위치에 있는 사람들이에요."},
+    {round:2,type:'multiple',word:'관용',context:'보기 · 인권 / 차별 / 소수자 / 관용 / 억압',question:'서로 다름을 _______으로 받아들여야 한다.',options:['인권','차별','소수자','관용'],correct:3,example:"'관용'은 다른 것을 너그럽게 받아들이는 태도예요."},
+    {round:2,type:'multiple',word:'연대',context:'보기 · 존엄 / 연대 / 보편적 / 옹호 / 인식',question:'노동자들이 _______하여 권리를 찾았다.',options:['존엄','연대','보편적','옹호'],correct:1,example:"'연대'는 여러 사람이 같은 목적으로 뭉치는 것이에요."},
+    {round:2,type:'multiple',word:'옹호',context:'보기 · 존엄 / 연대 / 보편적 / 옹호 / 인식',question:'인권 단체가 피해자를 _______했다.',options:['존엄','연대','보편적','옹호'],correct:3,example:"'옹호'는 어떤 사람이나 의견을 지지하고 보호하는 것이에요."},
+    {round:2,type:'multiple',word:'인식',context:'보기 · 존엄 / 연대 / 보편적 / 옹호 / 인식',question:'인권에 대한 _______이 높아졌다.',options:['존엄','연대','보편적','인식'],correct:3,example:"'인식'은 어떤 것을 알고 이해하는 것이에요."},
+    {round:3,type:'multiple',word:'인권',question:"'인권'이 보편적인 가치인 이유는?",options:['특별한 사람만 갖는 권리이기 때문','나라마다 다른 권리이기 때문','사람이라면 누구나 갖는 권리이기 때문','어른만 갖는 권리이기 때문','정부가 주는 권리이기 때문'],correct:2,example:"'인권'은 특정 사람이 아닌 모든 사람이 갖는 권리라 보편적이에요."},
+    {round:3,type:'multiple',word:'차별',question:"'차별'을 없애기 위한 방법으로 알맞지 않은 것은?",options:['관용의 자세를 갖는다','다름을 인정하고 존중한다','소수자의 권리를 보호한다','다수의 편의만 생각한다','평등한 기회를 제공한다'],correct:3,example:"'차별'을 없애려면 소수자를 포함한 모든 사람을 평등하게 대우해야 해요."},
+    {round:4,type:'ox',word:'인권',question:"'인권'은 사람이라면 누구나 갖는 기본적인 권리이다.",correct:true,example:'예: 인권은 누구에게나 존중받아야 한다.'},
+    {round:4,type:'ox',word:'차별',question:"'차별'은 다름을 인정하고 평등하게 대우하는 것이다.",correct:false,example:"'차별'은 다름을 이유로 불공평하게 대우하는 것이에요."},
+    {round:4,type:'ox',word:'존엄',question:"인간의 '존엄'성은 어떤 상황에도 지켜져야 한다.",correct:true,example:'예: 인간의 존엄성은 어떤 상황에도 지켜져야 한다.'},
+    {round:4,type:'ox',word:'억압',question:"'억압'은 힘으로 누르고 자유를 빼앗는 것이다.",correct:true,example:'예: 억압에 저항한 독립운동가들을 기억한다.'},
+    {round:4,type:'ox',word:'보편적',question:"'보편적'이란 일부에만 해당하는 것을 뜻한다.",correct:false,example:"'보편적'은 모든 것에 두루 해당하는 것이에요."}
+  ],
+  14: [
+    {round:1,type:'multiple',word:'공존',question:"'공존'의 뜻으로 알맞은 것은?",options:['서로 양보하여 합의에 이르는 것','서로 다른 것들이 함께 살아가는 것','여러 것을 하나로 합치는 것','두 개의 극단으로 갈리는 현상'],correct:1,example:'예문: 다양한 문화가 공존하는 사회가 아름답다.'},
+    {round:1,type:'multiple',word:'타협',question:"'타협'의 뜻으로 알맞은 것은?",options:['서로 다른 것들이 함께 살아가는 것','서로 양보하여 합의에 이르는 것','두 개의 극단으로 갈리는 현상','여러 것을 하나로 합치는 것'],correct:1,example:'예문: 갈등을 타협으로 해결했다.'},
+    {round:1,type:'multiple',word:'양극화',question:"'양극화'의 뜻으로 알맞은 것은?",options:['여러 문화가 함께 존재하는 것','여러 것을 하나로 합치는 것','두 개의 극단으로 갈리는 현상','해결해야 할 문제나 목표'],correct:2,example:'예문: 빈부 양극화 문제가 심각하다.'},
+    {round:1,type:'multiple',word:'복지',question:"'복지'의 뜻으로 알맞은 것은?",options:['어떤 일을 하기 위한 주변 상황이나 조건','국민의 행복한 생활을 위한 제도와 시설','제도로 정해진 방식이나 틀','해결해야 할 문제나 목표'],correct:1,example:'예문: 복지 제도가 잘 갖춰진 나라에서 살고 싶다.'},
+    {round:1,type:'multiple',word:'통합',question:"'통합'의 뜻으로 알맞은 것은?",options:['두 개의 극단으로 갈리는 현상','여러 문화가 함께 존재하는 것','여러 것을 하나로 합치는 것','서로 양보하여 합의에 이르는 것'],correct:2,example:'예문: 사회 통합을 위해 노력해야 한다.'},
+    {round:2,type:'multiple',word:'다문화',context:'보기 · 공존 / 타협 / 다문화 / 통합 / 양극화',question:'_______가정이 늘어나고 있다.',options:['공존','타협','다문화','통합'],correct:2,example:"'다문화'는 여러 문화가 함께 존재하는 것이에요."},
+    {round:2,type:'multiple',word:'여건',context:'보기 · 복지 / 여건 / 협의 / 제도적 / 과제',question:'교육 _______이 좋아졌다.',options:['복지','여건','협의','제도적'],correct:1,example:"'여건'은 어떤 일을 하기 위한 주변 상황이나 조건이에요."},
+    {round:2,type:'multiple',word:'협의',context:'보기 · 복지 / 여건 / 협의 / 제도적 / 과제',question:'_______를 통해 문제를 해결했다.',options:['복지','여건','협의','제도적'],correct:2,example:"'협의'는 여러 사람이 모여 의논하는 것이에요."},
+    {round:2,type:'multiple',word:'제도적',context:'보기 · 복지 / 여건 / 협의 / 제도적 / 과제',question:'_______장치를 마련해야 한다.',options:['복지','여건','협의','제도적'],correct:3,example:"'제도적'은 제도로 정해진 방식이나 틀이에요."},
+    {round:2,type:'multiple',word:'과제',context:'보기 · 복지 / 여건 / 협의 / 제도적 / 과제',question:'환경 문제는 우리 모두의 _______이다.',options:['복지','여건','협의','과제'],correct:3,example:"'과제'는 해결해야 할 문제나 목표예요."},
+    {round:3,type:'multiple',word:'다문화',question:"'다문화' 사회에서 필요한 태도로 알맞은 것은?",options:['하나의 문화만 인정한다','관용과 상호 존중의 자세를 갖는다','외국 문화를 모두 거부한다','자국 문화가 가장 우월하다고 생각한다','다른 문화에 무관심하다'],correct:1,example:"'다문화' 사회에서는 서로의 문화를 존중하고 관용의 자세가 필요해요."},
+    {round:3,type:'multiple',word:'양극화',question:"'양극화' 문제를 해결하기 위한 방법은?",options:['부유층에게 세금을 더 걷어 복지를 늘린다','빈곤층을 무시한다','모든 사람에게 똑같이 돈을 준다','경쟁을 더 강화한다','복지 제도를 없앤다'],correct:0,example:"'양극화'를 줄이려면 복지 제도를 강화해 불평등을 줄여야 해요."},
+    {round:4,type:'ox',word:'공존',question:"'공존'은 서로 다른 것들이 함께 살아가는 것이다.",correct:true,example:'예: 다양한 문화가 공존하는 사회가 아름답다.'},
+    {round:4,type:'ox',word:'타협',question:"'타협'은 한쪽만 양보하는 것이다.",correct:false,example:"'타협'은 서로 양보하여 합의에 이르는 것이에요."},
+    {round:4,type:'ox',word:'양극화',question:"'양극화'는 두 개의 극단으로 갈리는 현상이다.",correct:true,example:'예: 빈부 양극화 문제가 심각하다.'},
+    {round:4,type:'ox',word:'복지',question:"'복지'는 국민의 행복한 생활을 위한 제도와 시설이다.",correct:true,example:'예: 복지 제도가 잘 갖춰진 나라에서 살고 싶다.'},
+    {round:4,type:'ox',word:'통합',question:"'통합'은 여러 것을 더 많이 나누는 것이다.",correct:false,example:"'통합'은 여러 것을 하나로 합치는 것이에요."}
+  ],
+  15: [
+    {round:1,type:'multiple',word:'희소성',question:"'희소성'의 뜻으로 알맞은 것은?",options:['인간의 욕구에 비해 자원이 부족한 상태','여러 대안 중 하나를 고르는 것','소비자가 상품을 사고자 하는 욕구','재화와 서비스를 생산·분배·소비하는 활동'],correct:0,example:'예문: 희소성 때문에 선택을 해야 한다.'},
+    {round:1,type:'multiple',word:'기회비용',question:"'기회비용'의 뜻으로 알맞은 것은?",options:['목적에 따라 돈을 쓰는 것','일을 하거나 재산을 통해 얻는 돈','어떤 것을 선택함으로써 포기한 것의 가치','생산자가 상품을 팔고자 하는 욕구'],correct:2,example:'예문: 공부를 선택하면 놀이가 기회비용이다.'},
+    {round:1,type:'multiple',word:'수요',question:"'수요'의 뜻으로 알맞은 것은?",options:['생산자가 상품을 팔고자 하는 욕구','소비자가 상품을 사고자 하는 욕구','이치에 맞고 논리적인 것','목적에 따라 돈을 쓰는 것'],correct:1,example:'예문: 가격이 오르면 수요가 줄어든다.'},
+    {round:1,type:'multiple',word:'공급',question:"'공급'의 뜻으로 알맞은 것은?",options:['소비자가 상품을 사고자 하는 욕구','생산자가 상품을 팔고자 하는 욕구','일을 하거나 재산을 통해 얻는 돈','이치에 맞고 논리적인 것'],correct:1,example:'예문: 공급이 늘면 가격이 내려간다.'},
+    {round:1,type:'multiple',word:'합리적',question:"'합리적'의 뜻으로 알맞은 것은?",options:['필요한 것에 비해 양이 모자란 것','이치에 맞고 논리적인 것','목적에 따라 돈을 쓰는 것','일을 하거나 재산을 통해 얻는 돈'],correct:1,example:'예문: 합리적인 소비 습관을 길러야 한다.'},
+    {round:2,type:'multiple',word:'선택',context:'보기 · 희소성 / 선택 / 기회비용 / 수요 / 공급',question:'합리적인 _______이 중요하다.',options:['희소성','선택','기회비용','수요'],correct:1,example:"'선택'은 여러 대안 중 하나를 고르는 것이에요."},
+    {round:2,type:'multiple',word:'소득',context:'보기 · 합리적 / 소득 / 지출 / 부족 / 경제',question:'_______이 늘어 생활이 나아졌다.',options:['합리적','소득','지출','부족'],correct:1,example:"'소득'은 일을 하거나 재산을 통해 얻는 돈이에요."},
+    {round:2,type:'multiple',word:'지출',context:'보기 · 합리적 / 소득 / 지출 / 부족 / 경제',question:'수입보다 _______이 많으면 적자가 난다.',options:['합리적','소득','지출','부족'],correct:2,example:"'지출'은 목적에 따라 돈을 쓰는 것이에요."},
+    {round:2,type:'multiple',word:'부족',context:'보기 · 합리적 / 소득 / 지출 / 부족 / 경제',question:'자원이 _______하여 수입에 의존한다.',options:['합리적','소득','지출','부족'],correct:3,example:"'부족'은 필요한 것에 비해 양이 모자란 것이에요."},
+    {round:2,type:'multiple',word:'경제',context:'보기 · 합리적 / 소득 / 지출 / 부족 / 경제',question:'_______가 발전하면 국민 생활이 나아진다.',options:['합리적','소득','지출','경제'],correct:3,example:"'경제'는 재화와 서비스를 생산·분배·소비하는 활동이에요."},
+    {round:3,type:'multiple',word:'기회비용',question:"'기회비용'의 예로 알맞은 것은?",options:['물건을 살 때 내는 돈','공부 대신 게임을 선택했을 때 포기한 공부의 가치','물건을 만드는 비용','세금을 내는 것'],correct:1,example:"선택할 때 포기한 것의 가치가 '기회비용'이에요."},
+    {round:3,type:'multiple',word:'수요와 공급',question:'가격이 오르면 수요와 공급은 어떻게 변하나요?',options:['수요 증가, 공급 감소','수요 감소, 공급 증가','수요 증가, 공급 증가','수요 감소, 공급 감소','변화 없음'],correct:1,example:"가격이 오르면 소비자는 덜 사고(수요 감소), 생산자는 더 팔려 해요(공급 증가)."},
+    {round:4,type:'ox',word:'희소성',question:"'희소성'은 인간의 욕구에 비해 자원이 부족한 상태이다.",correct:true,example:'예: 희소성 때문에 선택을 해야 한다.'},
+    {round:4,type:'ox',word:'기회비용',question:"'기회비용'은 어떤 것을 선택함으로써 포기한 것의 가치이다.",correct:true,example:'예: 공부를 선택하면 놀이가 기회비용이다.'},
+    {round:4,type:'ox',word:'수요',question:"'수요'는 생산자가 상품을 팔고자 하는 욕구이다.",correct:false,example:"'수요'는 소비자가 상품을 사고자 하는 욕구예요."},
+    {round:4,type:'ox',word:'소득',question:"'소득'은 일을 하거나 재산을 통해 얻는 돈이다.",correct:true,example:'예: 소득이 늘어 생활이 나아졌다.'},
+    {round:4,type:'ox',word:'합리적',question:"'합리적'인 소비는 이치에 맞고 논리적인 소비이다.",correct:true,example:'예: 합리적인 소비 습관을 길러야 한다.'}
+  ],
+  16: [
+    {round:1,type:'multiple',word:'생산',question:"'생산'의 뜻으로 알맞은 것은?",options:['재화나 서비스를 사용하는 것','재화나 서비스를 만들어내는 것','일을 나누어 각자 맡은 것을 하는 것','투입 대비 최대의 성과를 내는 것'],correct:1,example:'예문: 공장에서 물건을 생산한다.'},
+    {round:1,type:'multiple',word:'소비',question:"'소비'의 뜻으로 알맞은 것은?",options:['재화나 서비스를 만들어내는 것','재화나 서비스를 사용하는 것','잘할 수 있는 분야에 집중하는 것','원료를 가공하여 물건을 만드는 것'],correct:1,example:'예문: 현명한 소비가 경제를 살린다.'},
+    {round:1,type:'multiple',word:'효율',question:"'효율'의 뜻으로 알맞은 것은?",options:['필요 이상으로 남는 것','상품이 생산자에서 소비자까지 이동하는 과정','투입 대비 최대의 성과를 내는 것','원료를 가공하여 물건을 만드는 것'],correct:2,example:'예문: 기계화로 생산 효율이 높아졌다.'},
+    {round:1,type:'multiple',word:'유통',question:"'유통'의 뜻으로 알맞은 것은?",options:['생산 과정에서 새로 만들어지는 가치','상품이 생산자에서 소비자까지 이동하는 과정','물건을 만드는 데 쓰이는 기본 재료','일을 나누어 각자 맡은 것을 하는 것'],correct:1,example:'예문: 유통 단계가 줄면 가격이 내려간다.'},
+    {round:1,type:'multiple',word:'분업',question:"'분업'의 뜻으로 알맞은 것은?",options:['잘할 수 있는 분야에 집중하는 것','일을 나누어 각자 맡은 것을 하는 것','필요 이상으로 남는 것','원료를 가공하여 물건을 만드는 것'],correct:1,example:'예문: 분업으로 생산 효율이 높아졌다.'},
+    {round:2,type:'multiple',word:'특화',context:'보기 · 생산 / 소비 / 분업 / 특화 / 유통',question:'나라마다 _______된 산업이 있다.',options:['생산','소비','분업','특화'],correct:3,example:"'특화'는 잘할 수 있는 분야에 집중하는 것이에요."},
+    {round:2,type:'multiple',word:'부가가치',context:'보기 · 부가가치 / 원자재 / 제조 / 효율 / 잉여',question:'기술력이 높으면 _______가 커진다.',options:['부가가치','원자재','제조','잉여'],correct:0,example:"'부가가치'는 생산 과정에서 새로 만들어지는 가치예요."},
+    {round:2,type:'multiple',word:'원자재',context:'보기 · 부가가치 / 원자재 / 제조 / 효율 / 잉여',question:'_______가격이 오르면 물가가 오른다.',options:['부가가치','원자재','제조','잉여'],correct:1,example:"'원자재'는 물건을 만드는 데 쓰이는 기본 재료예요."},
+    {round:2,type:'multiple',word:'제조',context:'보기 · 부가가치 / 원자재 / 제조 / 효율 / 잉여',question:'자동차를 _______하는 공장이다.',options:['부가가치','원자재','제조','잉여'],correct:2,example:"'제조'는 원료를 가공하여 물건을 만드는 것이에요."},
+    {round:2,type:'multiple',word:'잉여',context:'보기 · 부가가치 / 원자재 / 제조 / 효율 / 잉여',question:'_______생산물을 수출한다.',options:['부가가치','원자재','제조','잉여'],correct:3,example:"'잉여'는 필요 이상으로 남는 것이에요."},
+    {round:3,type:'multiple',word:'분업',question:"'분업'의 장점으로 알맞은 것은?",options:['모든 사람이 모든 것을 잘 할 수 있다','한 사람이 모든 일을 담당한다','각자 맡은 일을 전문적으로 해서 효율이 높아진다','분업하면 생산량이 줄어든다','원자재 비용이 늘어난다'],correct:2,example:"'분업'으로 각자 전문 분야에 집중하면 생산 효율이 높아져요."},
+    {round:3,type:'multiple',word:'유통',question:"'유통' 단계가 줄어들면 일어나는 결과는?",options:['상품 가격이 올라간다','소비자가 더 비싸게 산다','소비자가 더 싸게 살 수 있다','생산량이 줄어든다','원자재 가격이 오른다'],correct:2,example:"'유통' 단계가 줄면 중간 비용이 줄어 소비자가 더 싸게 살 수 있어요."},
+    {round:4,type:'ox',word:'생산',question:"'생산'은 재화나 서비스를 만들어내는 것이다.",correct:true,example:'예: 공장에서 물건을 생산한다.'},
+    {round:4,type:'ox',word:'소비',question:"'소비'는 재화나 서비스를 만들어내는 것이다.",correct:false,example:"'소비'는 재화나 서비스를 사용하는 것이에요."},
+    {round:4,type:'ox',word:'분업',question:"'분업'은 일을 나누어 각자 맡은 것을 하는 것이다.",correct:true,example:'예: 분업으로 생산 효율이 높아졌다.'},
+    {round:4,type:'ox',word:'효율',question:"'효율'은 투입 대비 최대의 성과를 내는 것이다.",correct:true,example:'예: 기계화로 생산 효율이 높아졌다.'},
+    {round:4,type:'ox',word:'유통',question:"'유통'은 상품이 생산자에서 소비자까지 이동하는 과정이다.",correct:true,example:'예: 유통 단계가 줄면 가격이 내려간다.'}
+  ],
+  17: [
+    {round:1,type:'multiple',word:'시장',question:"'시장'의 뜻으로 알맞은 것은?",options:['상품의 값','상품을 사고파는 거래가 이루어지는 곳','한 기업이 시장 전체를 혼자 지배하는 것','물가가 지속적으로 오르는 현상'],correct:1,example:'예문: 전통 시장에서 물건을 샀다.'},
+    {round:1,type:'multiple',word:'독점',question:"'독점'의 뜻으로 알맞은 것은?",options:['같은 목표를 위해 서로 앞서려는 것','수요와 공급이 일치하는 가격','한 기업이 시장 전체를 혼자 지배하는 것','전반적인 상품 가격의 수준'],correct:2,example:'예문: 독점 기업은 가격을 마음대로 올릴 수 있다.'},
+    {round:1,type:'multiple',word:'인플레이션',question:"'인플레이션'의 뜻으로 알맞은 것은?",options:['물가가 지속적으로 오르는 현상','수요와 공급이 일치하는 가격','사업이나 투자로 얻는 이익','물건이나 서비스를 사고파는 것'],correct:0,example:'예문: 인플레이션으로 돈의 가치가 떨어진다.'},
+    {round:1,type:'multiple',word:'경쟁',question:"'경쟁'의 뜻으로 알맞은 것은?",options:['한 기업이 시장 전체를 혼자 지배하는 것','같은 목표를 위해 서로 앞서려는 것','물가가 지속적으로 오르는 현상','전반적인 상품 가격의 수준'],correct:1,example:'예문: 기업 간 경쟁이 상품을 발전시킨다.'},
+    {round:1,type:'multiple',word:'물가',question:"'물가'의 뜻으로 알맞은 것은?",options:['사업이나 투자에서 생기는 손해','물건이나 서비스를 사고파는 것','전반적인 상품 가격의 수준','사업이나 투자로 얻는 이익'],correct:2,example:'예문: 물가가 오르면 생활이 힘들어진다.'},
+    {round:2,type:'multiple',word:'가격',context:'보기 · 시장 / 가격 / 균형가격 / 독점 / 경쟁',question:'수요와 공급에 따라 _______이 결정된다.',options:['시장','가격','균형가격','독점'],correct:1,example:"'가격'은 상품의 값이에요."},
+    {round:2,type:'multiple',word:'균형가격',context:'보기 · 시장 / 가격 / 균형가격 / 독점 / 경쟁',question:'_______에서 시장이 안정된다.',options:['시장','가격','균형가격','독점'],correct:2,example:"'균형가격'은 수요와 공급이 일치하는 가격이에요."},
+    {round:2,type:'multiple',word:'거래',context:'보기 · 인플레이션 / 물가 / 거래 / 수익 / 손실',question:'공정한 _______가 이루어져야 한다.',options:['인플레이션','물가','거래','수익'],correct:2,example:"'거래'는 물건이나 서비스를 사고파는 것이에요."},
+    {round:2,type:'multiple',word:'수익',context:'보기 · 인플레이션 / 물가 / 거래 / 수익 / 손실',question:'투자로 _______을 얻었다.',options:['인플레이션','물가','거래','수익'],correct:3,example:"'수익'은 사업이나 투자로 얻는 이익이에요."},
+    {round:2,type:'multiple',word:'손실',context:'보기 · 인플레이션 / 물가 / 거래 / 수익 / 손실',question:'잘못된 투자로 _______이 발생했다.',options:['인플레이션','물가','거래','손실'],correct:3,example:"'손실'은 사업이나 투자에서 생기는 손해예요."},
+    {round:3,type:'multiple',word:'독점',question:"'독점'이 경제에 미치는 부정적인 영향은?",options:['소비자가 더 싸게 살 수 있다','기업이 경쟁하여 품질이 좋아진다','기업이 가격을 마음대로 올려 소비자가 손해를 본다','새로운 기업이 생겨나기 쉽다','시장이 활성화된다'],correct:2,example:"'독점' 기업은 경쟁이 없어 가격을 마음대로 올릴 수 있어 소비자가 손해를 봐요."},
+    {round:3,type:'multiple',word:'인플레이션',question:"'인플레이션'이 계속되면 나타나는 결과는?",options:['돈의 가치가 높아진다','같은 돈으로 더 많이 살 수 있다','같은 돈으로 살 수 있는 것이 줄어든다','물가가 안정된다','소득이 자동으로 늘어난다'],correct:2,example:"'인플레이션'으로 물가가 오르면 같은 돈으로 살 수 있는 것이 줄어들어요."},
+    {round:4,type:'ox',word:'시장',question:"'시장'은 상품을 사고파는 거래가 이루어지는 곳이다.",correct:true,example:'예: 전통 시장에서 물건을 샀다.'},
+    {round:4,type:'ox',word:'독점',question:"'독점'은 여러 기업이 경쟁하는 상태이다.",correct:false,example:"'독점'은 한 기업이 시장 전체를 혼자 지배하는 것이에요."},
+    {round:4,type:'ox',word:'인플레이션',question:"'인플레이션'은 물가가 지속적으로 오르는 현상이다.",correct:true,example:'예: 인플레이션으로 돈의 가치가 떨어진다.'},
+    {round:4,type:'ox',word:'경쟁',question:"기업 간 '경쟁'은 상품의 질을 높이는 데 도움이 된다.",correct:true,example:'예: 기업 간 경쟁이 상품을 발전시킨다.'},
+    {round:4,type:'ox',word:'수익과 손실',question:"투자에서 이익이 나면 '수익', 손해가 나면 '손실'이다.",correct:true,example:"'수익'은 이익, '손실'은 손해예요."}
+  ],
+  18: [
+    {round:1,type:'multiple',word:'무역',question:"'무역'의 뜻으로 알맞은 것은?",options:['나라와 나라 사이에 물건을 사고파는 것','국내 상품을 다른 나라에 파는 것','다른 나라 상품을 국내로 사들이는 것','서로 다른 나라 돈의 교환 비율'],correct:0,example:'예문: 우리나라는 무역에 의존하는 경제이다.'},
+    {round:1,type:'multiple',word:'수출',question:"'수출'의 뜻으로 알맞은 것은?",options:['다른 나라 상품을 국내로 사들이는 것','국내 상품을 다른 나라에 파는 것','수입 상품에 부과하는 세금','서로 다른 나라 돈의 교환 비율'],correct:1,example:'예문: 반도체를 수출하여 외화를 벌었다.'},
+    {round:1,type:'multiple',word:'관세',question:"'관세'의 뜻으로 알맞은 것은?",options:['서로 다른 나라 돈의 교환 비율','수출이 수입보다 많아 이익이 남는 것','수입 상품에 부과하는 세금','관세 없이 자유롭게 교역하는 것'],correct:2,example:'예문: 관세를 높이면 수입이 줄어든다.'},
+    {round:1,type:'multiple',word:'환율',question:"'환율'의 뜻으로 알맞은 것은?",options:['수입 상품에 부과하는 세금','서로 다른 나라 돈의 교환 비율','수입이 수출보다 많아 손해가 나는 것','자국 산업을 보호하기 위해 수입을 제한하는 것'],correct:1,example:'예문: 환율이 오르면 수출에 유리하다.'},
+    {round:1,type:'multiple',word:'흑자',question:"'흑자'의 뜻으로 알맞은 것은?",options:['수입이 수출보다 많아 손해가 나는 것','수출이 수입보다 많아 이익이 남는 것','관세 없이 자유롭게 교역하는 것','자국 산업을 보호하기 위해 수입을 제한하는 것'],correct:1,example:'예문: 무역 흑자가 커졌다.'},
+    {round:2,type:'multiple',word:'교역',context:'보기 · 교역 / 무역 / 수출 / 수입 / 관세',question:'실크로드를 통해 _______이 활발했다.',options:['교역','무역','수출','수입'],correct:0,example:"'교역'은 나라와 나라 사이에 물건을 사고파는 것이에요."},
+    {round:2,type:'multiple',word:'수입',context:'보기 · 교역 / 무역 / 수출 / 수입 / 관세',question:'에너지를 해외에서 _______한다.',options:['교역','무역','수출','수입'],correct:3,example:"'수입'은 다른 나라 상품을 국내로 사들이는 것이에요."},
+    {round:2,type:'multiple',word:'적자',context:'보기 · 환율 / 흑자 / 적자 / 보호무역 / 자유무역',question:'무역 _______가 계속되면 경제에 문제가 생긴다.',options:['환율','흑자','적자','보호무역'],correct:2,example:"'적자'는 수입이 수출보다 많아 손해가 나는 것이에요."},
+    {round:2,type:'multiple',word:'보호무역',context:'보기 · 환율 / 흑자 / 적자 / 보호무역 / 자유무역',question:'_______으로 국내 산업을 지킨다.',options:['환율','흑자','적자','보호무역'],correct:3,example:"'보호무역'은 자국 산업을 보호하기 위해 수입을 제한하는 것이에요."},
+    {round:2,type:'multiple',word:'자유무역',context:'보기 · 환율 / 흑자 / 적자 / 보호무역 / 자유무역',question:'_______협정으로 교역이 늘었다.',options:['환율','흑자','적자','자유무역'],correct:3,example:"'자유무역'은 관세 없이 자유롭게 교역하는 것이에요."},
+    {round:3,type:'multiple',word:'관세',question:"'관세'를 높이면 어떤 일이 생기나요?",options:['수입이 늘어난다','수입품 가격이 내려간다','수입이 줄고 국내 산업이 보호된다','수출이 줄어든다','무역 흑자가 줄어든다'],correct:2,example:"'관세'가 높아지면 수입품 가격이 오르고 수입이 줄어 국내 산업이 보호돼요."},
+    {round:3,type:'multiple',word:'환율',question:'환율이 오르면 유리한 쪽은?',options:['수입하는 기업','해외여행 가는 사람','수출하는 기업','외국 상품을 사는 소비자','외화를 쓰는 사람'],correct:2,example:"환율이 오르면 같은 달러를 더 많은 원화로 받을 수 있어 수출 기업에 유리해요."},
+    {round:4,type:'ox',word:'무역',question:"'무역'은 나라 사이에 상품을 사고파는 경제 활동이다.",correct:true,example:'예: 우리나라는 무역에 의존하는 경제이다.'},
+    {round:4,type:'ox',word:'수출',question:"'수출'은 다른 나라 상품을 국내로 사들이는 것이다.",correct:false,example:"'수출'은 국내 상품을 다른 나라에 파는 것이에요."},
+    {round:4,type:'ox',word:'흑자',question:"무역 '흑자'는 수출이 수입보다 많아 이익이 남는 것이다.",correct:true,example:'예: 무역 흑자가 커졌다.'},
+    {round:4,type:'ox',word:'관세',question:"'관세'는 수출 상품에 부과하는 세금이다.",correct:false,example:"'관세'는 수입 상품에 부과하는 세금이에요."},
+    {round:4,type:'ox',word:'자유무역',question:"'자유무역'은 관세 없이 자유롭게 교역하는 것이다.",correct:true,example:'예: 자유무역 협정으로 교역이 늘었다.'}
+  ],
+  19: [
+    {round:1,type:'multiple',word:'노동',question:"'노동'의 뜻으로 알맞은 것은?",options:['특별한 지식과 기술이 필요한 직업','생산을 위해 몸이나 정신을 쓰는 것','노동에 대한 대가로 받는 돈','기술이나 일에 능숙해진 것'],correct:1,example:'예문: 공정한 노동에 대한 보상이 필요하다.'},
+    {round:1,type:'multiple',word:'임금',question:"'임금'의 뜻으로 알맞은 것은?",options:['일할 의지가 있지만 일자리가 없는 상태','노동에 대한 대가로 받는 돈','일할 사람을 채용하는 것','어떤 일을 직업으로 삼아 하는 것'],correct:1,example:'예문: 최저 임금이 인상되었다.'},
+    {round:1,type:'multiple',word:'실업',question:"'실업'의 뜻으로 알맞은 것은?",options:['일할 사람을 채용하는 것','직업을 얻는 것','일할 의지가 있지만 일자리가 없는 상태','기술이나 일에 능숙해진 것'],correct:2,example:'예문: 실업률이 높으면 사회 문제가 생긴다.'},
+    {round:1,type:'multiple',word:'전문직',question:"'전문직'의 뜻으로 알맞은 것은?",options:['생계를 위해 지속적으로 하는 일','어떤 일을 직업으로 삼아 하는 것','특별한 지식과 기술이 필요한 직업','기술이나 일에 능숙해진 것'],correct:2,example:'예문: 의사·변호사는 대표적인 전문직이다.'},
+    {round:1,type:'multiple',word:'숙련',question:"'숙련'의 뜻으로 알맞은 것은?",options:['일할 의지가 있지만 일자리가 없는 상태','기술이나 일에 능숙해진 것','일할 사람을 채용하는 것','노동에 대한 대가로 받는 돈'],correct:1,example:'예문: 숙련된 기술자가 되기 위해 오래 훈련했다.'},
+    {round:2,type:'multiple',word:'직업',context:'보기 · 직업 / 노동 / 임금 / 실업 / 고용',question:'미래에 어떤 _______을 가질지 생각해보았다.',options:['직업','노동','임금','실업'],correct:0,example:"'직업'은 생계를 위해 지속적으로 하는 일이에요."},
+    {round:2,type:'multiple',word:'고용',context:'보기 · 직업 / 노동 / 임금 / 실업 / 고용',question:'기업이 _______을 늘려 일자리가 생겼다.',options:['직업','노동','임금','고용'],correct:3,example:"'고용'은 일할 사람을 채용하는 것이에요."},
+    {round:2,type:'multiple',word:'취업',context:'보기 · 노동권 / 전문직 / 종사하다 / 숙련 / 취업',question:'_______을 위해 열심히 준비했다.',options:['노동권','전문직','종사','취업'],correct:3,example:"'취업'은 직업을 얻는 것이에요."},
+    {round:2,type:'multiple',word:'노동권',context:'보기 · 노동권 / 전문직 / 종사하다 / 숙련 / 취업',question:'_______을 보장받아야 한다.',options:['노동권','전문직','종사','취업'],correct:0,example:"'노동권'은 일할 권리와 노동 조건에 관한 권리예요."},
+    {round:2,type:'multiple',word:'종사하다',context:'보기 · 노동권 / 전문직 / 종사하다 / 숙련 / 취업',question:'교육 분야에 _______고 싶다.',options:['노동권을 갖','전문직에 가','종사하','취업하'],correct:2,example:"'종사하다'는 어떤 일을 직업으로 삼아 하는 것이에요."},
+    {round:3,type:'multiple',word:'실업',question:"'실업'이 증가하면 나타나는 사회 문제로 알맞은 것은?",options:['국민 소득이 높아진다','범죄율이 감소한다','소비가 줄어 경기가 침체된다','복지 비용이 줄어든다','기업이 성장한다'],correct:2,example:"'실업'이 늘면 소득이 줄어 소비가 감소하고 경기가 침체돼요."},
+    {round:3,type:'multiple',word:'노동권',question:"'노동권'을 보호하는 예로 알맞은 것은?",options:['최저 임금 없이 임금을 자유롭게 정한다','노동자가 하루 24시간 일해도 된다','주 52시간 근무제를 시행한다','아이도 일할 수 있게 허용한다','휴가 없이 일년 내내 일한다'],correct:2,example:"주 52시간 근무제는 노동자의 '노동권'을 보호하는 제도예요."},
+    {round:4,type:'ox',word:'노동',question:"'노동'은 생산을 위해 몸이나 정신을 쓰는 것이다.",correct:true,example:'예: 공정한 노동에 대한 보상이 필요하다.'},
+    {round:4,type:'ox',word:'임금',question:"'임금'은 노동에 대한 대가로 받는 돈이다.",correct:true,example:'예: 최저 임금이 인상되었다.'},
+    {round:4,type:'ox',word:'실업',question:"'실업'은 일하기 싫어서 일을 안 하는 상태이다.",correct:false,example:"'실업'은 일할 의지가 있지만 일자리가 없는 상태예요."},
+    {round:4,type:'ox',word:'전문직',question:"'전문직'은 특별한 지식과 기술이 필요한 직업이다.",correct:true,example:'예: 의사·변호사는 대표적인 전문직이다.'},
+    {round:4,type:'ox',word:'숙련',question:"'숙련'은 기술이나 일에 능숙해진 것이다.",correct:true,example:'예: 숙련된 기술자가 되기 위해 오래 훈련했다.'}
+  ],
+  20: [
+    {round:1,type:'multiple',word:'금융',question:"'금융'의 뜻으로 알맞은 것은?",options:['소득 중 일부를 모아두는 것','돈을 운용하고 관리하는 경제 활동','미래 이익을 위해 돈을 쓰는 것','국가 운영을 위해 국민이 내는 돈'],correct:1,example:'예문: 금융 기관에서 대출을 받았다.'},
+    {round:1,type:'multiple',word:'저축',question:"'저축'의 뜻으로 알맞은 것은?",options:['돈을 운용하고 관리하는 경제 활동','미래 이익을 위해 돈을 쓰는 것','소득 중 일부를 모아두는 것','돈을 빌린 대가로 추가로 지급하는 돈'],correct:2,example:'예문: 미래를 위해 저축하는 습관이 중요하다.'},
+    {round:1,type:'multiple',word:'세금',question:"'세금'의 뜻으로 알맞은 것은?",options:['빚, 갚아야 할 돈','국가 운영을 위해 국민이 내는 돈','개인이나 기업이 가진 재산','빚을 갚을 능력과 믿음'],correct:1,example:'예문: 세금으로 도로와 학교를 만든다.'},
+    {round:1,type:'multiple',word:'부채',question:"'부채'의 뜻으로 알맞은 것은?",options:['개인이나 기업이 가진 재산','빚을 갚을 능력과 믿음','국가 운영을 위해 국민이 내는 돈','빚, 갚아야 할 돈'],correct:3,example:'예문: 부채가 늘면 경제적으로 어려워진다.'},
+    {round:1,type:'multiple',word:'신용',question:"'신용'의 뜻으로 알맞은 것은?",options:['미래 이익을 위해 돈을 쓰는 것','빚, 갚아야 할 돈','빚을 갚을 능력과 믿음','개인이나 기업이 가진 재산'],correct:2,example:'예문: 신용이 좋으면 대출받기 쉽다.'},
+    {round:2,type:'multiple',word:'투자',context:'보기 · 금융 / 저축 / 투자 / 이자 / 세금',question:'주식에 _______하여 수익을 냈다.',options:['금융','저축','투자','이자'],correct:2,example:"'투자'는 미래 이익을 위해 돈을 쓰는 것이에요."},
+    {round:2,type:'multiple',word:'이자',context:'보기 · 금융 / 저축 / 투자 / 이자 / 세금',question:'은행에서 돈을 빌리면 _______를 내야 한다.',options:['금융','저축','투자','이자'],correct:3,example:"'이자'는 돈을 빌린 대가로 추가로 지급하는 돈이에요."},
+    {round:2,type:'multiple',word:'예산',context:'보기 · 예산 / 부채 / 자산 / 신용 / 보험',question:'국가 _______을 어떻게 쓸지 결정한다.',options:['예산','부채','자산','신용'],correct:0,example:"'예산'은 미리 계획한 수입과 지출이에요."},
+    {round:2,type:'multiple',word:'자산',context:'보기 · 예산 / 부채 / 자산 / 신용 / 보험',question:'집과 자동차는 중요한 _______이다.',options:['예산','부채','자산','신용'],correct:2,example:"'자산'은 개인이나 기업이 가진 재산이에요."},
+    {round:2,type:'multiple',word:'보험',context:'보기 · 예산 / 부채 / 자산 / 신용 / 보험',question:'건강_______으로 병원비를 아낄 수 있다.',options:['예산','부채','자산','보험'],correct:3,example:"'보험'은 위험에 대비해 미리 보험료를 내는 제도예요."},
+    {round:3,type:'multiple',word:'저축과 투자',question:"'저축'과 '투자'의 차이로 알맞은 것은?",options:['저축은 미래를 위해 쓰는 것, 투자는 모아두는 것','저축은 안전하게 모아두는 것, 투자는 이익을 위해 위험을 감수하는 것','둘은 같은 뜻이다','저축이 더 많은 이익을 준다','투자는 손실이 없다'],correct:1,example:"'저축'은 안전하게 모아두는 것, '투자'는 이익을 위해 위험을 감수하는 것이에요."},
+    {round:3,type:'multiple',word:'세금',question:'세금이 하는 역할로 알맞지 않은 것은?',options:['도로를 만든다','학교를 운영한다','기업의 이익을 보장한다','군대를 유지한다','복지 서비스를 제공한다'],correct:2,example:"'세금'은 국가 운영에 쓰이지, 기업의 이익을 보장하는 데 쓰이지 않아요."},
+    {round:4,type:'ox',word:'금융',question:"'금융'은 돈을 운용하고 관리하는 경제 활동이다.",correct:true,example:'예: 금융 기관에서 대출을 받았다.'},
+    {round:4,type:'ox',word:'저축',question:"'저축'은 소득 중 일부를 모아두는 것이다.",correct:true,example:'예: 미래를 위해 저축하는 습관이 중요하다.'},
+    {round:4,type:'ox',word:'부채',question:"'부채'는 개인이나 기업이 가진 재산이다.",correct:false,example:"'부채'는 빚, 갚아야 할 돈이에요. 재산은 '자산'이에요."},
+    {round:4,type:'ox',word:'신용',question:"'신용'이 좋으면 대출받기 쉽다.",correct:true,example:'예: 신용이 좋으면 대출받기 쉽다.'},
+    {round:4,type:'ox',word:'세금',question:"'세금'은 국가 운영을 위해 국민이 내는 돈이다.",correct:true,example:'예: 세금으로 도로와 학교를 만든다.'}
+  ]
+};
+
+const QUESTIONS = ALL_QUESTIONS[weekNum] || ALL_QUESTIONS[1];
+const state = {
+  name: '',
+  grade: '',
+  currentQuestion: 0,
+  totalScore: 0,
+  roundScores: [0, 0, 0, 0],
+  correctCount: 0,
+  wrongQuestions: [],
+  combo: 0,
+  maxCombo: 0,
+  startTime: 0,
+  timeTaken: 0,
+  isPracticeMode: false,
+  practiceQuestions: [],
+};
+
+let timerInterval = null;
+let remainingMs = 0;
+let answered = false;
+
+const ROUND_NAMES = ['새싹', '잎사귀', '꽃', '큰 나무'];
+const ROUND_EMOJIS = ['🌱', '🌿', '🌸', '🌳'];
+const ROUND_POINTS = [5, 5, 10, 6]; // 라운드별 1문제당 점수 (총 100점 만점)
+const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤'];
+
+// ============================================================
+// 🔧 유틸 함수
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.hidden = true);
+  document.getElementById(id).hidden = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function getGrade(score) {
+  if (score >= 95) return { emoji: '🌳', name: '큰 나무', msg: '완벽해요! 어휘 마스터!' };
+  if (score >= 85) return { emoji: '🍎', name: '열매', msg: '아주 잘했어요!' };
+  if (score >= 70) return { emoji: '🌸', name: '꽃', msg: '잘하고 있어요!' };
+  if (score >= 50) return { emoji: '🌿', name: '잎사귀', msg: '한 걸음 더 자라요!' };
+  return { emoji: '🌱', name: '새싹', msg: '천천히 더 익혀봐요!' };
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}분 ${sec}초` : `${sec}초`;
+}
+
+// ============================================================
+// 🎯 시작 화면
+// ============================================================
+function initStartScreen() {
+  // 주차·강의명 동적 업데이트
+  document.getElementById('display-week').textContent = LESSON.week;
+  document.getElementById('display-lesson').textContent = LESSON.lesson.replace(/(\d+강)/, '$1 ·');
+
+  const nameInput = document.getElementById('name-input');
+  nameInput.addEventListener('input', e => {
+    state.name = e.target.value.trim();
+    updateStartButton();
+  });
+
+  document.querySelectorAll('.grade-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.grade = btn.dataset.grade;
+      document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateStartButton();
+    });
+  });
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('view-records-btn').addEventListener('click', showRecords);
+}
+
+function updateStartButton() {
+  document.getElementById('start-btn').disabled = !(state.name && state.grade);
+}
+
+
+// ============================================================
+// 🎮 게임 시작
+// ============================================================
+function startGame() {
+  state.currentQuestion = 0;
+  state.totalScore = 0;
+  state.roundScores = [0, 0, 0, 0];
+  state.correctCount = 0;
+  state.wrongQuestions = [];
+  state.combo = 0;
+  state.maxCombo = 0;
+  state.startTime = Date.now();
+  state.isPracticeMode = false;
+  showScreen('quiz-screen');
+  showQuestion(0);
+}
+
+function showQuestion(idx) {
+  const questions = state.isPracticeMode ? state.practiceQuestions : QUESTIONS;
+  if (idx >= questions.length) {
+    if (state.isPracticeMode) {
+      finishPractice();
+    } else {
+      finishGame();
+    }
+    return;
+  }
+
+  answered = false;
+  const q = questions[idx];
+
+  // 헤더 업데이트
+  document.getElementById('round-badge').textContent =
+    `${ROUND_EMOJIS[q.round - 1]} ${q.round}라운드 · ${ROUND_NAMES[q.round - 1]}`;
+  document.getElementById('question-counter').textContent = `${idx + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((idx + 1) / questions.length) * 100}%`;
+  document.getElementById('score-value').textContent = state.totalScore.toLocaleString();
+  document.getElementById('correct-value').textContent = state.correctCount;
+  document.getElementById('combo-value').textContent = state.combo;
+
+  // 컨텍스트 (보기)
+  const ctxEl = document.getElementById('question-context');
+  if (q.context) {
+    ctxEl.textContent = q.context;
+    ctxEl.hidden = false;
+  } else {
+    ctxEl.hidden = true;
+  }
+
+  document.getElementById('question-text').textContent = q.question;
+
+  // 선택지
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+
+  if (q.type === 'ox') {
+    optionsEl.className = 'ox-options';
+    const oBtn = document.createElement('button');
+    oBtn.className = 'ox-option';
+    oBtn.textContent = 'O';
+    oBtn.addEventListener('click', () => answerQuestion(true));
+    optionsEl.appendChild(oBtn);
+
+    const xBtn = document.createElement('button');
+    xBtn.className = 'ox-option';
+    xBtn.textContent = 'X';
+    xBtn.addEventListener('click', () => answerQuestion(false));
+    optionsEl.appendChild(xBtn);
+  } else {
+    optionsEl.className = 'options';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = `${CIRCLE_NUMS[i]} ${opt}`;
+      btn.addEventListener('click', () => answerQuestion(i));
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  // 피드백 숨김
+  document.getElementById('feedback').hidden = true;
+  document.getElementById('next-btn-wrap').hidden = true;
+
+  startTimer(20);
+}
+
+function startTimer(seconds) {
+  if (timerInterval) clearInterval(timerInterval);
+
+  const totalMs = seconds * 1000;
+  remainingMs = totalMs;
+
+  const timerFill = document.getElementById('timer-fill');
+  timerFill.classList.remove('warning', 'danger');
+  timerFill.style.width = '100%';
+
+  const tickMs = 100;
+  timerInterval = setInterval(() => {
+    if (answered) {
+      clearInterval(timerInterval);
+      return;
+    }
+    remainingMs -= tickMs;
+    const pct = Math.max(0, (remainingMs / totalMs) * 100);
+    timerFill.style.width = `${pct}%`;
+
+    if (pct < 25) {
+      timerFill.classList.add('danger');
+      timerFill.classList.remove('warning');
+    } else if (pct < 50) {
+      timerFill.classList.add('warning');
+    }
+
+    if (remainingMs <= 0) {
+      clearInterval(timerInterval);
+      answerQuestion(null); // 시간 초과
+    }
+  }, tickMs);
+}
+
+function answerQuestion(answer) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const questions = state.isPracticeMode ? state.practiceQuestions : QUESTIONS;
+  const idx = state.currentQuestion;
+  const q = questions[idx];
+
+  let isCorrect = false;
+  if (q.type === 'ox') {
+    isCorrect = answer === q.correct;
+  } else {
+    isCorrect = answer === q.correct;
+  }
+
+  // 시각화
+  const optionEls = document.querySelectorAll('#options > *');
+  optionEls.forEach(el => el.disabled = true);
+
+  if (q.type === 'ox') {
+    const correctIdx = q.correct ? 0 : 1;
+    optionEls[correctIdx].classList.add('correct');
+    if (!isCorrect && answer !== null) {
+      const wrongIdx = answer ? 0 : 1;
+      optionEls[wrongIdx].classList.add('wrong');
+    }
+  } else {
+    optionEls[q.correct].classList.add('correct');
+    if (!isCorrect && answer !== null && optionEls[answer]) {
+      optionEls[answer].classList.add('wrong');
+    }
+  }
+
+  // 점수 계산 (일반 모드에서만)
+  if (!state.isPracticeMode) {
+    if (isCorrect) {
+      state.combo++;
+      const pts = ROUND_POINTS[q.round - 1];
+
+      state.totalScore += pts;
+      state.roundScores[q.round - 1] += pts;
+      state.correctCount++;
+
+      if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+      if (state.combo >= 3) showComboPopup(state.combo);
+    } else {
+      state.combo = 0;
+      state.wrongQuestions.push(idx);
+    }
+  } else {
+    if (!isCorrect) {
+      // 연습 모드에서도 어떤 문제 틀렸는지는 트래킹하지 않음 (이미 틀렸던 문제니까)
+    }
+  }
+
+  // 통계 업데이트
+  document.getElementById('score-value').textContent = state.totalScore.toLocaleString();
+  document.getElementById('correct-value').textContent = state.correctCount;
+  document.getElementById('combo-value').textContent = state.combo;
+
+  // 피드백 표시
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  let title;
+  if (isCorrect) {
+    title = '✨ 정답이에요!';
+  } else if (answer === null) {
+    title = '⏰ 시간 초과!';
+  } else {
+    title = '💧 아쉬워요!';
+  }
+
+  let body = '';
+  if (!isCorrect) {
+    if (q.type === 'ox') {
+      body = `<strong>정답: ${q.correct ? 'O' : 'X'}</strong><br>${q.example || ''}`;
+    } else {
+      body = `<strong>정답: ${CIRCLE_NUMS[q.correct]} ${q.options[q.correct]}</strong><br>${q.example || ''}`;
+    }
+  } else {
+    body = q.example || '';
+  }
+
+  fb.innerHTML = `
+    <div class="feedback-title">${title}</div>
+    <div class="feedback-explanation">${body}</div>
+  `;
+  fb.hidden = false;
+
+  const isLast = (idx + 1) >= questions.length;
+  document.getElementById('next-btn').textContent = isLast ? '결과 보기 →' : '다음 문제 →';
+  document.getElementById('next-btn-wrap').hidden = false;
+}
+
+function showComboPopup(combo) {
+  const el = document.createElement('div');
+  el.className = 'combo-display';
+  el.textContent = `🔥 ${combo} 콤보!`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function nextQuestion() {
+  state.currentQuestion++;
+  showQuestion(state.currentQuestion);
+}
+
+// ============================================================
+// 🏁 게임 종료 & 결과
+// ============================================================
+function finishGame() {
+  state.timeTaken = Math.round((Date.now() - state.startTime) / 1000);
+  showResults();
+  submitToSheets();
+  saveLocalRecord();
+}
+
+function showResults() {
+  const grade = getGrade(state.totalScore);
+
+  document.getElementById('result-emoji').textContent = grade.emoji;
+  document.getElementById('result-grade').textContent = grade.name;
+  document.getElementById('result-score').textContent = state.totalScore.toLocaleString();
+  document.getElementById('result-correct').textContent = `${state.correctCount} / ${QUESTIONS.length}`;
+  document.getElementById('result-time').textContent = formatTime(state.timeTaken);
+  document.getElementById('result-combo').textContent = state.maxCombo;
+
+  // 라운드별 점수
+  const breakdown = document.getElementById('round-breakdown');
+  breakdown.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const row = document.createElement('div');
+    row.className = 'round-row';
+    row.innerHTML = `
+      <span>${ROUND_EMOJIS[i]} ${i + 1}라운드 · ${ROUND_NAMES[i]}</span>
+      <strong>${state.roundScores[i].toLocaleString()}점</strong>
+    `;
+    breakdown.appendChild(row);
+  }
+
+  // 틀린 어휘
+  const wrongSection = document.getElementById('wrong-words-section');
+  const reviewBtn = document.getElementById('btn-review-cards');
+  const retryBtn = document.getElementById('btn-retry-wrong');
+
+  if (state.wrongQuestions.length === 0) {
+    wrongSection.innerHTML = `<div class="perfect-banner">🎉 모든 문제를 맞혔어요! 완벽해요!</div>`;
+    reviewBtn.style.display = 'none';
+    retryBtn.style.display = 'none';
+  } else {
+    const uniqueWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+    wrongSection.innerHTML = `
+      <h3>🌧️ 다시 살펴볼 어휘 (${uniqueWords.length}개)</h3>
+      <div>${uniqueWords.map(w => `<span class="wrong-word-chip">${w}</span>`).join('')}</div>
+    `;
+    reviewBtn.style.display = '';
+    retryBtn.style.display = '';
+  }
+
+  showScreen('result-screen');
+}
+
+// ============================================================
+// 📤 구글 시트로 점수 전송
+// ============================================================
+async function submitToSheets() {
+  const statusEl = document.getElementById('submit-status');
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    statusEl.hidden = true;
+    return;
+  }
+
+  statusEl.className = 'submit-status sending';
+  statusEl.textContent = '📤 성적을 기록하는 중...';
+  statusEl.hidden = false;
+
+  const gradeInfo = getGrade(state.totalScore);
+  const uniqueWrongWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+
+  const data = {
+    name: state.name,
+    grade: state.grade,
+    lesson: `${LESSON.week} - ${LESSON.lesson}`,
+    totalScore: state.totalScore,
+    correctCount: `${state.correctCount}/${QUESTIONS.length}`,
+    gradeLevel: `${gradeInfo.emoji} ${gradeInfo.name}`,
+    roundScores: state.roundScores.map((s, i) => `R${i + 1}:${s}`).join(' / '),
+    wrongWords: uniqueWrongWords.join(', ') || '없음',
+    timeTaken: state.timeTaken,
+    maxCombo: state.maxCombo
+  };
+
+  try {
+    const params = new URLSearchParams(data);
+    const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (response.ok) {
+      statusEl.className = 'submit-status success';
+      statusEl.textContent = '✅ 성적이 기록되었어요!';
+    } else {
+      throw new Error('Submit failed');
+    }
+  } catch (err) {
+    statusEl.className = 'submit-status error';
+    statusEl.textContent = '⚠️ 성적 기록 실패. 인터넷 연결을 확인해 주세요.';
+    console.error('Submission error:', err);
+  }
+}
+
+// ============================================================
+// 💾 로컬 기록 저장 (학생 본인용)
+// ============================================================
+async function saveLocalRecord() {
+  try {
+    const record = {
+      name: state.name,
+      grade: state.grade,
+      score: state.totalScore,
+      correct: state.correctCount,
+      total: QUESTIONS.length,
+      timestamp: Date.now(),
+      timeTaken: state.timeTaken,
+      maxCombo: state.maxCombo
+    };
+    const key = `record:${Date.now()}`;
+    localStorage.setItem(key, JSON.stringify(record));
+  } catch (e) {
+    console.warn('로컬 저장 실패', e);
+  }
+}
+
+async function showRecords() {
+  const listEl = document.getElementById('record-list');
+  listEl.innerHTML = '<div class="empty-state">불러오는 중...</div>';
+  showScreen('records-screen');
+
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('record:'));
+    if (keys.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>게임을 한 번 도전해 보세요! 🌱</div>';
+      return;
+    }
+
+    const records = [];
+    for (const key of keys) {
+      try {
+        const item = localStorage.getItem(key);
+        if (item) records.push(JSON.parse(item));
+      } catch (e) { /* skip */ }
+    }
+
+    records.sort((a, b) => b.timestamp - a.timestamp);
+    const recent = records.slice(0, 20);
+
+    listEl.innerHTML = recent.map(r => {
+      const d = new Date(r.timestamp);
+      const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      return `
+        <div class="record-item">
+          <div>
+            <div class="record-name">${r.name} (${r.grade}학년)</div>
+            <div class="record-info">${dateStr} · 정답 ${r.correct}/${r.total} · ${formatTime(r.timeTaken)}</div>
+          </div>
+          <div class="record-score">${r.score.toLocaleString()}</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    listEl.innerHTML = '<div class="empty-state" style="color: var(--error);">기록을 불러올 수 없어요.</div>';
+    console.error(e);
+  }
+}
+
+// ============================================================
+// 📚 어휘 카드 복습
+// ============================================================
+let reviewCards = [];
+let currentCardIdx = 0;
+
+function startReview() {
+  const uniqueWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+  reviewCards = uniqueWords.map(word => {
+    const v = LESSON.vocab.find(x => x.word === word) ||
+             LESSON.vocab.find(x => word.includes(x.word.slice(0, 2))) ||
+             { word, meaning: '뜻 정보를 찾을 수 없어요.', example: '' };
+    return v;
+  });
+  if (reviewCards.length === 0) return;
+  currentCardIdx = 0;
+  renderCard();
+  showScreen('review-screen');
+}
+
+function renderCard() {
+  const c = reviewCards[currentCardIdx];
+  document.getElementById('review-word').textContent = c.word;
+  document.getElementById('review-meaning').textContent = c.meaning;
+  document.getElementById('review-example').textContent = c.example ? `예: ${c.example}` : '';
+  document.getElementById('card-counter').textContent = `${currentCardIdx + 1} / ${reviewCards.length}`;
+  document.getElementById('prev-card-btn').disabled = currentCardIdx === 0;
+  document.getElementById('next-card-btn').disabled = currentCardIdx === reviewCards.length - 1;
+}
+
+// ============================================================
+// 🔄 틀린 문제 다시 풀기 (연습 모드)
+// ============================================================
+function retryWrong() {
+  state.practiceQuestions = state.wrongQuestions.map(i => QUESTIONS[i]);
+  state.currentQuestion = 0;
+  state.isPracticeMode = true;
+  showScreen('quiz-screen');
+  showQuestion(0);
+}
+
+function finishPractice() {
+  alert('🌿 복습 완료! 잘 익혔어요.\n결과 화면으로 돌아갈게요.');
+  state.isPracticeMode = false;
+  showScreen('result-screen');
+}
+
+// ============================================================
+// 🚀 초기화
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initStartScreen();
+
+  document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+  document.getElementById('btn-review-cards').addEventListener('click', startReview);
+  document.getElementById('btn-retry-wrong').addEventListener('click', retryWrong);
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    state.isPracticeMode = false;
+    showScreen('start-screen');
+  });
+
+  document.getElementById('prev-card-btn').addEventListener('click', () => {
+    if (currentCardIdx > 0) { currentCardIdx--; renderCard(); }
+  });
+  document.getElementById('next-card-btn').addEventListener('click', () => {
+    if (currentCardIdx < reviewCards.length - 1) { currentCardIdx++; renderCard(); }
+  });
+
+  document.getElementById('btn-back-from-review').addEventListener('click', () => {
+    showScreen('result-screen');
+  });
+
+  document.getElementById('btn-back-from-records').addEventListener('click', () => {
+    showScreen('start-screen');
+  });
+});
+</script>
+</body>
+</html>
