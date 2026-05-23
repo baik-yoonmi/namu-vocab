@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나무 어휘 레벨업 - 1주차</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAF6EC;
+    --card: #FFFFFF;
+    --primary: #5C8A4A;
+    --primary-dark: #4A7239;
+    --secondary: #E8B547;
+    --secondary-dark: #C99732;
+    --brown: #7A5530;
+    --success: #7FB069;
+    --error: #D8704D;
+    --text: #2E1F12;
+    --text-light: #6B5742;
+    --border: #E5DCC8;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #FAF6EC 0%, #F0E6D0 100%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    padding: 20px;
+  }
+
+  #app {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .screen {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 36px 28px;
+    box-shadow: 0 8px 32px rgba(122, 85, 48, 0.12);
+    border: 2px solid var(--border);
+    animation: fadeIn 0.4s ease;
+  }
+
+  [hidden] { display: none !important; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === Start Screen === */
+  .start-header { text-align: center; margin-bottom: 24px; }
+  .logo { font-size: 56px; margin-bottom: 8px; }
+  .title { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+  .subtitle { color: var(--text-light); font-size: 15px; }
+
+  .lesson-info {
+    background: linear-gradient(135deg, #F0E6D0 0%, #E8DCC0 100%);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 20px 0 28px;
+    text-align: center;
+  }
+  .lesson-info .week { font-size: 13px; color: var(--brown); font-weight: 600; }
+  .lesson-info .lesson-title { font-size: 19px; color: var(--text); font-weight: 700; margin-top: 4px; }
+
+  .form-group { margin-bottom: 18px; }
+  .label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--text); font-size: 15px; }
+
+  .input {
+    width: 100%; padding: 14px 16px;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-size: 16px; background: #FFFCF5;
+    font-family: inherit; transition: border-color 0.2s;
+  }
+  .input:focus { outline: none; border-color: var(--primary); }
+
+  .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grade-btn {
+    padding: 14px; border: 2px solid var(--border);
+    background: #FFFCF5; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .grade-btn:hover { border-color: var(--primary); }
+  .grade-btn.selected {
+    background: var(--primary); color: white; border-color: var(--primary);
+  }
+
+  .btn-primary {
+    width: 100%; padding: 16px;
+    background: var(--primary); color: white;
+    border: none; border-radius: 12px;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+  .btn-primary:disabled { background: #B5C4A8; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    padding: 14px; background: white;
+    color: var(--primary); border: 2px solid var(--primary);
+    border-radius: 12px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .btn-secondary:hover { background: #F0F5EC; }
+
+  .btn-text {
+    background: none; border: none; color: var(--text-light);
+    font-size: 14px; cursor: pointer; padding: 8px; font-family: inherit;
+    text-decoration: underline;
+  }
+  .btn-text:hover { color: var(--primary); }
+
+  /* === Quiz Screen === */
+  .quiz-header { margin-bottom: 20px; }
+
+  .round-info {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 12px;
+  }
+  .round-badge {
+    background: var(--secondary); color: var(--brown);
+    padding: 6px 14px; border-radius: 20px;
+    font-weight: 700; font-size: 13px;
+  }
+  .question-counter { color: var(--text-light); font-weight: 600; font-size: 13px; }
+
+  .progress-bar {
+    height: 8px; background: var(--border);
+    border-radius: 4px; overflow: hidden; margin-bottom: 16px;
+  }
+  .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, #F5F0E0 0%, #EDE4CB 100%);
+    border-radius: 12px; padding: 10px 6px; text-align: center;
+  }
+  .stat-label { font-size: 11px; color: var(--text-light); font-weight: 600; }
+  .stat-value { font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+  .stat-value.combo { color: var(--secondary-dark); }
+
+  .timer-bar {
+    height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden; margin-bottom: 20px;
+  }
+  .timer-fill {
+    height: 100%; background: var(--primary);
+    transition: width 0.1s linear;
+  }
+  .timer-fill.warning { background: var(--secondary); }
+  .timer-fill.danger { background: var(--error); }
+
+  .question {
+    font-size: 20px; font-weight: 700;
+    color: var(--text); margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .question-context {
+    background: #FFF8E6;
+    border-left: 4px solid var(--secondary);
+    padding: 12px 16px; border-radius: 8px;
+    margin-bottom: 16px; font-size: 14px;
+    color: var(--brown); font-weight: 600;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    padding: 14px 18px; background: #FFFCF5;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-size: 15px; text-align: left; cursor: pointer;
+    transition: all 0.2s; font-family: inherit; color: var(--text);
+    line-height: 1.5;
+  }
+  .option:hover:not(:disabled) { border-color: var(--primary); background: #F5F9F0; }
+  .option.correct {
+    background: #E8F5DC; border-color: var(--success);
+    color: var(--primary-dark); font-weight: 700;
+  }
+  .option.wrong {
+    background: #FDECE7; border-color: var(--error); color: #A04A30;
+  }
+  .option:disabled { cursor: default; }
+
+  .ox-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ox-option {
+    padding: 36px 20px; background: #FFFCF5;
+    border: 2px solid var(--border); border-radius: 16px;
+    font-size: 44px; font-weight: 800; cursor: pointer;
+    transition: all 0.2s; font-family: inherit; color: var(--text-light);
+  }
+  .ox-option:hover:not(:disabled) {
+    border-color: var(--primary); background: #F5F9F0; color: var(--primary);
+  }
+  .ox-option.correct { background: #E8F5DC; border-color: var(--success); color: var(--success); }
+  .ox-option.wrong { background: #FDECE7; border-color: var(--error); color: var(--error); }
+  .ox-option:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 18px; padding: 16px;
+    border-radius: 12px; animation: slideIn 0.3s ease;
+  }
+  .feedback.correct { background: #E8F5DC; border-left: 4px solid var(--success); }
+  .feedback.wrong { background: #FDECE7; border-left: 4px solid var(--error); }
+  .feedback-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .feedback.correct .feedback-title { color: var(--primary-dark); }
+  .feedback.wrong .feedback-title { color: var(--error); }
+  .feedback-explanation { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .next-btn-wrap { margin-top: 16px; }
+
+  /* Combo popup */
+  .combo-display {
+    position: fixed; top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--secondary), #FFB74D);
+    color: white; padding: 16px 32px;
+    border-radius: 20px; font-size: 22px; font-weight: 800;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    z-index: 100; animation: comboPop 1.2s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes comboPop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
+  /* === Result Screen === */
+  .result-header { text-align: center; margin-bottom: 24px; }
+  .result-emoji { font-size: 80px; margin-bottom: 8px; line-height: 1; }
+  .result-grade { font-size: 28px; font-weight: 800; color: var(--primary); }
+  .result-score {
+    font-size: 52px; font-weight: 900;
+    color: var(--secondary-dark); margin: 8px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .result-score-label { font-size: 14px; color: var(--text-light); font-weight: 600; }
+
+  .result-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin: 20px 0;
+  }
+  .result-stat {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 12px 8px; text-align: center;
+  }
+  .result-stat-label { font-size: 12px; color: var(--text-light); font-weight: 600; }
+  .result-stat-value { font-size: 18px; font-weight: 800; color: var(--brown); margin-top: 4px; }
+
+  .round-summary {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 16px; margin-bottom: 20px;
+  }
+  .round-summary h3 {
+    font-size: 15px; margin-bottom: 12px;
+    color: var(--brown); font-weight: 700;
+  }
+  .round-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+  }
+  .round-row:last-child { border-bottom: none; }
+  .round-row strong { color: var(--primary); }
+
+  .wrong-words-section { margin-bottom: 20px; }
+  .wrong-words-section h3 {
+    font-size: 15px; color: var(--error);
+    margin-bottom: 10px; font-weight: 700;
+  }
+  .wrong-word-chip {
+    display: inline-block; background: #FDECE7;
+    color: #A04A30; padding: 6px 12px;
+    border-radius: 16px; margin: 3px;
+    font-weight: 600; font-size: 13px;
+  }
+  .perfect-banner {
+    text-align: center; padding: 16px;
+    background: #E8F5DC; border-radius: 12px;
+    color: var(--primary-dark); font-weight: 700; font-size: 15px;
+  }
+
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .action-full { grid-column: span 2; }
+
+  .submit-status {
+    text-align: center; margin-top: 16px;
+    padding: 10px; border-radius: 8px; font-size: 13px;
+  }
+  .submit-status.sending { background: #FFF8E6; color: var(--brown); }
+  .submit-status.success { background: #E8F5DC; color: var(--primary-dark); }
+  .submit-status.error { background: #FDECE7; color: var(--error); }
+
+  /* === Review Card Screen === */
+  .review-header {
+    text-align: center; margin-bottom: 24px;
+  }
+  .review-header h2 {
+    font-size: 22px; color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .review-header p { color: var(--text-light); font-size: 14px; }
+
+  .review-card {
+    background: linear-gradient(135deg, #FFF8E6 0%, #FFE9B0 100%);
+    border-radius: 20px; padding: 32px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    text-align: center; border: 2px solid var(--secondary);
+    margin-bottom: 16px; min-height: 280px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .review-word {
+    font-size: 36px; font-weight: 800;
+    color: var(--brown); margin-bottom: 16px;
+  }
+  .review-meaning {
+    font-size: 17px; color: var(--text);
+    margin-bottom: 16px; padding: 14px;
+    background: rgba(255,255,255,0.6); border-radius: 12px;
+    font-weight: 600;
+  }
+  .review-example {
+    font-style: italic; color: var(--text-light);
+    padding: 12px; background: rgba(255,255,255,0.4);
+    border-radius: 12px; font-size: 14px;
+  }
+
+  .card-nav {
+    display: flex; justify-content: space-between;
+    align-items: center; margin: 16px 0;
+  }
+  .card-counter { font-weight: 700; color: var(--text-light); font-size: 14px; }
+  .nav-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--primary); color: white;
+    border: none; font-size: 20px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--primary-dark); }
+  .nav-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+  /* === Records Screen === */
+  .records-header { text-align: center; margin-bottom: 20px; }
+  .records-header h2 {
+    font-size: 22px; color: var(--primary); margin-bottom: 4px;
+  }
+  .records-header p { color: var(--text-light); font-size: 14px; }
+
+  .record-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
+  .record-item {
+    background: #F5F0E0; border-radius: 12px;
+    padding: 14px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .record-info { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+  .record-name { font-weight: 700; font-size: 15px; color: var(--text); }
+  .record-score {
+    font-size: 22px; font-weight: 800; color: var(--primary);
+  }
+
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-light);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    .screen { padding: 24px 20px; }
+    .title { font-size: 24px; }
+    .question { font-size: 17px; }
+    .result-score { font-size: 44px; }
+    .result-emoji { font-size: 64px; }
+    .ox-option { padding: 28px 10px; font-size: 36px; }
+    .review-word { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Start Screen ===== -->
+  <div id="start-screen" class="screen">
+    <div class="start-header">
+      <div class="logo">🌳</div>
+      <div class="title">나무 어휘 레벨업</div>
+      <div class="subtitle">나무국어논술</div>
+    </div>
+
+    <div class="lesson-info">
+      <div class="week" id="display-week">1주차</div>
+      <div class="lesson-title" id="display-lesson">01강 · 오감으로 느끼는 세상</div>
+    </div>
+
+    <div class="form-group">
+      <label class="label" for="name-input">이름</label>
+      <input type="text" id="name-input" class="input" placeholder="이름을 입력해 주세요" maxlength="10">
+    </div>
+
+    <div class="form-group">
+      <label class="label">학년</label>
+      <div class="grade-selector">
+        <button class="grade-btn" data-grade="4">4학년</button>
+        <button class="grade-btn" data-grade="5">5학년</button>
+        <button class="grade-btn" data-grade="6">6학년</button>
+      </div>
+    </div>
+
+    <button id="start-btn" class="btn-primary" disabled>시작하기 🌱</button>
+    <div style="text-align:center; margin-top: 16px;">
+      <button id="view-records-btn" class="btn-text">📊 내 기록 보기</button>
+    </div>
+  </div>
+
+  <!-- ===== Quiz Screen ===== -->
+  <div id="quiz-screen" class="screen" hidden>
+    <div class="quiz-header">
+      <div class="round-info">
+        <div class="round-badge" id="round-badge">🌱 1라운드</div>
+        <div class="question-counter" id="question-counter">1 / 17</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">점수</div>
+          <div class="stat-value" id="score-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">정답</div>
+          <div class="stat-value" id="correct-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">콤보</div>
+          <div class="stat-value combo" id="combo-value">0</div>
+        </div>
+      </div>
+      <div class="timer-bar">
+        <div class="timer-fill" id="timer-fill" style="width: 100%"></div>
+      </div>
+    </div>
+
+    <div class="question-context" id="question-context" hidden></div>
+    <div class="question" id="question-text"></div>
+    <div id="options" class="options"></div>
+
+    <div class="feedback" id="feedback" hidden></div>
+
+    <div class="next-btn-wrap" id="next-btn-wrap" hidden>
+      <button id="next-btn" class="btn-primary">다음 문제 →</button>
+    </div>
+  </div>
+
+  <!-- ===== Result Screen ===== -->
+  <div id="result-screen" class="screen" hidden>
+    <div class="result-header">
+      <div class="result-emoji" id="result-emoji">🌳</div>
+      <div class="result-grade" id="result-grade">큰 나무</div>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-score-label">100점 만점</div>
+    </div>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-label">정답</div>
+        <div class="result-stat-value" id="result-correct">0 / 17</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">소요 시간</div>
+        <div class="result-stat-value" id="result-time">0분</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">최고 콤보</div>
+        <div class="result-stat-value" id="result-combo">0</div>
+      </div>
+    </div>
+
+    <div class="round-summary">
+      <h3>📊 라운드별 점수</h3>
+      <div id="round-breakdown"></div>
+    </div>
+
+    <div class="wrong-words-section" id="wrong-words-section"></div>
+
+    <div class="action-grid">
+      <button id="btn-review-cards" class="btn-secondary">📚 어휘 카드 복습</button>
+      <button id="btn-retry-wrong" class="btn-secondary">🔄 틀린 문제 다시</button>
+      <button id="btn-restart" class="btn-primary action-full">🌱 처음부터 다시 도전</button>
+    </div>
+
+    <div class="submit-status" id="submit-status" hidden></div>
+  </div>
+
+  <!-- ===== Review Card Screen ===== -->
+  <div id="review-screen" class="screen" hidden>
+    <div class="review-header">
+      <h2>📚 어휘 카드 복습</h2>
+      <p>틀린 어휘를 카드로 다시 익혀봐요</p>
+    </div>
+
+    <div class="review-card">
+      <div class="review-word" id="review-word"></div>
+      <div class="review-meaning" id="review-meaning"></div>
+      <div class="review-example" id="review-example"></div>
+    </div>
+
+    <div class="card-nav">
+      <button class="nav-btn" id="prev-card-btn">←</button>
+      <div class="card-counter" id="card-counter">1 / 1</div>
+      <button class="nav-btn" id="next-card-btn">→</button>
+    </div>
+
+    <button id="btn-back-from-review" class="btn-secondary" style="width: 100%; margin-top: 8px;">결과로 돌아가기</button>
+  </div>
+
+  <!-- ===== Records Screen ===== -->
+  <div id="records-screen" class="screen" hidden>
+    <div class="records-header">
+      <h2>📊 내 기록</h2>
+      <p>최근 도전한 점수를 확인해요</p>
+    </div>
+
+    <div class="record-list" id="record-list"></div>
+
+    <button id="btn-back-from-records" class="btn-secondary" style="width: 100%; margin-top: 16px;">처음으로 돌아가기</button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// ⚙️ 설정 - 구글 시트 연동 URL을 여기에 붙여넣으세요
+// ============================================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWIHX6PdiLJDst0w_nPfBbXyyjXL1ZG6765S6M_U4_6Wm_5LY7aW7rf5iAdVeUHG0A/exec';
+
+// ============================================================
+// 📚 전체 주차 어휘 데이터 (1~5주차)
+// ============================================================
+const ALL_LESSONS = {
+  1: {
+    week: '1주차', lesson: '01강 오감으로 느끼는 세상',
+    vocab: [
+      { word: '감칠맛', meaning: '자꾸 먹고 싶어지는 맛', example: '할머니 김치찌개는 감칠맛이 난다.' },
+      { word: '악취', meaning: '코를 찌르는 나쁜 냄새', example: '쓰레기통 근처에서 악취가 풍겼다.' },
+      { word: '매캐하다', meaning: '연기나 곰팡이 냄새가 코를 자극하다', example: '모닥불 연기가 매캐하게 퍼졌다.' },
+      { word: '음미하다', meaning: '맛이나 의미를 천천히 느끼다', example: '시 한 편을 천천히 음미했다.' },
+      { word: '인기척', meaning: '사람이 있다는 걸 알 수 있는 소리나 낌새', example: '인기척이 없어 빈집인 줄 알았다.' },
+      { word: '낯빛', meaning: '얼굴에 드러나는 표정이나 빛깔', example: '선생님의 낯빛이 어두워 보였다.' },
+      { word: '눈시울', meaning: '눈물이 맺히는 눈 가장자리', example: '이별 장면에서 눈시울이 붉어졌다.' },
+      { word: '미간', meaning: '두 눈썹 사이', example: '어려운 문제를 풀다 미간을 찡그렸다.' },
+      { word: '선호하다', meaning: '여럿 중에서 어떤 것을 특별히 더 좋아하다', example: '나는 단맛보다 짠맛을 선호한다.' },
+      { word: '망각하다', meaning: '알고 있던 것을 완전히 잊어버리다', example: '약속을 망각하고 친구를 기다리게 했다.' }
+    ]
+  },
+  2: {
+    week: '2주차', lesson: '02강 마음의 날씨',
+    vocab: [
+      { word: '두근거리다', meaning: '기대나 긴장으로 심장이 빠르게 뛰다', example: '발표 차례가 다가오자 심장이 두근거렸다.' },
+      { word: '설레다', meaning: '기대나 흥분으로 마음이 들뜨다', example: '소풍 전날 밤 설레어서 잠을 못 잤다.' },
+      { word: '뭉클하다', meaning: '감동이나 슬픔이 갑자기 북받치다', example: '엄마 편지를 읽고 가슴이 뭉클했다.' },
+      { word: '씁쓸하다', meaning: '기분이 언짢고 서운하다', example: '혼자 남겨진 기분이 씁쓸했다.' },
+      { word: '흐뭇하다', meaning: '마음에 흡족해서 기쁘다', example: '친구의 칭찬에 흐뭇한 미소가 지어졌다.' },
+      { word: '안도하다', meaning: '걱정이 사라져 마음을 놓다', example: '무사히 도착했다는 소식에 안도했다.' },
+      { word: '멍하다', meaning: '아무 생각 없이 정신이 빠진 듯하다', example: '충격을 받아 한동안 멍하게 있었다.' },
+      { word: '어리둥절하다', meaning: '영문을 몰라 얼떨떨하다', example: '갑자기 박수가 터지자 어리둥절했다.' },
+      { word: '아련하다', meaning: '기억이나 느낌이 흐릿하고 희미하다', example: '어린 시절 기억이 아련하게 떠올랐다.' },
+      { word: '당혹스럽다', meaning: '갑작스러운 일에 어찌할 바를 모르다', example: '예상치 못한 질문에 당혹스러웠다.' }
+    ]
+  },
+  3: {
+    week: '3주차', lesson: '03강 마음의 결',
+    vocab: [
+      { word: '너그럽다', meaning: '마음이 넓고 남의 잘못을 잘 받아들이다', example: '선생님은 실수를 너그럽게 용서해 주셨다.' },
+      { word: '꼼꼼하다', meaning: '빈틈없이 자세하고 세심하다', example: '답을 꼼꼼하게 다시 확인했다.' },
+      { word: '성급하다', meaning: '마음이 급해서 참을성이 없다', example: '성급하게 결론을 내리면 후회하게 된다.' },
+      { word: '고집스럽다', meaning: '자신의 생각을 굽히지 않다', example: '고집스럽게 자기 방식만 주장했다.' },
+      { word: '온화하다', meaning: '성격이나 말투가 부드럽고 따뜻하다', example: '온화한 목소리로 달래 주었다.' },
+      { word: '겸손하다', meaning: '자신을 낮추고 남을 존중하다', example: '상을 받고도 겸손하게 행동했다.' },
+      { word: '솔직하다', meaning: '꾸밈 없이 있는 그대로 말하다', example: '잘못을 솔직하게 인정했다.' },
+      { word: '소극적', meaning: '스스로 나서지 않고 물러서는 태도', example: '소극적인 태도로는 발전하기 어렵다.' },
+      { word: '적극적', meaning: '스스로 나서서 활발하게 행동하는 태도', example: '적극적으로 손을 들고 의견을 말했다.' },
+      { word: '엄격하다', meaning: '규칙이나 기준을 엄하게 지키다', example: '아버지는 약속에 엄격한 분이다.' }
+    ]
+  },
+  4: {
+    week: '4주차', lesson: '04강 나는 어떤 사람일까?',
+    vocab: [
+      { word: '비유하다', meaning: '어떤 것을 다른 것에 빗대어 설명하다', example: '마음을 호수에 비유하여 표현했다.' },
+      { word: '빗대다', meaning: '어떤 것을 다른 것에 비교해서 말하다', example: '욕심 많은 사람을 곰에 빗대어 말했다.' },
+      { word: '생생하다', meaning: '눈앞에 있는 것처럼 실감이 나다', example: '책 속 장면이 생생하게 떠올랐다.' },
+      { word: '실감하다', meaning: '실제처럼 느끼다', example: '직접 해보니 어려움을 실감했다.' },
+      { word: '전달하다', meaning: '말이나 글로 내용을 다른 사람에게 알리다', example: '내 마음을 잘 전달하고 싶었다.' },
+      { word: '과장하다', meaning: '사실보다 크게 부풀려 말하다', example: '"백 번 말했잖아"처럼 과장해서 표현했다.' },
+      { word: '묘사하다', meaning: '대상을 말이나 글로 그림처럼 나타내다', example: '가을 풍경을 생생하게 묘사했다.' },
+      { word: '강조하다', meaning: '어떤 부분을 특별히 두드러지게 나타내다', example: '중요한 내용에 밑줄을 그어 강조했다.' },
+      { word: '인용하다', meaning: '남의 말이나 글을 자신의 글 속에 가져다 쓰다', example: '속담을 인용하여 글을 마무리했다.' },
+      { word: '암시하다', meaning: '직접 말하지 않고 넌지시 알리다', example: '이야기의 결말을 제목이 암시하고 있었다.' }
+    ]
+  },
+  5: {
+    week: '5주차', lesson: '05강 몸이 말한다',
+    vocab: [
+      { word: '어슬렁거리다', meaning: '목적 없이 천천히 돌아다니다', example: '고양이가 골목을 어슬렁거렸다.' },
+      { word: '허둥대다', meaning: '당황해서 갈팡질팡하다', example: '지각할까 봐 아침부터 허둥댔다.' },
+      { word: '비틀거리다', meaning: '중심을 잡지 못하고 흔들리다', example: '무거운 짐을 들고 비틀거렸다.' },
+      { word: '머뭇거리다', meaning: '망설이며 선뜻 행동하지 못하다', example: '사과하려다 문 앞에서 머뭇거렸다.' },
+      { word: '서성거리다', meaning: '한 곳을 왔다 갔다 하다', example: '결과를 기다리며 복도를 서성거렸다.' },
+      { word: '배회하다', meaning: '목적 없이 이리저리 돌아다니다', example: '밤늦게 골목을 배회하는 것은 위험하다.' },
+      { word: '돌진하다', meaning: '거침없이 세차게 달려들다', example: '선수가 골대를 향해 돌진했다.' },
+      { word: '주저하다', meaning: '망설이며 결정을 못 내리다', example: '도움을 요청하는 것을 주저하지 마라.' },
+      { word: '분주하다', meaning: '몹시 바쁘게 움직이다', example: '명절 전날 부엌이 분주했다.' },
+      { word: '활보하다', meaning: '팔을 크게 흔들며 당당하게 걷다', example: '무대 위를 당당하게 활보했다.' }
+    ]
+  },
+  6: {
+    week: '6주차', lesson: '06강 말과 글의 힘',
+    vocab: [
+      { word: '늠름하다', meaning: '생김새나 태도가 씩씩하고 당당하다', example: '늠름하게 서 있는 장군의 모습이었다.' },
+      { word: '수척하다', meaning: '몸이 야위고 파리하다', example: '병을 앓고 나서 많이 수척해졌다.' },
+      { word: '앳되다', meaning: '나이보다 어려 보이다', example: '앳된 얼굴의 신입생이 들어왔다.' },
+      { word: '야위다', meaning: '살이 빠져 몸이 마르다', example: '오래 아프더니 많이 야위었다.' },
+      { word: '수수하다', meaning: '꾸밈 없이 소박하고 평범하다', example: '수수한 옷차림이었지만 단정했다.' },
+      { word: '단정하다', meaning: '차림새나 태도가 깔끔하고 바르다', example: '교복을 단정하게 갖춰 입었다.' },
+      { word: '초라하다', meaning: '볼품이 없고 변변치 않다', example: '낡은 옷차림이 초라해 보였다.' },
+      { word: '당당하다', meaning: '태도가 씩씩하고 자신감이 있다', example: '당당하게 무대 위에 올라갔다.' },
+      { word: '위엄', meaning: '점잖고 엄숙한 태도에서 느껴지는 기운', example: '선생님의 위엄 있는 눈빛에 조용해졌다.' },
+      { word: '기색', meaning: '얼굴이나 태도에 드러나는 감정이나 분위기', example: '전혀 두려운 기색이 없었다.' }
+    ]
+  },
+  7: {
+    week: '7주차', lesson: '07강 이야기 속으로',
+    vocab: [
+      { word: '줄거리', meaning: '이야기의 중심 내용을 간추린 것', example: '책의 줄거리를 간단하게 정리했다.' },
+      { word: '배경', meaning: '이야기가 일어나는 때와 장소', example: '이 소설의 배경은 조선 시대이다.' },
+      { word: '복선', meaning: '앞으로 일어날 일을 미리 암시하는 내용', example: '첫 장면의 복선이 결말에서 드러났다.' },
+      { word: '결말', meaning: '이야기의 끝 부분', example: '주인공이 행복해지는 결말이었다.' },
+      { word: '펼쳐지다', meaning: '이야기나 장면이 눈앞에 나타나다', example: '책을 펴자 신비로운 세계가 펼쳐졌다.' },
+      { word: '갈등', meaning: '인물 사이에 생기는 대립이나 충돌', example: '두 인물의 갈등이 이야기를 이끌었다.' },
+      { word: '주인공', meaning: '이야기에서 가장 중심이 되는 인물', example: '주인공은 용감한 소녀였다.' },
+      { word: '사건', meaning: '이야기 속에서 일어나는 일', example: '뜻밖의 사건으로 이야기가 바뀌었다.' },
+      { word: '서술', meaning: '어떤 사실이나 내용을 순서대로 설명함', example: '시간 순서대로 서술한 글이다.' },
+      { word: '교훈', meaning: '이야기를 통해 얻는 깨달음이나 가르침', example: '이 이야기의 교훈은 정직함이다.' }
+    ]
+  },
+  8: {
+    week: '8주차', lesson: '08강 함께 사는 우리',
+    vocab: [
+      { word: '배려하다', meaning: '남을 위해 마음을 쓰다', example: '친구를 배려하여 자리를 양보했다.' },
+      { word: '다독이다', meaning: '달래거나 위로해 주다', example: '우는 친구를 다독여 주었다.' },
+      { word: '어우러지다', meaning: '여럿이 함께 잘 섞이다', example: '모두가 어우러져 즐겁게 놀았다.' },
+      { word: '허물없다', meaning: '서로 거리낌 없을 만큼 가깝다', example: '우리는 허물없는 친구 사이이다.' },
+      { word: '이바지하다', meaning: '도움이 되도록 힘을 보태다', example: '봉사 활동으로 사회에 이바지했다.' },
+      { word: '협력하다', meaning: '힘을 합쳐 함께 일하다', example: '모둠원이 협력하여 과제를 완성했다.' },
+      { word: '존중하다', meaning: '높이 여기고 소중하게 대하다', example: '친구의 의견을 존중해야 한다.' },
+      { word: '소통하다', meaning: '생각이나 뜻이 서로 통하다', example: '대화를 통해 서로 소통했다.' },
+      { word: '공동체', meaning: '같은 목적으로 이루어진 집단', example: '학교는 함께 배우는 공동체이다.' },
+      { word: '배타적', meaning: '다른 것을 받아들이지 않고 밀어내는', example: '배타적인 태도는 갈등을 만든다.' }
+    ]
+  },
+  9: {
+    week: '9주차', lesson: '09강 역사의 흔적',
+    vocab: [
+      { word: '흔적', meaning: '무언가가 지나간 자리나 남은 표시', example: '전쟁의 흔적이 건물에 남아 있었다.' },
+      { word: '지켜내다', meaning: '끝까지 보호하고 유지하다', example: '나라를 지켜내기 위해 싸웠다.' },
+      { word: '빼앗기다', meaning: '강제로 가진 것을 잃다', example: '땅을 빼앗기고 고향을 떠났다.' },
+      { word: '일어서다', meaning: '쓰러졌다가 다시 힘을 차리다', example: '위기에서 다시 일어서는 모습이 감동적이었다.' },
+      { word: '이겨내다', meaning: '어려움을 끝까지 극복하다', example: '고난을 이겨내고 독립을 이루었다.' },
+      { word: '침략', meaning: '다른 나라에 힘으로 쳐들어가는 것', example: '외적의 침략에 백성들이 맞서 싸웠다.' },
+      { word: '저항', meaning: '억압이나 불의에 맞서 싸움', example: '독립운동가들의 저항이 계속되었다.' },
+      { word: '독립', meaning: '다른 나라의 지배에서 벗어나 스스로 서는 것', example: '3·1운동은 독립을 외친 운동이다.' },
+      { word: '희생', meaning: '다른 사람이나 목적을 위해 자신을 바치는 것', example: '나라를 위해 희생한 분들을 기억해야 한다.' },
+      { word: '극복', meaning: '어렵거나 힘든 것을 이겨냄', example: '위기를 극복하고 나라가 다시 일어섰다.' }
+    ]
+  },
+  10: {
+    week: '10주차', lesson: '10강 나라와 사회',
+    vocab: [
+      { word: '다스리다', meaning: '나라나 집단을 관리하고 이끌다', example: '왕이 나라를 다스렸다.' },
+      { word: '어기다', meaning: '규칙이나 약속을 지키지 않다', example: '신호를 어기면 위험하다.' },
+      { word: '맞서다', meaning: '반대하거나 저항하다', example: '불의에 맞서 싸웠다.' },
+      { word: '드러나다', meaning: '숨겨져 있던 것이 밖으로 나타나다', example: '진실이 결국 드러났다.' },
+      { word: '가꾸다', meaning: '보살피며 발전시키다', example: '더 나은 사회를 가꾸어 나가야 한다.' },
+      { word: '민주주의', meaning: '국민이 주권을 가지고 스스로 다스리는 제도', example: '우리나라는 민주주의 국가이다.' },
+      { word: '권리', meaning: '어떤 일을 할 수 있는 자격이나 힘', example: '모든 사람은 교육받을 권리가 있다.' },
+      { word: '의무', meaning: '반드시 해야 하는 일', example: '납세는 국민의 의무이다.' },
+      { word: '평등', meaning: '차별 없이 똑같이 대우받는 것', example: '모든 사람은 법 앞에 평등하다.' },
+      { word: '제도', meaning: '사회를 운영하기 위해 정해 놓은 규칙이나 방법', example: '선거 제도를 통해 대표를 뽑는다.' }
+    ]
+  },
+  11: {
+    week: '11주차', lesson: '11강 우리 문화',
+    vocab: [
+      { word: '이어받다', meaning: '앞 사람의 것을 물려받다', example: '선조의 정신을 이어받아 발전시켰다.' },
+      { word: '물려주다', meaning: '자신의 것을 다음 사람에게 전해주다', example: '부모님이 소중한 가훈을 물려주셨다.' },
+      { word: '빚어내다', meaning: '노력으로 훌륭한 것을 만들어내다', example: '장인이 도자기를 빚어냈다.' },
+      { word: '깃들다', meaning: '정신이나 뜻이 안에 담기다', example: '작품에 작가의 혼이 깃들어 있다.' },
+      { word: '되살리다', meaning: '사라진 것을 다시 살려내다', example: '전통 공예를 되살리는 노력이 필요하다.' },
+      { word: '전통', meaning: '예로부터 이어져 내려오는 풍습이나 방식', example: '한복은 우리의 소중한 전통이다.' },
+      { word: '유산', meaning: '앞 세대에서 물려받은 것', example: '문화유산을 잘 보존해야 한다.' },
+      { word: '보존', meaning: '오래도록 잘 지키고 간직함', example: '귀중한 문서를 보존하였다.' },
+      { word: '계승', meaning: '앞 세대의 것을 이어받음', example: '전통문화를 계승하고 발전시켰다.' },
+      { word: '문화재', meaning: '문화적으로 가치 있는 유물이나 유적', example: '경복궁은 대표적인 문화재이다.' }
+    ]
+  },
+  12: {
+    week: '12주차', lesson: '12강 자연과 인간',
+    vocab: [
+      { word: '싱그럽다', meaning: '신선하고 생기 있는 느낌이 나다', example: '봄날 싱그러운 풀 향기가 났다.' },
+      { word: '드넓다', meaning: '끝없이 넓다', example: '드넓은 바다를 바라보았다.' },
+      { word: '무성하다', meaning: '나무나 풀이 많이 자라 빽빽하다', example: '여름엔 나뭇잎이 무성하다.' },
+      { word: '메마르다', meaning: '물기가 없고 건조하다', example: '가뭄으로 땅이 메말라 갔다.' },
+      { word: '어우러지다', meaning: '서로 다른 것이 잘 섞여 조화롭다', example: '꽃과 나무가 어우러져 아름다웠다.' },
+      { word: '생태', meaning: '생물이 살아가는 모양이나 상태', example: '생태 환경을 보호해야 한다.' },
+      { word: '환경', meaning: '생물을 둘러싸고 영향을 미치는 주변 상태', example: '환경 오염이 심각해지고 있다.' },
+      { word: '오염', meaning: '공기·물·흙 등이 더럽혀지는 것', example: '강물이 오염되어 물고기가 사라졌다.' },
+      { word: '보호', meaning: '위험이나 피해를 막아 지킴', example: '멸종 위기 동물을 보호해야 한다.' },
+      { word: '순환', meaning: '한 바퀴 돌아서 제자리로 돌아옴', example: '물은 증발하고 비가 되는 순환을 반복한다.' }
+    ]
+  },
+  13: {
+    week: '13주차', lesson: '13강 변화의 바람',
+    vocab: [
+      { word: '앞서다', meaning: '남보다 먼저 나아가다', example: '기술 개발에서 앞서 나갔다.' },
+      { word: '뒤처지다', meaning: '남보다 뒤에 처지거나 뒤떨어지다', example: '공부를 게을리하면 뒤처질 수 있다.' },
+      { word: '거듭나다', meaning: '완전히 새롭게 바뀌다', example: '실패를 딛고 거듭난 선수였다.' },
+      { word: '이루다', meaning: '목표나 목적을 완성하다', example: '꿈을 이루기 위해 노력했다.' },
+      { word: '맞이하다', meaning: '새로운 것을 받아들이다', example: '새 학기를 설레는 마음으로 맞이했다.' },
+      { word: '발전', meaning: '더 나은 상태로 나아감', example: '과학 기술의 발전이 눈부시다.' },
+      { word: '혁신', meaning: '낡은 것을 바꿔 새롭게 함', example: '회사는 끊임없는 혁신으로 성장했다.' },
+      { word: '적응', meaning: '새로운 환경이나 상황에 맞게 변화함', example: '새 학교에 빠르게 적응했다.' },
+      { word: '도전', meaning: '어렵거나 힘든 것에 과감히 나서는 것', example: '새로운 도전을 두려워하지 않았다.' },
+      { word: '성장', meaning: '몸이나 능력이 자라고 발전함', example: '아이의 성장을 지켜보는 것이 기쁘다.' }
+    ]
+  },
+  14: {
+    week: '14주차', lesson: '14강 다양한 생각',
+    vocab: [
+      { word: '따지다', meaning: '옳고 그름을 꼼꼼히 살피다', example: '조건을 꼼꼼히 따져보았다.' },
+      { word: '헤아리다', meaning: '상황이나 마음을 잘 생각해 보다', example: '친구의 마음을 헤아려 주었다.' },
+      { word: '견주다', meaning: '서로 비교하다', example: '두 작품을 견주어 분석했다.' },
+      { word: '짚어보다', meaning: '하나하나 살펴보다', example: '문제점을 하나씩 짚어보았다.' },
+      { word: '옳다', meaning: '바르고 맞다', example: '그의 판단이 옳았음이 밝혀졌다.' },
+      { word: '관점', meaning: '어떤 것을 바라보는 입장이나 각도', example: '다양한 관점에서 생각해야 한다.' },
+      { word: '논리', meaning: '말이나 글에서 앞뒤가 맞는 생각의 흐름', example: '논리적으로 주장을 펼쳤다.' },
+      { word: '분석', meaning: '복잡한 것을 나누어 자세히 살펴봄', example: '데이터를 분석하여 결론을 냈다.' },
+      { word: '비교', meaning: '두 가지 이상을 견주어 살펴봄', example: '두 나라의 문화를 비교했다.' },
+      { word: '반론', meaning: '상대의 주장에 반대하여 따지는 것', example: '상대의 의견에 반론을 제기했다.' }
+    ]
+  },
+  15: {
+    week: '15주차', lesson: '15강 지구 이야기',
+    vocab: [
+      { word: '품다', meaning: '안에 담아 간직하다', example: '산이 깊은 비밀을 품고 있었다.' },
+      { word: '녹다', meaning: '고체가 열을 받아 액체로 변하다', example: '빙하가 녹아 해수면이 높아진다.' },
+      { word: '솟아오르다', meaning: '위로 힘차게 올라오다', example: '화산에서 마그마가 솟아올랐다.' },
+      { word: '뒤덮다', meaning: '온통 덮어 가리다', example: '화산재가 마을을 뒤덮었다.' },
+      { word: '깎이다', meaning: '바람이나 물에 의해 조금씩 닳아 없어지다', example: '바위가 오랜 세월에 깎여 모양이 바뀌었다.' },
+      { word: '지층', meaning: '자갈·모래·진흙 등이 쌓여 층을 이루는 것', example: '지층을 보면 지구의 역사를 알 수 있다.' },
+      { word: '화산', meaning: '땅속 마그마가 지표면으로 터져 나오는 것', example: '화산 폭발로 마을이 피해를 입었다.' },
+      { word: '침식', meaning: '바람·물 등이 땅이나 바위를 깎아 없애는 것', example: '강물의 침식으로 협곡이 생겼다.' },
+      { word: '퇴적', meaning: '모래·흙 등이 물이나 바람에 의해 쌓이는 것', example: '강 하류에는 퇴적 작용이 활발하다.' },
+      { word: '지진', meaning: '땅이 흔들리는 자연현상', example: '지진으로 건물이 흔들렸다.' }
+    ]
+  },
+  16: {
+    week: '16주차', lesson: '16강 과학의 눈',
+    vocab: [
+      { word: '살피다', meaning: '자세히 들여다보다', example: '주변을 꼼꼼하게 살폈다.' },
+      { word: '밝혀내다', meaning: '숨겨진 것을 알아내다', example: '사건의 원인을 밝혀냈다.' },
+      { word: '따져보다', meaning: '이유나 원인을 꼼꼼히 생각해 보다', example: '결과를 꼼꼼히 따져보았다.' },
+      { word: '되풀이하다', meaning: '같은 것을 반복하다', example: '실험을 여러 번 되풀이했다.' },
+      { word: '이끌어내다', meaning: '결론이나 결과를 만들어내다', example: '실험을 통해 결론을 이끌어냈다.' },
+      { word: '관찰', meaning: '자연 현상을 주의 깊게 살펴봄', example: '식물의 성장을 관찰했다.' },
+      { word: '실험', meaning: '어떤 것을 알아내기 위해 직접 해보는 것', example: '물의 끓는점을 실험으로 확인했다.' },
+      { word: '가설', meaning: '아직 증명되지 않은 설명이나 추측', example: '가설을 세우고 실험을 시작했다.' },
+      { word: '증거', meaning: '어떤 사실을 뒷받침하는 자료나 물건', example: '주장을 뒷받침하는 증거를 제시했다.' },
+      { word: '결론', meaning: '생각이나 연구 끝에 내리는 판단', example: '실험 결과를 바탕으로 결론을 내렸다.' }
+    ]
+  },
+  17: {
+    week: '17주차', lesson: '17강 기술과 미래',
+    vocab: [
+      { word: '앞당기다', meaning: '정해진 때보다 일찍 하다', example: '출발 시간을 앞당겼다.' },
+      { word: '내다보다', meaning: '앞날을 미리 생각하다', example: '미래를 내다보는 안목이 필요하다.' },
+      { word: '넓히다', meaning: '범위나 영역을 크게 하다', example: '지식의 범위를 넓혔다.' },
+      { word: '이어주다', meaning: '서로 연결시켜 주다', example: '인터넷이 세계를 이어준다.' },
+      { word: '만들어내다', meaning: '새로운 것을 창조하다', example: '새로운 기술을 만들어냈다.' },
+      { word: '발명', meaning: '없던 것을 새로 만들어냄', example: '에디슨은 전구를 발명했다.' },
+      { word: '인공지능', meaning: '컴퓨터가 인간처럼 생각하고 학습하는 기술', example: '인공지능이 빠르게 발전하고 있다.' },
+      { word: '자동화', meaning: '기계가 스스로 작동하게 만드는 것', example: '공장의 자동화로 생산이 빨라졌다.' },
+      { word: '정보', meaning: '어떤 것에 대해 알려주는 내용이나 지식', example: '정확한 정보를 찾는 것이 중요하다.' },
+      { word: '통신', meaning: '멀리 떨어진 곳과 정보를 주고받는 것', example: '통신 기술의 발달로 세상이 좁아졌다.' }
+    ]
+  },
+  18: {
+    week: '18주차', lesson: '18강 문학을 읽는 눈',
+    vocab: [
+      { word: '되새기다', meaning: '읽은 내용을 다시 생각하며 음미하다', example: '시의 의미를 되새기며 읽었다.' },
+      { word: '녹아들다', meaning: '내용이나 감동이 마음속 깊이 스며들다', example: '이야기가 마음속에 녹아들었다.' },
+      { word: '빠져들다', meaning: '흥미로운 것에 깊이 열중하다', example: '소설에 빠져들어 시간 가는 줄 몰랐다.' },
+      { word: '살아나다', meaning: '글 속 장면이나 인물이 생생하게 느껴지다', example: '글 속 인물이 생생하게 살아났다.' },
+      { word: '엿보다', meaning: '은밀하게 들여다보다', example: '작가의 마음을 엿볼 수 있었다.' },
+      { word: '공감', meaning: '남의 감정이나 생각을 같이 느끼는 것', example: '주인공의 슬픔에 공감했다.' },
+      { word: '시점', meaning: '이야기를 전달하는 시각이나 위치', example: '1인칭 시점으로 쓰인 소설이다.' },
+      { word: '상징', meaning: '어떤 것이 다른 것을 대표하여 나타냄', example: '비둘기는 평화의 상징이다.' },
+      { word: '주제', meaning: '글에서 말하고자 하는 중심 생각', example: '이 소설의 주제는 우정이다.' },
+      { word: '감상', meaning: '작품을 보거나 읽고 느끼는 것', example: '그림을 감상하며 생각에 잠겼다.' }
+    ]
+  },
+  19: {
+    week: '19주차', lesson: '19강 설득하고 설명하기',
+    vocab: [
+      { word: '내세우다', meaning: '주장이나 의견을 강하게 드러내다', example: '자신의 의견을 강하게 내세웠다.' },
+      { word: '뒷받침하다', meaning: '근거나 증거로 주장을 강화하다', example: '자료로 주장을 뒷받침했다.' },
+      { word: '풀어쓰다', meaning: '어렵거나 복잡한 것을 쉽게 설명하다', example: '어려운 내용을 쉽게 풀어썼다.' },
+      { word: '끌어들이다', meaning: '예시나 사례를 가져와 사용하다', example: '실제 사례를 끌어들여 설명했다.' },
+      { word: '짜임새', meaning: '글의 구성이나 짜여진 형태', example: '짜임새 있는 글이 읽기 좋다.' },
+      { word: '논설', meaning: '어떤 주제에 대해 주장하고 이유를 밝히는 글', example: '환경 보호에 관한 논설을 썼다.' },
+      { word: '설득', meaning: '다른 사람을 말로 납득시키는 것', example: '논리적인 말로 친구를 설득했다.' },
+      { word: '예시', meaning: '구체적인 예를 들어 설명하는 것', example: '예시를 들어 쉽게 설명했다.' },
+      { word: '요약', meaning: '중요한 내용만 골라 짧게 정리하는 것', example: '긴 글을 세 줄로 요약했다.' },
+      { word: '논거', meaning: '주장을 뒷받침하는 이유나 근거', example: '충분한 논거로 주장을 강화했다.' }
+    ]
+  },
+  20: {
+    week: '20주차', lesson: '20강 우리말 탐구',
+    vocab: [
+      { word: '다듬다', meaning: '말이나 글을 더 좋게 고치다', example: '글을 여러 번 다듬었다.' },
+      { word: '헷갈리다', meaning: '무엇이 무엇인지 분간하기 어렵다', example: '비슷한 단어가 헷갈렸다.' },
+      { word: '펼치다', meaning: '내용이나 이야기를 넓게 전개하다', example: '이야기를 생생하게 펼쳤다.' },
+      { word: '뒤섞이다', meaning: '여러 가지가 마구 섞이다', example: '사투리와 표준어가 뒤섞였다.' },
+      { word: '갈고닦다', meaning: '실력이나 능력을 꾸준히 키우다', example: '오랫동안 글쓰기 실력을 갈고닦았다.' },
+      { word: '어원', meaning: '낱말이 처음 생겨난 유래', example: '"별"의 어원을 찾아보았다.' },
+      { word: '표준어', meaning: '전 국민이 공통으로 쓰도록 정한 말', example: '"맞아"는 표준어이다.' },
+      { word: '방언', meaning: '특정 지역에서만 쓰이는 말', example: '제주도 방언은 독특하다.' },
+      { word: '외래어', meaning: '다른 나라에서 들어와 우리말처럼 쓰이는 말', example: '"버스"는 외래어이다.' },
+      { word: '고유어', meaning: '우리나라 고유의 순우리말', example: '"하늘"은 고유어이다.' }
+    ]
+  },
+  21: {
+    week: '21주차', lesson: '21강 날씨와 재해',
+    vocab: [
+      { word: '몰아치다', meaning: '바람이나 비가 세차게 덮치다', example: '폭풍이 세차게 몰아쳤다.' },
+      { word: '걷히다', meaning: '구름이나 안개가 사라지다', example: '안개가 걷히고 하늘이 맑아졌다.' },
+      { word: '뒤흔들다', meaning: '세게 흔들어 놓다', example: '지진이 건물을 뒤흔들었다.' },
+      { word: '할퀴다', meaning: '날카롭게 긁어 상처를 내다', example: '태풍이 해안가를 할퀴고 지나갔다.' },
+      { word: '잠기다', meaning: '물에 완전히 덮이다', example: '홍수로 도로가 물에 잠겼다.' },
+      { word: '호우', meaning: '짧은 시간에 많은 비가 내리는 것', example: '호우 경보가 발령되었다.' },
+      { word: '태풍', meaning: '강한 바람과 비를 동반하는 열대성 폭풍', example: '태풍이 상륙하여 큰 피해를 주었다.' },
+      { word: '가뭄', meaning: '오랫동안 비가 내리지 않는 것', example: '가뭄으로 농작물이 말라버렸다.' },
+      { word: '예보', meaning: '앞으로 일어날 일을 미리 알리는 것', example: '기상 예보를 확인하고 우산을 챙겼다.' },
+      { word: '대피', meaning: '위험을 피해 안전한 곳으로 이동하는 것', example: '태풍에 대비해 대피 훈련을 했다.' }
+    ]
+  }
+};
+
+// URL 파라미터로 주차 결정
+const weekNum = parseInt(new URLSearchParams(window.location.search).get('week')) || 1;
+const LESSON = ALL_LESSONS[weekNum] || ALL_LESSONS[1];
+
+// ============================================================
+// ❓ 문제 데이터 — 주차별 자동 생성
+// ============================================================
+const ALL_QUESTIONS = {
+  1: [
+    { round:1, type:'multiple', word:'감칠맛', question:"'감칠맛'의 뜻으로 알맞은 것은?", options:['자꾸 먹고 싶어지는 맛','입에 닿자마자 톡 쏘는 매운맛','처음엔 달지만 끝에 쓴맛이 남는 맛','너무 짜서 자꾸 물을 찾게 되는 맛'], correct:0, example:'예문: 할머니 김치찌개는 감칠맛이 난다.' },
+    { round:1, type:'multiple', word:'악취', question:"'악취'의 뜻으로 알맞은 것은?", options:['코를 찌르는 나쁜 냄새','꽃에서 나는 향기로운 냄새','빵을 구울 때 나는 고소한 냄새','비가 올 때 흙에서 나는 냄새'], correct:0, example:'예문: 쓰레기통 근처에서 악취가 풍겼다.' },
+    { round:1, type:'multiple', word:'매캐하다', question:"'매캐하다'의 뜻으로 알맞은 것은?", options:['향긋하고 달콤한 냄새가 나다','시원하고 상쾌한 향이 풍기다','연기나 곰팡이 냄새가 코를 자극하다','고소하고 구수한 냄새가 풍기다'], correct:2, example:'예문: 모닥불 연기가 매캐하게 퍼졌다.' },
+    { round:1, type:'multiple', word:'음미하다', question:"'음미하다'의 뜻으로 알맞은 것은?", options:['음식을 빠르게 먹어 치우다','맛이나 의미를 천천히 느끼다','음식을 만들어 다른 사람에게 나누다','음식의 양을 정확히 재서 담다'], correct:1, example:'예문: 시 한 편을 천천히 음미했다.' },
+    { round:1, type:'multiple', word:'인기척', question:"'인기척'의 뜻으로 알맞은 것은?", options:['동물이 멀리서 내는 울음소리','바람이 불 때 나뭇잎이 흔들리는 소리','물건이 떨어질 때 나는 소리','사람이 있다는 걸 알 수 있는 소리나 낌새'], correct:3, example:'예문: 인기척이 없어 빈집인 줄 알았다.' },
+    { round:2, type:'multiple', word:'낯빛', context:'보기 · 낯빛 / 눈시울 / 미간 / 선호 / 망각', question:'엄마는 내 성적표를 보더니 _______이/가 굳어졌다.', options:['낯빛','눈시울','미간','선호'], correct:0, example:"'낯빛'은 얼굴에 드러나는 표정이나 빛깔을 뜻해요." },
+    { round:2, type:'multiple', word:'눈시울', context:'보기 · 낯빛 / 눈시울 / 미간 / 선호 / 망각', question:'감동적인 영화를 보다가 _______이 촉촉해졌다.', options:['낯빛','눈시울','미간','망각'], correct:1, example:"'눈시울'은 눈물이 맺히는 눈 가장자리를 뜻해요." },
+    { round:2, type:'multiple', word:'미간', context:'보기 · 낯빛 / 눈시울 / 미간 / 선호 / 망각', question:'수학 문제가 너무 어려워서 _______을 잔뜩 찡그렸다.', options:['낯빛','눈시울','미간','선호'], correct:2, example:"'미간'은 두 눈썹 사이를 뜻해요." },
+    { round:2, type:'multiple', word:'선호', context:'보기 · 낯빛 / 눈시울 / 미간 / 선호 / 망각', question:'나는 피자보다 떡볶이를 더 _______한다.', options:['선호','망각','음미','매캐'], correct:0, example:"'선호하다'는 여럿 중에서 어떤 것을 더 좋아한다는 뜻이에요." },
+    { round:2, type:'multiple', word:'망각', context:'보기 · 낯빛 / 눈시울 / 미간 / 선호 / 망각', question:'숙제를 _______해서 선생님께 혼이 났다.', options:['선호','망각','음미','감칠맛'], correct:1, example:"'망각하다'는 알고 있던 것을 완전히 잊어버린다는 뜻이에요." },
+    { round:3, type:'multiple', word:'악취', question:"'악취'의 뜻으로 알맞은 것은?", options:['기분 좋은 달콤한 냄새','코를 찌르는 나쁜 냄새','음식이 익을 때 나는 구수한 냄새','꽃에서 나는 향기로운 냄새','빗물이 흙에 닿을 때 나는 냄새'], correct:1, example:'예문: 쓰레기통 근처에서 악취가 풍겼다.' },
+    { round:3, type:'multiple', word:'인기척', question:"'인기척'이 가장 자연스럽게 쓰인 문장은?", options:['강아지가 인기척처럼 뛰어다녔다.','밖에서 인기척이 들려 얼른 문을 열었다.','맛있는 음식에서 인기척이 났다.','날씨가 흐려서 인기척이 느껴졌다.','자전거를 빠르게 타자 인기척이 났다.'], correct:1, example:"'인기척'은 사람이 있다는 걸 알 수 있는 소리나 낌새예요." },
+    { round:4, type:'ox', word:'매캐하다', question:"'매캐하다'는 달콤하고 좋은 냄새를 표현하는 말이다.", correct:false, example:"'매캐하다'는 연기나 곰팡이 냄새처럼 코를 자극하는 불쾌한 냄새를 뜻해요." },
+    { round:4, type:'ox', word:'음미하다', question:"'음미하다'는 맛이나 의미를 빠르게 훑어본다는 뜻이다.", correct:false, example:"'음미하다'는 천천히 느끼는 것이에요. 예: 시 한 편을 천천히 음미했다." },
+    { round:4, type:'ox', word:'인기척', question:"'인기척'은 사람이 있다는 걸 알 수 있는 소리나 낌새를 말한다.", correct:true, example:'예: 인기척이 없어 빈집인 줄 알았다.' },
+    { round:4, type:'ox', word:'눈시울', question:"'눈시울이 붉어지다'는 눈물이 맺힐 것 같다는 표현이다.", correct:true, example:"'눈시울'은 눈물이 맺히는 눈 가장자리예요." },
+    { round:4, type:'ox', word:'선호하다', question:"'선호하다'는 어떤 것을 특별히 더 싫어한다는 뜻이다.", correct:false, example:"'선호하다'는 더 '좋아한다'는 뜻이에요." }
+  ],
+  2: [
+    { round:1, type:'multiple', word:'두근거리다', question:"'두근거리다'의 뜻으로 알맞은 것은?", options:['기대나 긴장으로 심장이 빠르게 뛰다','너무 졸려서 눈이 감기다','화가 나서 손발이 떨리다','추워서 몸이 오들오들 떨리다'], correct:0, example:'예문: 발표 차례가 다가오자 심장이 두근거렸다.' },
+    { round:1, type:'multiple', word:'뭉클하다', question:"'뭉클하다'의 뜻으로 알맞은 것은?", options:['배가 고파 속이 쓰리다','감동이나 슬픔이 갑자기 북받치다','몸이 아파서 기운이 없다','갑자기 깜짝 놀라다'], correct:1, example:'예문: 엄마 편지를 읽고 가슴이 뭉클했다.' },
+    { round:1, type:'multiple', word:'흐뭇하다', question:"'흐뭇하다'의 뜻으로 알맞은 것은?", options:['마음이 불편하고 언짢다','갑작스러운 일에 어찌할 바를 모르다','마음에 흡족해서 기쁘다','기억이나 느낌이 흐릿하고 희미하다'], correct:2, example:'예문: 친구의 칭찬에 흐뭇한 미소가 지어졌다.' },
+    { round:1, type:'multiple', word:'설레다', question:"'설레다'를 올바르게 사용한 문장은?", options:['시험에 떨어져서 가슴이 설레었다.','소풍 전날 밤 너무 설레어서 잠을 못 잤다.','길을 잃어서 마음이 설레었다.','친구와 크게 싸우고 나서 마음이 설레었다.'], correct:1, example:"'설레다'는 기대나 흥분으로 마음이 들뜨는 것이에요." },
+    { round:1, type:'multiple', word:'씁쓸하다', question:"'씁쓸하다'의 뜻으로 알맞은 것은?", options:['너무 기쁘고 즐겁다','기분이 언짢고 서운하다','크게 놀라서 어이가 없다','갑자기 슬퍼서 눈물이 나다'], correct:1, example:'예문: 혼자 남겨진 기분이 씁쓸했다.' },
+    { round:2, type:'multiple', word:'안도하다', context:'보기 · 안도하다 / 멍하다 / 어리둥절하다 / 아련하다 / 당혹스럽다', question:'시험 결과가 좋아서 부모님이 _______하셨다.', options:['안도','멍','어리둥절','당혹'], correct:0, example:"'안도하다'는 걱정이 사라져 마음을 놓는 것이에요." },
+    { round:2, type:'multiple', word:'어리둥절하다', context:'보기 · 안도하다 / 멍하다 / 어리둥절하다 / 아련하다 / 당혹스럽다', question:'갑자기 불이 꺼지자 아이들이 _______한 표정을 지었다.', options:['안도한','멍한','어리둥절한','아련한'], correct:2, example:"'어리둥절하다'는 영문을 몰라 얼떨떨한 것이에요." },
+    { round:2, type:'multiple', word:'멍하다', context:'보기 · 안도하다 / 멍하다 / 어리둥절하다 / 아련하다 / 당혹스럽다', question:'충격적인 소식을 듣고 한동안 _______하게 앉아 있었다.', options:['안도','멍','당혹','아련'], correct:1, example:"'멍하다'는 아무 생각 없이 정신이 빠진 듯한 상태예요." },
+    { round:2, type:'multiple', word:'아련하다', context:'보기 · 안도하다 / 멍하다 / 어리둥절하다 / 아련하다 / 당혹스럽다', question:'오래된 사진을 보니 어린 시절이 _______하게 떠올랐다.', options:['안도','아련','멍','어리둥절'], correct:1, example:"'아련하다'는 기억이나 느낌이 흐릿하고 희미한 것이에요." },
+    { round:2, type:'multiple', word:'당혹스럽다', context:'보기 · 안도하다 / 멍하다 / 어리둥절하다 / 아련하다 / 당혹스럽다', question:'갑자기 이름이 불려서 _______러워서 얼굴이 빨개졌다.', options:['안도스','당혹스','멍','아련스'], correct:1, example:"'당혹스럽다'는 갑작스러운 일에 어찌할 바를 모르는 것이에요." },
+    { round:3, type:'multiple', word:'흐뭇하다', question:"'흐뭇하다'의 뜻으로 알맞은 것은?", options:['마음이 불편하고 언짢다','갑작스러운 일에 어찌할 바를 모르다','마음에 흡족해서 기쁘다','기억이나 느낌이 흐릿하고 희미하다','아무 생각 없이 정신이 빠진 듯하다'], correct:2, example:'예문: 친구의 칭찬에 흐뭇한 미소가 지어졌다.' },
+    { round:3, type:'multiple', word:'설레다', question:"'설레다'가 가장 자연스럽게 쓰인 문장은?", options:['시험에 떨어져서 가슴이 설레었다.','소풍 전날 밤 너무 설레어서 잠을 못 잤다.','길을 잃어서 마음이 설레었다.','무서운 영화를 보고 나서 설레었다.','친구와 싸우고 나서 설레었다.'], correct:1, example:"'설레다'는 기대나 흥분으로 마음이 들뜨는 것이에요." },
+    { round:4, type:'ox', word:'두근거리다', question:"'두근거리다'는 기대나 긴장으로 심장이 빠르게 뛰는 것을 말한다.", correct:true, example:'예: 발표 차례가 다가오자 심장이 두근거렸다.' },
+    { round:4, type:'ox', word:'씁쓸하다', question:"'씁쓸하다'는 기분이 매우 좋고 신난다는 뜻이다.", correct:false, example:"'씁쓸하다'는 기분이 언짢고 서운한 것이에요." },
+    { round:4, type:'ox', word:'아련하다', question:"'아련하다'는 기억이나 느낌이 흐릿하고 희미한 것을 말한다.", correct:true, example:'예: 어린 시절 기억이 아련하게 떠올랐다.' },
+    { round:4, type:'ox', word:'안도하다', question:"'안도하다'는 걱정이 더 커졌다는 뜻이다.", correct:false, example:"'안도하다'는 걱정이 사라져 마음을 놓는 것이에요." },
+    { round:4, type:'ox', word:'멍하다', question:"'멍하다'는 아무 생각 없이 정신이 빠진 듯한 상태를 말한다.", correct:true, example:'예: 충격을 받아 한동안 멍하게 있었다.' }
+  ],
+  3: [
+    { round:1, type:'multiple', word:'너그럽다', question:"'너그럽다'의 뜻으로 알맞은 것은?", options:['마음이 넓고 남의 잘못을 잘 받아들이다','빈틈없이 자세하고 세심하다','자신의 생각을 굽히지 않다','자신을 낮추고 남을 존중하다'], correct:0, example:'예문: 선생님은 실수를 너그럽게 용서해 주셨다.' },
+    { round:1, type:'multiple', word:'성급하다', question:"'성급하다'의 뜻으로 알맞은 것은?", options:['꾸밈 없이 있는 그대로 말하다','마음이 급해서 참을성이 없다','스스로 나서서 활발하게 행동하다','규칙이나 기준을 엄하게 지키다'], correct:1, example:'예문: 성급하게 결론을 내리면 후회하게 된다.' },
+    { round:1, type:'multiple', word:'온화하다', question:"'온화하다'의 뜻으로 알맞은 것은?", options:['규칙이나 기준을 엄하게 지키다','자신의 생각을 굽히지 않다','성격이나 말투가 부드럽고 따뜻하다','스스로 나서지 않고 물러서다'], correct:2, example:'예문: 온화한 목소리로 달래 주었다.' },
+    { round:1, type:'multiple', word:'겸손하다', question:"'겸손하다'의 뜻으로 알맞은 것은?", options:['자신을 높이고 남을 무시하다','꾸밈 없이 있는 그대로 말하다','규칙이나 기준을 엄하게 지키다','자신을 낮추고 남을 존중하다'], correct:3, example:'예문: 상을 받고도 겸손하게 행동했다.' },
+    { round:1, type:'multiple', word:'꼼꼼하다', question:"'꼼꼼하다'의 뜻으로 알맞은 것은?", options:['마음이 급해서 참을성이 없다','빈틈없이 자세하고 세심하다','스스로 나서서 활발하게 행동하다','자신의 생각을 굽히지 않다'], correct:1, example:'예문: 답을 꼼꼼하게 다시 확인했다.' },
+    { round:2, type:'multiple', word:'솔직하다', context:'보기 · 겸손하다 / 솔직하다 / 소극적 / 적극적 / 엄격하다', question:'잘못을 _______하게 인정했다.', options:['겸손','솔직','소극적','엄격'], correct:1, example:"'솔직하다'는 꾸밈 없이 있는 그대로 말하는 것이에요." },
+    { round:2, type:'multiple', word:'소극적', context:'보기 · 겸손하다 / 솔직하다 / 소극적 / 적극적 / 엄격하다', question:'_______인 태도로는 발전하기 어렵다.', options:['겸손','솔직','소극','적극'], correct:2, example:"'소극적'은 스스로 나서지 않고 물러서는 태도예요." },
+    { round:2, type:'multiple', word:'적극적', context:'보기 · 겸손하다 / 솔직하다 / 소극적 / 적극적 / 엄격하다', question:'_______으로 손을 들고 의견을 말했다.', options:['소극','적극','겸손','솔직'], correct:1, example:"'적극적'은 스스로 나서서 활발하게 행동하는 태도예요." },
+    { round:2, type:'multiple', word:'엄격하다', context:'보기 · 겸손하다 / 솔직하다 / 소극적 / 적극적 / 엄격하다', question:'아버지는 약속에 _______한 분이다.', options:['온화','겸손','엄격','솔직'], correct:2, example:"'엄격하다'는 규칙이나 기준을 엄하게 지키는 것이에요." },
+    { round:2, type:'multiple', word:'고집스럽다', context:'보기 · 너그럽다 / 꼼꼼하다 / 성급하다 / 고집스럽다 / 온화하다', question:'_______하게 자기 방식만 주장했다.', options:['너그럽','꼼꼼','성급','고집스럽'], correct:3, example:"'고집스럽다'는 자신의 생각을 굽히지 않는 것이에요." },
+    { round:3, type:'multiple', word:'겸손하다', question:"'겸손하다'와 반대되는 의미를 가진 말은?", options:['솔직하다','적극적이다','거만하다','온화하다','꼼꼼하다'], correct:2, example:"'겸손하다'는 자신을 낮추고 남을 존중하는 것, 반대는 '거만하다'예요." },
+    { round:3, type:'multiple', word:'소극적', question:"'소극적'인 행동으로 알맞은 것은?", options:['모르는 문제를 큰소리로 질문하다','발표를 자원해서 나가다','어려운 일이 생겨도 혼자 조용히 해결하려 하다','새로운 친구에게 먼저 말을 걸다','문제가 생기면 바로 도움을 요청하다'], correct:2, example:"'소극적'은 스스로 나서지 않고 물러서는 태도예요." },
+    { round:4, type:'ox', word:'너그럽다', question:"'너그럽다'는 마음이 넓고 남의 잘못을 잘 받아들이는 것을 말한다.", correct:true, example:'예: 선생님은 실수를 너그럽게 용서해 주셨다.' },
+    { round:4, type:'ox', word:'성급하다', question:"'성급하다'는 참을성이 많고 여유롭다는 뜻이다.", correct:false, example:"'성급하다'는 마음이 급해서 참을성이 없는 것이에요." },
+    { round:4, type:'ox', word:'겸손하다', question:"'겸손하다'는 자신을 낮추고 남을 존중하는 것을 말한다.", correct:true, example:'예: 상을 받고도 겸손하게 행동했다.' },
+    { round:4, type:'ox', word:'적극적', question:"'소극적'과 '적극적'은 같은 뜻이다.", correct:false, example:"'소극적'은 나서지 않는 태도, '적극적'은 나서서 행동하는 태도예요. 반대말이에요." },
+    { round:4, type:'ox', word:'엄격하다', question:"'엄격하다'는 규칙이나 기준을 엄하게 지키는 것을 말한다.", correct:true, example:'예: 아버지는 약속에 엄격한 분이다.' }
+  ],
+  4: [
+    { round:1, type:'multiple', word:'비유하다', question:"'비유하다'의 뜻으로 알맞은 것은?", options:['어떤 것을 다른 것에 빗대어 설명하다','사실보다 크게 부풀려 말하다','직접 말하지 않고 넌지시 알리다','대상을 말이나 글로 그림처럼 나타내다'], correct:0, example:'예문: 마음을 호수에 비유하여 표현했다.' },
+    { round:1, type:'multiple', word:'과장하다', question:"'과장하다'의 뜻으로 알맞은 것은?", options:['어떤 것을 다른 것에 빗대어 설명하다','사실보다 크게 부풀려 말하다','남의 말이나 글을 자신의 글에 가져다 쓰다','어떤 부분을 특별히 두드러지게 나타내다'], correct:1, example:'예문: "백 번 말했잖아"처럼 과장해서 표현했다.' },
+    { round:1, type:'multiple', word:'묘사하다', question:"'묘사하다'의 뜻으로 알맞은 것은?", options:['말이나 글로 내용을 다른 사람에게 알리다','직접 말하지 않고 넌지시 알리다','대상을 말이나 글로 그림처럼 나타내다','어떤 부분을 특별히 두드러지게 나타내다'], correct:2, example:'예문: 가을 풍경을 생생하게 묘사했다.' },
+    { round:1, type:'multiple', word:'암시하다', question:"'암시하다'의 뜻으로 알맞은 것은?", options:['사실보다 크게 부풀려 말하다','어떤 부분을 특별히 두드러지게 나타내다','남의 말이나 글을 자신의 글에 가져다 쓰다','직접 말하지 않고 넌지시 알리다'], correct:3, example:'예문: 이야기의 결말을 제목이 암시하고 있었다.' },
+    { round:1, type:'multiple', word:'인용하다', question:"'인용하다'의 뜻으로 알맞은 것은?", options:['남의 말이나 글을 자신의 글 속에 가져다 쓰다','어떤 것을 다른 것에 빗대어 설명하다','실제처럼 느끼다','어떤 부분을 특별히 두드러지게 나타내다'], correct:0, example:'예문: 속담을 인용하여 글을 마무리했다.' },
+    { round:2, type:'multiple', word:'생생하다', context:'보기 · 생생하다 / 실감하다 / 전달하다 / 강조하다 / 인용하다', question:'책 속 장면이 _______하게 떠올랐다.', options:['생생','실감','전달','강조'], correct:0, example:"'생생하다'는 눈앞에 있는 것처럼 실감이 나는 것이에요." },
+    { round:2, type:'multiple', word:'실감하다', context:'보기 · 생생하다 / 실감하다 / 전달하다 / 강조하다 / 인용하다', question:'직접 해보니 어려움을 _______했다.', options:['생생','실감','전달','강조'], correct:1, example:"'실감하다'는 실제처럼 느끼는 것이에요." },
+    { round:2, type:'multiple', word:'전달하다', context:'보기 · 생생하다 / 실감하다 / 전달하다 / 강조하다 / 인용하다', question:'내 마음을 잘 _______하고 싶었다.', options:['생생','실감','전달','강조'], correct:2, example:"'전달하다'는 말이나 글로 내용을 다른 사람에게 알리는 것이에요." },
+    { round:2, type:'multiple', word:'강조하다', context:'보기 · 생생하다 / 실감하다 / 전달하다 / 강조하다 / 인용하다', question:'중요한 내용에 밑줄을 그어 _______했다.', options:['생생','실감','전달','강조'], correct:3, example:"'강조하다'는 어떤 부분을 특별히 두드러지게 나타내는 것이에요." },
+    { round:2, type:'multiple', word:'빗대다', context:'보기 · 비유하다 / 빗대다 / 과장하다 / 묘사하다 / 암시하다', question:'욕심 많은 사람을 곰에 _______어 말했다.', options:['비유하','빗대','과장하','암시하'], correct:1, example:"'빗대다'는 어떤 것을 다른 것에 비교해서 말하는 것이에요." },
+    { round:3, type:'multiple', word:'비유하다', question:"'비유하다'와 가장 가까운 의미의 단어는?", options:['강조하다','빗대다','인용하다','묘사하다','암시하다'], correct:1, example:"'비유하다'와 '빗대다'는 둘 다 어떤 것을 다른 것에 견주어 설명하는 방법이에요." },
+    { round:3, type:'multiple', word:'과장하다', question:"'과장하다'가 쓰인 예문으로 알맞은 것은?", options:['속담을 인용하여 글을 마무리했다.','가을 풍경을 생생하게 묘사했다.','백 번 말했잖아라고 과장해서 표현했다.','이야기의 결말을 제목이 암시했다.','중요한 내용에 밑줄을 그어 강조했다.'], correct:2, example:"'과장하다'는 사실보다 크게 부풀려 말하는 것이에요." },
+    { round:4, type:'ox', word:'비유하다', question:"'비유하다'는 어떤 것을 다른 것에 빗대어 설명하는 것이다.", correct:true, example:'예: 마음을 호수에 비유하여 표현했다.' },
+    { round:4, type:'ox', word:'과장하다', question:"'과장하다'는 사실을 있는 그대로 정확하게 말하는 것이다.", correct:false, example:"'과장하다'는 사실보다 크게 부풀려 말하는 것이에요." },
+    { round:4, type:'ox', word:'인용하다', question:"'인용하다'는 남의 말이나 글을 자신의 글 속에 가져다 쓰는 것이다.", correct:true, example:'예: 속담을 인용하여 글을 마무리했다.' },
+    { round:4, type:'ox', word:'암시하다', question:"'암시하다'는 직접적으로 분명하게 말하는 것이다.", correct:false, example:"'암시하다'는 직접 말하지 않고 넌지시 알리는 것이에요." },
+    { round:4, type:'ox', word:'강조하다', question:"'강조하다'는 어떤 부분을 특별히 두드러지게 나타내는 것이다.", correct:true, example:'예: 중요한 내용에 밑줄을 그어 강조했다.' }
+  ],
+  5: [
+    { round:1, type:'multiple', word:'어슬렁거리다', question:"'어슬렁거리다'의 뜻으로 알맞은 것은?", options:['목적 없이 천천히 돌아다니다','당황해서 갈팡질팡하다','중심을 잡지 못하고 흔들리다','망설이며 선뜻 행동하지 못하다'], correct:0, example:'예문: 고양이가 골목을 어슬렁거렸다.' },
+    { round:1, type:'multiple', word:'허둥대다', question:"'허둥대다'의 뜻으로 알맞은 것은?", options:['목적 없이 이리저리 돌아다니다','당황해서 갈팡질팡하다','한 곳을 왔다 갔다 하다','거침없이 세차게 달려들다'], correct:1, example:'예문: 지각할까 봐 아침부터 허둥댔다.' },
+    { round:1, type:'multiple', word:'머뭇거리다', question:"'머뭇거리다'의 뜻으로 알맞은 것은?", options:['중심을 잡지 못하고 흔들리다','목적 없이 천천히 돌아다니다','망설이며 선뜻 행동하지 못하다','몹시 바쁘게 움직이다'], correct:2, example:'예문: 사과하려다 문 앞에서 머뭇거렸다.' },
+    { round:1, type:'multiple', word:'분주하다', question:"'분주하다'의 뜻으로 알맞은 것은?", options:['팔을 크게 흔들며 당당하게 걷다','거침없이 세차게 달려들다','한 곳을 왔다 갔다 하다','몹시 바쁘게 움직이다'], correct:3, example:'예문: 명절 전날 부엌이 분주했다.' },
+    { round:1, type:'multiple', word:'활보하다', question:"'활보하다'의 뜻으로 알맞은 것은?", options:['망설이며 결정을 못 내리다','목적 없이 이리저리 돌아다니다','팔을 크게 흔들며 당당하게 걷다','중심을 잡지 못하고 흔들리다'], correct:2, example:'예문: 무대 위를 당당하게 활보했다.' },
+    { round:2, type:'multiple', word:'서성거리다', context:'보기 · 어슬렁거리다 / 비틀거리다 / 서성거리다 / 배회하다 / 돌진하다', question:'결과를 기다리며 복도를 _______렸다.', options:['어슬렁거','비틀거','서성거','배회하'], correct:2, example:"'서성거리다'는 한 곳을 왔다 갔다 하는 것이에요." },
+    { round:2, type:'multiple', word:'비틀거리다', context:'보기 · 어슬렁거리다 / 비틀거리다 / 서성거리다 / 배회하다 / 돌진하다', question:'무거운 짐을 들고 _______렸다.', options:['어슬렁거','비틀거','서성거','배회하'], correct:1, example:"'비틀거리다'는 중심을 잡지 못하고 흔들리는 것이에요." },
+    { round:2, type:'multiple', word:'배회하다', context:'보기 · 어슬렁거리다 / 비틀거리다 / 서성거리다 / 배회하다 / 돌진하다', question:'밤늦게 골목을 _______하는 것은 위험하다.', options:['어슬렁거','비틀거','서성거','배회'], correct:3, example:"'배회하다'는 목적 없이 이리저리 돌아다니는 것이에요." },
+    { round:2, type:'multiple', word:'돌진하다', context:'보기 · 어슬렁거리다 / 비틀거리다 / 서성거리다 / 배회하다 / 돌진하다', question:'선수가 골대를 향해 _______했다.', options:['어슬렁거','비틀거','서성거','돌진'], correct:3, example:"'돌진하다'는 거침없이 세차게 달려드는 것이에요." },
+    { round:2, type:'multiple', word:'주저하다', context:'보기 · 주저하다 / 분주하다 / 활보하다 / 머뭇거리다 / 허둥대다', question:'도움을 요청하는 것을 _______하지 마라.', options:['주저','분주','활보','머뭇거리'], correct:0, example:"'주저하다'는 망설이며 결정을 못 내리는 것이에요." },
+    { round:3, type:'multiple', word:'어슬렁거리다', question:"'어슬렁거리다'와 뜻이 가장 비슷한 단어는?", options:['돌진하다','활보하다','배회하다','분주하다','비틀거리다'], correct:2, example:"'어슬렁거리다'와 '배회하다' 모두 목적 없이 돌아다니는 뜻이에요." },
+    { round:3, type:'multiple', word:'분주하다', question:"'분주하다'가 가장 잘 어울리는 상황은?", options:['시험이 끝나고 운동장에서 쉬는 상황','명절 전날 음식을 만드느라 바쁜 부엌','수업 중 조용히 책을 읽는 교실','혼자 산책하며 천천히 걷는 공원','졸려서 침대에 누운 상황'], correct:1, example:"'분주하다'는 몹시 바쁘게 움직이는 것이에요." },
+    { round:4, type:'ox', word:'어슬렁거리다', question:"'어슬렁거리다'는 목적 없이 천천히 돌아다니는 것을 말한다.", correct:true, example:'예: 고양이가 골목을 어슬렁거렸다.' },
+    { round:4, type:'ox', word:'허둥대다', question:"'허둥대다'는 여유롭고 침착하게 행동하는 것이다.", correct:false, example:"'허둥대다'는 당황해서 갈팡질팡하는 것이에요." },
+    { round:4, type:'ox', word:'활보하다', question:"'활보하다'는 팔을 크게 흔들며 당당하게 걷는 것이다.", correct:true, example:'예: 무대 위를 당당하게 활보했다.' },
+    { round:4, type:'ox', word:'머뭇거리다', question:"'머뭇거리다'와 '주저하다'는 둘 다 망설이는 태도를 나타낸다.", correct:true, example:"'머뭇거리다'는 선뜻 행동 못하는 것, '주저하다'는 결정을 못 내리는 것으로 비슷한 뜻이에요." },
+    { round:4, type:'ox', word:'분주하다', question:"'분주하다'는 한가롭게 쉬는 상태를 나타낸다.", correct:false, example:"'분주하다'는 몹시 바쁘게 움직이는 것이에요." }
+  ],
+  6: [
+    { round:1, type:'multiple', word:'늠름하다', question:"'늠름하다'의 뜻으로 알맞은 것은?", options:['생김새나 태도가 씩씩하고 당당하다','몸이 야위고 파리하다','볼품이 없고 변변치 않다','나이보다 어려 보이다'], correct:0, example:'예문: 늠름하게 서 있는 장군의 모습이었다.' },
+    { round:1, type:'multiple', word:'수척하다', question:"'수척하다'의 뜻으로 알맞은 것은?", options:['태도가 씩씩하고 자신감이 있다','꾸밈 없이 소박하고 평범하다','몸이 야위고 파리하다','차림새나 태도가 깔끔하고 바르다'], correct:2, example:'예문: 병을 앓고 나서 많이 수척해졌다.' },
+    { round:1, type:'multiple', word:'단정하다', question:"'단정하다'의 뜻으로 알맞은 것은?", options:['볼품이 없고 변변치 않다','차림새나 태도가 깔끔하고 바르다','생김새나 태도가 씩씩하고 당당하다','나이보다 어려 보이다'], correct:1, example:'예문: 교복을 단정하게 갖춰 입었다.' },
+    { round:1, type:'multiple', word:'당당하다', question:"'당당하다'의 뜻으로 알맞은 것은?", options:['몸이 야위고 파리하다','꾸밈 없이 소박하고 평범하다','볼품이 없고 변변치 않다','태도가 씩씩하고 자신감이 있다'], correct:3, example:'예문: 당당하게 무대 위에 올라갔다.' },
+    { round:1, type:'multiple', word:'위엄', question:"'위엄'의 뜻으로 알맞은 것은?", options:['얼굴에 드러나는 감정이나 분위기','점잖고 엄숙한 태도에서 느껴지는 기운','생김새나 태도가 씩씩하고 당당한 것','나이보다 어려 보이는 것'], correct:1, example:'예문: 선생님의 위엄 있는 눈빛에 조용해졌다.' },
+    { round:2, type:'multiple', word:'초라하다', context:'보기 · 수수하다 / 초라하다 / 야위다 / 앳되다 / 기색', question:'낡은 옷차림이 _______해 보였다.', options:['수수','초라','야위','앳돼'], correct:1, example:"'초라하다'는 볼품이 없고 변변치 않다는 뜻이에요." },
+    { round:2, type:'multiple', word:'앳되다', context:'보기 · 수수하다 / 초라하다 / 야위다 / 앳되다 / 기색', question:'_______된 얼굴의 신입생이 들어왔다.', options:['수수','초라','야위','앳'], correct:3, example:"'앳되다'는 나이보다 어려 보인다는 뜻이에요." },
+    { round:2, type:'multiple', word:'야위다', context:'보기 · 수수하다 / 초라하다 / 야위다 / 앳되다 / 기색', question:'오래 아프더니 많이 _______었다.', options:['수수해','초라해','야위','앳돼'], correct:2, example:"'야위다'는 살이 빠져 몸이 마르다는 뜻이에요." },
+    { round:2, type:'multiple', word:'기색', context:'보기 · 수수하다 / 초라하다 / 야위다 / 앳되다 / 기색', question:'전혀 두려운 _______이 없었다.', options:['수수','위엄','기색','당당'], correct:2, example:"'기색'은 얼굴이나 태도에 드러나는 감정이나 분위기예요." },
+    { round:2, type:'multiple', word:'수수하다', context:'보기 · 늠름하다 / 수척하다 / 단정하다 / 당당하다 / 수수하다', question:'_______한 옷차림이었지만 단정했다.', options:['늠름','수척','단정','수수'], correct:3, example:"'수수하다'는 꾸밈 없이 소박하고 평범하다는 뜻이에요." },
+    { round:3, type:'multiple', word:'늠름하다', question:"'늠름하다'와 반대에 가까운 말은?", options:['당당하다','위엄 있다','초라하다','단정하다','수수하다'], correct:2, example:"'늠름하다'는 씩씩하고 당당한 것, '초라하다'는 볼품없는 것이에요." },
+    { round:3, type:'multiple', word:'위엄', question:"'위엄'이 느껴지는 상황으로 가장 알맞은 것은?", options:['친구와 장난치며 노는 모습','낡은 옷을 입고 구석에 앉아 있는 모습','엄숙하게 앞을 바라보며 서 있는 장군의 모습','야위고 지쳐 보이는 표정','수수하게 차려입은 선생님 모습'], correct:2, example:"'위엄'은 점잖고 엄숙한 태도에서 느껴지는 기운이에요." },
+    { round:4, type:'ox', word:'늠름하다', question:"'늠름하다'는 씩씩하고 당당한 모습을 나타낸다.", correct:true, example:'예: 늠름하게 서 있는 장군의 모습이었다.' },
+    { round:4, type:'ox', word:'수척하다', question:"'수척하다'는 몸이 튼튼하고 건강하다는 뜻이다.", correct:false, example:"'수척하다'는 몸이 야위고 파리하다는 뜻이에요." },
+    { round:4, type:'ox', word:'단정하다', question:"'단정하다'는 차림새나 태도가 깔끔하고 바른 것이다.", correct:true, example:'예: 교복을 단정하게 갖춰 입었다.' },
+    { round:4, type:'ox', word:'초라하다', question:"'당당하다'와 '초라하다'는 비슷한 뜻이다.", correct:false, example:"'당당하다'는 자신감 있는 것, '초라하다'는 볼품없는 것으로 반대에 가까워요." },
+    { round:4, type:'ox', word:'기색', question:"'기색'은 얼굴이나 태도에 드러나는 감정이나 분위기를 말한다.", correct:true, example:'예: 전혀 두려운 기색이 없었다.' }
+  ],
+  7: [
+    { round:1, type:'multiple', word:'줄거리', question:"'줄거리'의 뜻으로 알맞은 것은?", options:['이야기의 중심 내용을 간추린 것','이야기가 일어나는 때와 장소','앞으로 일어날 일을 미리 암시하는 내용','이야기의 끝 부분'], correct:0, example:'예문: 책의 줄거리를 간단하게 정리했다.' },
+    { round:1, type:'multiple', word:'복선', question:"'복선'의 뜻으로 알맞은 것은?", options:['이야기의 끝 부분','인물 사이에 생기는 대립이나 충돌','앞으로 일어날 일을 미리 암시하는 내용','이야기에서 가장 중심이 되는 인물'], correct:2, example:'예문: 첫 장면의 복선이 결말에서 드러났다.' },
+    { round:1, type:'multiple', word:'갈등', question:"'갈등'의 뜻으로 알맞은 것은?", options:['이야기를 통해 얻는 깨달음','어떤 사실을 순서대로 설명함','인물 사이에 생기는 대립이나 충돌','이야기의 중심 내용을 간추린 것'], correct:2, example:'예문: 두 인물의 갈등이 이야기를 이끌었다.' },
+    { round:1, type:'multiple', word:'교훈', question:"'교훈'의 뜻으로 알맞은 것은?", options:['이야기가 일어나는 때와 장소','이야기 속에서 일어나는 일','이야기의 끝 부분','이야기를 통해 얻는 깨달음이나 가르침'], correct:3, example:'예문: 이 이야기의 교훈은 정직함이다.' },
+    { round:1, type:'multiple', word:'배경', question:"'배경'의 뜻으로 알맞은 것은?", options:['이야기가 일어나는 때와 장소','이야기의 중심 내용을 간추린 것','이야기에서 가장 중심이 되는 인물','앞으로 일어날 일을 미리 암시하는 내용'], correct:0, example:'예문: 이 소설의 배경은 조선 시대이다.' },
+    { round:2, type:'multiple', word:'결말', context:'보기 · 줄거리 / 배경 / 결말 / 펼쳐지다 / 갈등', question:'주인공이 행복해지는 _______이었다.', options:['줄거리','배경','결말','갈등'], correct:2, example:"'결말'은 이야기의 끝 부분이에요." },
+    { round:2, type:'multiple', word:'펼쳐지다', context:'보기 · 줄거리 / 배경 / 결말 / 펼쳐지다 / 갈등', question:'책을 펴자 신비로운 세계가 _______졌다.', options:['줄거려','배경이','결말이','펼쳐'], correct:3, example:"'펼쳐지다'는 이야기나 장면이 눈앞에 나타나는 것이에요." },
+    { round:2, type:'multiple', word:'주인공', context:'보기 · 주인공 / 사건 / 서술 / 교훈 / 복선', question:'_______은 용감한 소녀였다.', options:['주인공','사건','서술','교훈'], correct:0, example:"'주인공'은 이야기에서 가장 중심이 되는 인물이에요." },
+    { round:2, type:'multiple', word:'서술', context:'보기 · 주인공 / 사건 / 서술 / 교훈 / 복선', question:'시간 순서대로 _______한 글이다.', options:['주인공','사건','서술','교훈'], correct:2, example:"'서술'은 어떤 사실이나 내용을 순서대로 설명하는 것이에요." },
+    { round:2, type:'multiple', word:'사건', context:'보기 · 주인공 / 사건 / 서술 / 교훈 / 복선', question:'뜻밖의 _______으로 이야기가 바뀌었다.', options:['주인공','사건','서술','교훈'], correct:1, example:"'사건'은 이야기 속에서 일어나는 일이에요." },
+    { round:3, type:'multiple', word:'복선', question:"'복선'이 쓰인 예로 가장 알맞은 것은?", options:['주인공이 결국 성공하는 장면','이야기 첫 장에 나온 낡은 편지가 마지막 반전의 단서가 됨','두 인물이 싸우는 장면','작가가 독자에게 교훈을 직접 말해주는 부분','이야기의 시간과 장소를 설명하는 부분'], correct:1, example:"'복선'은 앞으로 일어날 일을 미리 암시하는 내용이에요." },
+    { round:3, type:'multiple', word:'갈등', question:"이야기 속 '갈등'의 예로 알맞은 것은?", options:['주인공이 학교에서 공부하는 장면','두 친구가 같은 물건을 서로 차지하려 다투는 상황','주인공이 행복하게 사는 결말','이야기의 배경이 봄날로 설정된 것','작가가 글을 쓰는 모습'], correct:1, example:"'갈등'은 인물 사이에 생기는 대립이나 충돌이에요." },
+    { round:4, type:'ox', word:'줄거리', question:"'줄거리'는 이야기의 중심 내용을 간추린 것이다.", correct:true, example:'예: 책의 줄거리를 간단하게 정리했다.' },
+    { round:4, type:'ox', word:'복선', question:"'복선'은 이야기의 결말 부분에 나오는 내용이다.", correct:false, example:"'복선'은 앞으로 일어날 일을 앞부분에서 미리 암시하는 내용이에요." },
+    { round:4, type:'ox', word:'갈등', question:"'갈등'은 인물 사이에 생기는 대립이나 충돌을 말한다.", correct:true, example:'예: 두 인물의 갈등이 이야기를 이끌었다.' },
+    { round:4, type:'ox', word:'교훈', question:"'교훈'과 '배경'은 같은 뜻이다.", correct:false, example:"'교훈'은 이야기에서 얻는 깨달음, '배경'은 이야기가 일어나는 때와 장소예요." },
+    { round:4, type:'ox', word:'서술', question:"'서술'은 어떤 사실이나 내용을 순서대로 설명하는 것이다.", correct:true, example:'예: 시간 순서대로 서술한 글이다.' }
+  ],
+  8: [
+    { round:1, type:'multiple', word:'배려하다', question:"'배려하다'의 뜻으로 알맞은 것은?", options:['남을 위해 마음을 쓰다','달래거나 위로해 주다','힘을 합쳐 함께 일하다','높이 여기고 소중하게 대하다'], correct:0, example:'예문: 친구를 배려하여 자리를 양보했다.' },
+    { round:1, type:'multiple', word:'협력하다', question:"'협력하다'의 뜻으로 알맞은 것은?", options:['생각이나 뜻이 서로 통하다','달래거나 위로해 주다','힘을 합쳐 함께 일하다','도움이 되도록 힘을 보태다'], correct:2, example:'예문: 모둠원이 협력하여 과제를 완성했다.' },
+    { round:1, type:'multiple', word:'존중하다', question:"'존중하다'의 뜻으로 알맞은 것은?", options:['여럿이 함께 잘 섞이다','높이 여기고 소중하게 대하다','다른 것을 받아들이지 않고 밀어내다','같은 목적으로 이루어진 집단'], correct:1, example:'예문: 친구의 의견을 존중해야 한다.' },
+    { round:1, type:'multiple', word:'공동체', question:"'공동체'의 뜻으로 알맞은 것은?", options:['달래거나 위로해 주는 것','다른 것을 받아들이지 않고 밀어내는','같은 목적으로 이루어진 집단','생각이나 뜻이 서로 통하는 것'], correct:2, example:'예문: 학교는 함께 배우는 공동체이다.' },
+    { round:1, type:'multiple', word:'소통하다', question:"'소통하다'의 뜻으로 알맞은 것은?", options:['생각이나 뜻이 서로 통하다','힘을 합쳐 함께 일하다','남을 위해 마음을 쓰다','높이 여기고 소중하게 대하다'], correct:0, example:'예문: 대화를 통해 서로 소통했다.' },
+    { round:2, type:'multiple', word:'다독이다', context:'보기 · 배려하다 / 다독이다 / 어우러지다 / 허물없다 / 이바지하다', question:'우는 친구를 _______여 주었다.', options:['배려하','다독','어우러지','이바지하'], correct:1, example:"'다독이다'는 달래거나 위로해 주는 것이에요." },
+    { round:2, type:'multiple', word:'어우러지다', context:'보기 · 배려하다 / 다독이다 / 어우러지다 / 허물없다 / 이바지하다', question:'모두가 _______져 즐겁게 놀았다.', options:['배려하','다독이','어우러','이바지하'], correct:2, example:"'어우러지다'는 여럿이 함께 잘 섞이는 것이에요." },
+    { round:2, type:'multiple', word:'허물없다', context:'보기 · 배려하다 / 다독이다 / 어우러지다 / 허물없다 / 이바지하다', question:'우리는 _______는 친구 사이이다.', options:['배려하','다독이','허물없','이바지하'], correct:2, example:"'허물없다'는 서로 거리낌 없을 만큼 가깝다는 뜻이에요." },
+    { round:2, type:'multiple', word:'이바지하다', context:'보기 · 배려하다 / 다독이다 / 어우러지다 / 허물없다 / 이바지하다', question:'봉사 활동으로 사회에 _______했다.', options:['배려','다독','어우러지','이바지'], correct:3, example:"'이바지하다'는 도움이 되도록 힘을 보태는 것이에요." },
+    { round:2, type:'multiple', word:'배타적', context:'보기 · 협력하다 / 존중하다 / 소통하다 / 공동체 / 배타적', question:'_______인 태도는 갈등을 만든다.', options:['협력','존중','소통','배타'], correct:3, example:"'배타적'은 다른 것을 받아들이지 않고 밀어내는 태도예요." },
+    { round:3, type:'multiple', word:'배타적', question:"'배타적'의 반대되는 태도는?", options:['초라한 태도','수수한 태도','개방적이고 포용하는 태도','당당한 태도','엄격한 태도'], correct:2, example:"'배타적'은 밀어내는 태도, 반대는 받아들이고 포용하는 태도예요." },
+    { round:3, type:'multiple', word:'소통하다', question:"'소통하다'가 잘 이루어지는 상황은?", options:['친구 말을 듣지 않고 혼자 결정하는 것','서로 생각을 나누고 이해하려 노력하는 것','배타적인 태도로 다른 의견을 거부하는 것','아무 말 없이 혼자 행동하는 것','자신의 의견만 반복해서 주장하는 것'], correct:1, example:"'소통하다'는 생각이나 뜻이 서로 통하는 것이에요." },
+    { round:4, type:'ox', word:'배려하다', question:"'배려하다'는 남을 위해 마음을 쓰는 것이다.", correct:true, example:'예: 친구를 배려하여 자리를 양보했다.' },
+    { round:4, type:'ox', word:'협력하다', question:"'협력하다'는 혼자서 열심히 일하는 것이다.", correct:false, example:"'협력하다'는 힘을 합쳐 함께 일하는 것이에요." },
+    { round:4, type:'ox', word:'공동체', question:"'공동체'는 같은 목적으로 이루어진 집단을 말한다.", correct:true, example:'예: 학교는 함께 배우는 공동체이다.' },
+    { round:4, type:'ox', word:'배타적', question:"'배타적'인 태도는 서로 어우러지는 데 도움이 된다.", correct:false, example:"'배타적'은 다른 것을 밀어내는 태도라 어우러지는 데 방해가 돼요." },
+    { round:4, type:'ox', word:'존중하다', question:"'존중하다'는 높이 여기고 소중하게 대하는 것이다.", correct:true, example:'예: 친구의 의견을 존중해야 한다.' }
+  ],
+  9: [
+    { round:1, type:'multiple', word:'흔적', question:"'흔적'의 뜻으로 알맞은 것은?", options:['무언가가 지나간 자리나 남은 표시','끝까지 보호하고 유지하는 것','어려움을 끝까지 극복하는 것','억압에 맞서 싸우는 것'], correct:0, example:'예문: 전쟁의 흔적이 건물에 남아 있었다.' },
+    { round:1, type:'multiple', word:'침략', question:"'침략'의 뜻으로 알맞은 것은?", options:['다른 나라의 지배에서 벗어나는 것','어려운 것을 이겨내는 것','다른 나라에 힘으로 쳐들어가는 것','억압이나 불의에 맞서 싸우는 것'], correct:2, example:'예문: 외적의 침략에 백성들이 맞서 싸웠다.' },
+    { round:1, type:'multiple', word:'저항', question:"'저항'의 뜻으로 알맞은 것은?", options:['어렵거나 힘든 것을 이겨냄','억압이나 불의에 맞서 싸움','자신을 희생하는 것','끝까지 보호하고 유지하는 것'], correct:1, example:'예문: 독립운동가들의 저항이 계속되었다.' },
+    { round:1, type:'multiple', word:'독립', question:"'독립'의 뜻으로 알맞은 것은?", options:['다른 나라에 힘으로 쳐들어가는 것','다른 사람을 위해 자신을 바치는 것','다른 나라의 지배에서 벗어나 스스로 서는 것','어렵거나 힘든 것을 이겨내는 것'], correct:2, example:'예문: 3·1운동은 독립을 외친 운동이다.' },
+    { round:1, type:'multiple', word:'희생', question:"'희생'의 뜻으로 알맞은 것은?", options:['끝까지 보호하고 유지하는 것','다른 사람이나 목적을 위해 자신을 바치는 것','어려움을 끝까지 극복하는 것','강제로 가진 것을 잃는 것'], correct:1, example:'예문: 나라를 위해 희생한 분들을 기억해야 한다.' },
+    { round:2, type:'multiple', word:'지켜내다', context:'보기 · 흔적 / 지켜내다 / 빼앗기다 / 일어서다 / 이겨내다', question:'나라를 _______기 위해 싸웠다.', options:['흔적을 남기','지켜내','빼앗기','일어서'], correct:1, example:"'지켜내다'는 끝까지 보호하고 유지하는 것이에요." },
+    { round:2, type:'multiple', word:'빼앗기다', context:'보기 · 흔적 / 지켜내다 / 빼앗기다 / 일어서다 / 이겨내다', question:'땅을 _______고 고향을 떠났다.', options:['지켜내','빼앗기','일어서','이겨내'], correct:1, example:"'빼앗기다'는 강제로 가진 것을 잃는 것이에요." },
+    { round:2, type:'multiple', word:'일어서다', context:'보기 · 흔적 / 지켜내다 / 빼앗기다 / 일어서다 / 이겨내다', question:'위기에서 다시 _______는 모습이 감동적이었다.', options:['지켜내','빼앗기','일어서','이겨내'], correct:2, example:"'일어서다'는 쓰러졌다가 다시 힘을 차리는 것이에요." },
+    { round:2, type:'multiple', word:'극복', context:'보기 · 침략 / 저항 / 독립 / 희생 / 극복', question:'위기를 _______하고 나라가 다시 일어섰다.', options:['침략','저항','독립','극복'], correct:3, example:"'극복'은 어렵거나 힘든 것을 이겨내는 것이에요." },
+    { round:2, type:'multiple', word:'이겨내다', context:'보기 · 흔적 / 지켜내다 / 빼앗기다 / 일어서다 / 이겨내다', question:'고난을 _______고 독립을 이루었다.', options:['지켜내','빼앗기','일어서','이겨내'], correct:3, example:"'이겨내다'는 어려움을 끝까지 극복하는 것이에요." },
+    { round:3, type:'multiple', word:'침략', question:"'침략'과 '저항'의 관계로 알맞은 것은?", options:['둘 다 같은 뜻이다','침략에 맞서는 행동이 저항이다','저항이 먼저 일어나고 침략이 뒤따른다','둘은 전혀 관계없다','침략은 좋은 것, 저항은 나쁜 것이다'], correct:1, example:"침략은 쳐들어가는 것, 저항은 그에 맞서 싸우는 것이에요." },
+    { round:3, type:'multiple', word:'독립', question:"'독립'을 이루기 위해 필요한 것과 가장 관련 있는 단어는?", options:['수척하다','앳되다','저항과 희생','수수하다','배타적'], correct:2, example:"독립을 위해서는 불의에 맞서는 '저항'과 자신을 바치는 '희생'이 필요해요." },
+    { round:4, type:'ox', word:'흔적', question:"'흔적'은 무언가가 지나간 자리나 남은 표시를 말한다.", correct:true, example:'예: 전쟁의 흔적이 건물에 남아 있었다.' },
+    { round:4, type:'ox', word:'침략', question:"'침략'은 다른 나라를 도와주러 가는 것이다.", correct:false, example:"'침략'은 다른 나라에 힘으로 쳐들어가는 것이에요." },
+    { round:4, type:'ox', word:'독립', question:"'독립'은 다른 나라의 지배에서 벗어나 스스로 서는 것이다.", correct:true, example:'예: 3·1운동은 독립을 외친 운동이다.' },
+    { round:4, type:'ox', word:'희생', question:"'희생'과 '극복'은 같은 뜻이다.", correct:false, example:"'희생'은 자신을 바치는 것, '극복'은 어려움을 이겨내는 것으로 다른 뜻이에요." },
+    { round:4, type:'ox', word:'저항', question:"'저항'은 억압이나 불의에 맞서 싸우는 것이다.", correct:true, example:'예: 독립운동가들의 저항이 계속되었다.' }
+  ],
+  10: [
+    { round:1, type:'multiple', word:'민주주의', question:"'민주주의'의 뜻으로 알맞은 것은?", options:['반드시 해야 하는 일','어떤 일을 할 수 있는 자격이나 힘','국민이 주권을 가지고 스스로 다스리는 제도','차별 없이 똑같이 대우받는 것'], correct:2, example:'예문: 우리나라는 민주주의 국가이다.' },
+    { round:1, type:'multiple', word:'권리', question:"'권리'의 뜻으로 알맞은 것은?", options:['사회를 운영하기 위해 정해 놓은 규칙','반드시 해야 하는 일','어떤 일을 할 수 있는 자격이나 힘','차별 없이 똑같이 대우받는 것'], correct:2, example:'예문: 모든 사람은 교육받을 권리가 있다.' },
+    { round:1, type:'multiple', word:'의무', question:"'의무'의 뜻으로 알맞은 것은?", options:['반드시 해야 하는 일','어떤 일을 할 수 있는 자격이나 힘','차별 없이 똑같이 대우받는 것','국민이 주권을 가지고 다스리는 제도'], correct:0, example:'예문: 납세는 국민의 의무이다.' },
+    { round:1, type:'multiple', word:'평등', question:"'평등'의 뜻으로 알맞은 것은?", options:['반드시 해야 하는 일','차별 없이 똑같이 대우받는 것','사회를 운영하기 위해 정해 놓은 규칙','숨겨져 있던 것이 밖으로 나타나다'], correct:1, example:'예문: 모든 사람은 법 앞에 평등하다.' },
+    { round:1, type:'multiple', word:'제도', question:"'제도'의 뜻으로 알맞은 것은?", options:['차별 없이 똑같이 대우받는 것','어떤 일을 할 수 있는 자격이나 힘','반드시 해야 하는 일','사회를 운영하기 위해 정해 놓은 규칙이나 방법'], correct:3, example:'예문: 선거 제도를 통해 대표를 뽑는다.' },
+    { round:2, type:'multiple', word:'다스리다', context:'보기 · 다스리다 / 어기다 / 맞서다 / 드러나다 / 가꾸다', question:'왕이 나라를 _______렸다.', options:['다스리','어기','맞서','드러나'], correct:0, example:"'다스리다'는 나라나 집단을 관리하고 이끄는 것이에요." },
+    { round:2, type:'multiple', word:'어기다', context:'보기 · 다스리다 / 어기다 / 맞서다 / 드러나다 / 가꾸다', question:'신호를 _______면 위험하다.', options:['다스리','어기','맞서','드러나'], correct:1, example:"'어기다'는 규칙이나 약속을 지키지 않는 것이에요." },
+    { round:2, type:'multiple', word:'드러나다', context:'보기 · 다스리다 / 어기다 / 맞서다 / 드러나다 / 가꾸다', question:'진실이 결국 _______났다.', options:['다스리','어기','맞서','드러나'], correct:3, example:"'드러나다'는 숨겨져 있던 것이 밖으로 나타나는 것이에요." },
+    { round:2, type:'multiple', word:'가꾸다', context:'보기 · 다스리다 / 어기다 / 맞서다 / 드러나다 / 가꾸다', question:'더 나은 사회를 _______어 나가야 한다.', options:['다스리','어기','맞서','가꾸'], correct:3, example:"'가꾸다'는 보살피며 발전시키는 것이에요." },
+    { round:2, type:'multiple', word:'맞서다', context:'보기 · 다스리다 / 어기다 / 맞서다 / 드러나다 / 가꾸다', question:'불의에 _______싸웠다.', options:['다스리','어기','맞서','드러나'], correct:2, example:"'맞서다'는 반대하거나 저항하는 것이에요." },
+    { round:3, type:'multiple', word:'권리', question:"'권리'와 '의무'의 관계로 알맞은 것은?", options:['둘 다 같은 뜻이다','권리는 해야 할 일, 의무는 할 수 있는 자격이다','권리는 할 수 있는 자격, 의무는 반드시 해야 할 일이다','둘은 전혀 관계없다','권리가 있으면 의무는 없어도 된다'], correct:2, example:"권리는 할 수 있는 자격, 의무는 반드시 해야 하는 일로 서로 짝을 이루어요." },
+    { round:3, type:'multiple', word:'민주주의', question:"'민주주의' 사회에서 중요한 것은?", options:['왕이 모든 것을 결정하는 것','국민이 스스로 참여하고 결정하는 것','소수의 사람이 나라를 지배하는 것','규칙을 어겨도 처벌받지 않는 것','평등 없이 차별이 허용되는 것'], correct:1, example:"'민주주의'는 국민이 주권을 가지고 스스로 다스리는 제도예요." },
+    { round:4, type:'ox', word:'민주주의', question:"'민주주의'는 국민이 주권을 가지고 스스로 다스리는 제도이다.", correct:true, example:'예: 우리나라는 민주주의 국가이다.' },
+    { round:4, type:'ox', word:'권리', question:"'권리'는 반드시 해야 하는 일이다.", correct:false, example:"'권리'는 할 수 있는 자격이나 힘이고, 반드시 해야 하는 일은 '의무'예요." },
+    { round:4, type:'ox', word:'평등', question:"'평등'은 차별 없이 똑같이 대우받는 것이다.", correct:true, example:'예: 모든 사람은 법 앞에 평등하다.' },
+    { round:4, type:'ox', word:'어기다', question:"'어기다'는 규칙이나 약속을 잘 지키는 것이다.", correct:false, example:"'어기다'는 규칙이나 약속을 지키지 않는 것이에요." },
+    { round:4, type:'ox', word:'제도', question:"'제도'는 사회를 운영하기 위해 정해 놓은 규칙이나 방법이다.", correct:true, example:'예: 선거 제도를 통해 대표를 뽑는다.' }
+  ],
+  11: [
+    { round:1, type:'multiple', word:'전통', question:"'전통'의 뜻으로 알맞은 것은?", options:['앞 세대에서 물려받은 것','예로부터 이어져 내려오는 풍습이나 방식','오래도록 잘 지키고 간직함','문화적으로 가치 있는 유물이나 유적'], correct:1, example:'예문: 한복은 우리의 소중한 전통이다.' },
+    { round:1, type:'multiple', word:'유산', question:"'유산'의 뜻으로 알맞은 것은?", options:['앞 세대의 것을 이어받음','예로부터 이어져 내려오는 풍습','앞 세대에서 물려받은 것','오래도록 잘 지키고 간직함'], correct:2, example:'예문: 문화유산을 잘 보존해야 한다.' },
+    { round:1, type:'multiple', word:'계승', question:"'계승'의 뜻으로 알맞은 것은?", options:['앞 세대의 것을 이어받음','노력으로 훌륭한 것을 만들어내다','사라진 것을 다시 살려내다','정신이나 뜻이 안에 담기다'], correct:0, example:'예문: 전통문화를 계승하고 발전시켰다.' },
+    { round:1, type:'multiple', word:'보존', question:"'보존'의 뜻으로 알맞은 것은?", options:['앞 세대에서 물려받은 것','오래도록 잘 지키고 간직함','사라진 것을 다시 살려내다','정신이나 뜻이 안에 담기다'], correct:1, example:'예문: 귀중한 문서를 보존하였다.' },
+    { round:1, type:'multiple', word:'깃들다', question:"'깃들다'의 뜻으로 알맞은 것은?", options:['노력으로 훌륭한 것을 만들어내다','사라진 것을 다시 살려내다','자신의 것을 다음 사람에게 전해주다','정신이나 뜻이 안에 담기다'], correct:3, example:'예문: 작품에 작가의 혼이 깃들어 있다.' },
+    { round:2, type:'multiple', word:'이어받다', context:'보기 · 이어받다 / 물려주다 / 빚어내다 / 되살리다 / 깃들다', question:'선조의 정신을 _______아 발전시켰다.', options:['이어받','물려주','빚어내','되살리'], correct:0, example:"'이어받다'는 앞 사람의 것을 물려받는 것이에요." },
+    { round:2, type:'multiple', word:'물려주다', context:'보기 · 이어받다 / 물려주다 / 빚어내다 / 되살리다 / 깃들다', question:'부모님이 소중한 가훈을 _______셨다.', options:['이어받','물려주','빚어내','되살리'], correct:1, example:"'물려주다'는 자신의 것을 다음 사람에게 전해주는 것이에요." },
+    { round:2, type:'multiple', word:'빚어내다', context:'보기 · 이어받다 / 물려주다 / 빚어내다 / 되살리다 / 깃들다', question:'장인이 도자기를 _______었다.', options:['이어받','물려주','빚어내','되살리'], correct:2, example:"'빚어내다'는 노력으로 훌륭한 것을 만들어내는 것이에요." },
+    { round:2, type:'multiple', word:'되살리다', context:'보기 · 이어받다 / 물려주다 / 빚어내다 / 되살리다 / 깃들다', question:'전통 공예를 _______는 노력이 필요하다.', options:['이어받','물려주','빚어내','되살리'], correct:3, example:"'되살리다'는 사라진 것을 다시 살려내는 것이에요." },
+    { round:2, type:'multiple', word:'문화재', context:'보기 · 전통 / 유산 / 보존 / 계승 / 문화재', question:'경복궁은 대표적인 _______이다.', options:['전통','유산','보존','문화재'], correct:3, example:"'문화재'는 문화적으로 가치 있는 유물이나 유적이에요." },
+    { round:3, type:'multiple', word:'전통', question:"'전통'과 '계승'의 관계로 알맞은 것은?", options:['둘은 반대되는 뜻이다','전통을 이어가는 것이 계승이다','계승이 먼저 있어야 전통이 생긴다','둘은 전혀 관계없다','같은 뜻이다'], correct:1, example:"'전통'은 이어져 내려오는 것, '계승'은 그것을 이어받는 행위예요." },
+    { round:3, type:'multiple', word:'유산', question:"'문화유산'을 보존해야 하는 이유로 가장 알맞은 것은?", options:['팔아서 돈을 벌기 위해','옛날 것은 모두 소중하기 때문에','조상의 지혜와 삶이 담겨 있기 때문에','현재에는 쓸모가 없기 때문에','외국인에게 보여주기 위해'], correct:2, example:"'유산'은 앞 세대에서 물려받은 소중한 것이에요." },
+    { round:4, type:'ox', word:'전통', question:"'전통'은 예로부터 이어져 내려오는 풍습이나 방식이다.", correct:true, example:'예: 한복은 우리의 소중한 전통이다.' },
+    { round:4, type:'ox', word:'보존', question:"'보존'은 낡은 것을 버리는 것이다.", correct:false, example:"'보존'은 오래도록 잘 지키고 간직하는 것이에요." },
+    { round:4, type:'ox', word:'계승', question:"'계승'은 앞 세대의 것을 이어받는 것이다.", correct:true, example:'예: 전통문화를 계승하고 발전시켰다.' },
+    { round:4, type:'ox', word:'깃들다', question:"'깃들다'는 정신이나 뜻이 안에 담기는 것이다.", correct:true, example:'예: 작품에 작가의 혼이 깃들어 있다.' },
+    { round:4, type:'ox', word:'유산', question:"'유산'과 '문화재'는 완전히 같은 뜻이다.", correct:false, example:"'유산'은 물려받은 모든 것, '문화재'는 그 중 문화적 가치가 있는 유물·유적이에요." }
+  ],
+  12: [
+    { round:1, type:'multiple', word:'싱그럽다', question:"'싱그럽다'의 뜻으로 알맞은 것은?", options:['끝없이 넓다','신선하고 생기 있는 느낌이 나다','나무나 풀이 많이 자라 빽빽하다','물기가 없고 건조하다'], correct:1, example:'예문: 봄날 싱그러운 풀 향기가 났다.' },
+    { round:1, type:'multiple', word:'무성하다', question:"'무성하다'의 뜻으로 알맞은 것은?", options:['물기가 없고 건조하다','신선하고 생기 있는 느낌이 나다','나무나 풀이 많이 자라 빽빽하다','끝없이 넓다'], correct:2, example:'예문: 여름엔 나뭇잎이 무성하다.' },
+    { round:1, type:'multiple', word:'오염', question:"'오염'의 뜻으로 알맞은 것은?", options:['생물을 둘러싸고 영향을 미치는 주변 상태','위험이나 피해를 막아 지킴','공기·물·흙 등이 더럽혀지는 것','한 바퀴 돌아서 제자리로 돌아옴'], correct:2, example:'예문: 강물이 오염되어 물고기가 사라졌다.' },
+    { round:1, type:'multiple', word:'순환', question:"'순환'의 뜻으로 알맞은 것은?", options:['위험이나 피해를 막아 지킴','한 바퀴 돌아서 제자리로 돌아옴','공기·물·흙 등이 더럽혀지는 것','생물이 살아가는 모양이나 상태'], correct:1, example:'예문: 물은 증발하고 비가 되는 순환을 반복한다.' },
+    { round:1, type:'multiple', word:'메마르다', question:"'메마르다'의 뜻으로 알맞은 것은?", options:['신선하고 생기 있는 느낌이 나다','물기가 없고 건조하다','나무나 풀이 많이 자라 빽빽하다','끝없이 넓다'], correct:1, example:'예문: 가뭄으로 땅이 메말라 갔다.' },
+    { round:2, type:'multiple', word:'드넓다', context:'보기 · 싱그럽다 / 드넓다 / 무성하다 / 메마르다 / 어우러지다', question:'_______은 바다를 바라보았다.', options:['싱그러운','드넓은','무성한','메마른'], correct:1, example:"'드넓다'는 끝없이 넓다는 뜻이에요." },
+    { round:2, type:'multiple', word:'어우러지다', context:'보기 · 싱그럽다 / 드넓다 / 무성하다 / 메마르다 / 어우러지다', question:'꽃과 나무가 _______져 아름다웠다.', options:['싱그러워','드넓어','어우러','메말라'], correct:2, example:"'어우러지다'는 서로 다른 것이 잘 섞여 조화롭다는 뜻이에요." },
+    { round:2, type:'multiple', word:'생태', context:'보기 · 생태 / 환경 / 오염 / 보호 / 순환', question:'_______환경을 보호해야 한다.', options:['생태','환경','오염','보호'], correct:0, example:"'생태'는 생물이 살아가는 모양이나 상태예요." },
+    { round:2, type:'multiple', word:'보호', context:'보기 · 생태 / 환경 / 오염 / 보호 / 순환', question:'멸종 위기 동물을 _______해야 한다.', options:['생태','환경','오염','보호'], correct:3, example:"'보호'는 위험이나 피해를 막아 지키는 것이에요." },
+    { round:2, type:'multiple', word:'환경', context:'보기 · 생태 / 환경 / 오염 / 보호 / 순환', question:'_______오염이 심각해지고 있다.', options:['생태','환경','오염','보호'], correct:1, example:"'환경'은 생물을 둘러싸고 영향을 미치는 주변 상태예요." },
+    { round:3, type:'multiple', word:'순환', question:"물의 순환 과정으로 알맞은 것은?", options:['오염→보호→생태','증발→구름→비→다시 물로','메마름→무성함→싱그러움','오염→순환→보호'], correct:1, example:"'순환'은 한 바퀴 돌아서 제자리로 돌아오는 것이에요." },
+    { round:3, type:'multiple', word:'오염', question:"'오염'을 줄이기 위한 행동으로 알맞은 것은?", options:['쓰레기를 강에 버린다','일회용품을 많이 쓴다','분리수거를 잘 한다','자동차를 많이 이용한다','공장 폐수를 바다에 버린다'], correct:2, example:"'오염'은 공기·물·흙 등이 더럽혀지는 것이에요." },
+    { round:4, type:'ox', word:'싱그럽다', question:"'싱그럽다'는 신선하고 생기 있는 느낌이 나는 것이다.", correct:true, example:'예: 봄날 싱그러운 풀 향기가 났다.' },
+    { round:4, type:'ox', word:'메마르다', question:"'메마르다'는 물기가 풍부하고 촉촉하다는 뜻이다.", correct:false, example:"'메마르다'는 물기가 없고 건조하다는 뜻이에요." },
+    { round:4, type:'ox', word:'순환', question:"'순환'은 한 바퀴 돌아서 제자리로 돌아오는 것이다.", correct:true, example:'예: 물은 증발하고 비가 되는 순환을 반복한다.' },
+    { round:4, type:'ox', word:'오염', question:"'오염'과 '보호'는 반대되는 개념이다.", correct:true, example:"'오염'은 더럽혀지는 것, '보호'는 지켜주는 것으로 반대예요." },
+    { round:4, type:'ox', word:'무성하다', question:"'무성하다'는 나무나 풀이 많이 자라 빽빽한 것이다.", correct:true, example:'예: 여름엔 나뭇잎이 무성하다.' }
+  ],
+  13: [
+    { round:1, type:'multiple', word:'혁신', question:"'혁신'의 뜻으로 알맞은 것은?", options:['더 나은 상태로 나아감','낡은 것을 바꿔 새롭게 함','새로운 환경에 맞게 변화함','몸이나 능력이 자라고 발전함'], correct:1, example:'예문: 회사는 끊임없는 혁신으로 성장했다.' },
+    { round:1, type:'multiple', word:'적응', question:"'적응'의 뜻으로 알맞은 것은?", options:['낡은 것을 바꿔 새롭게 함','어렵거나 힘든 것에 과감히 나서는 것','새로운 환경이나 상황에 맞게 변화함','목표나 목적을 완성하는 것'], correct:2, example:'예문: 새 학교에 빠르게 적응했다.' },
+    { round:1, type:'multiple', word:'발전', question:"'발전'의 뜻으로 알맞은 것은?", options:['더 나은 상태로 나아감','낡은 것을 바꿔 새롭게 함','몸이나 능력이 자라고 발전함','목표나 목적을 완성하는 것'], correct:0, example:'예문: 과학 기술의 발전이 눈부시다.' },
+    { round:1, type:'multiple', word:'도전', question:"'도전'의 뜻으로 알맞은 것은?", options:['더 나은 상태로 나아감','어렵거나 힘든 것에 과감히 나서는 것','새로운 것을 받아들이다','완전히 새롭게 바뀌다'], correct:1, example:'예문: 새로운 도전을 두려워하지 않았다.' },
+    { round:1, type:'multiple', word:'성장', question:"'성장'의 뜻으로 알맞은 것은?", options:['어렵거나 힘든 것에 과감히 나서는 것','낡은 것을 바꿔 새롭게 함','목표나 목적을 완성하는 것','몸이나 능력이 자라고 발전함'], correct:3, example:'예문: 아이의 성장을 지켜보는 것이 기쁘다.' },
+    { round:2, type:'multiple', word:'앞서다', context:'보기 · 앞서다 / 뒤처지다 / 거듭나다 / 이루다 / 맞이하다', question:'기술 개발에서 _______나갔다.', options:['앞서','뒤처지','거듭나','이루'], correct:0, example:"'앞서다'는 남보다 먼저 나아가는 것이에요." },
+    { round:2, type:'multiple', word:'뒤처지다', context:'보기 · 앞서다 / 뒤처지다 / 거듭나다 / 이루다 / 맞이하다', question:'공부를 게을리하면 _______질 수 있다.', options:['앞서','뒤처지','거듭나','이루'], correct:1, example:"'뒤처지다'는 남보다 뒤에 처지거나 뒤떨어지는 것이에요." },
+    { round:2, type:'multiple', word:'거듭나다', context:'보기 · 앞서다 / 뒤처지다 / 거듭나다 / 이루다 / 맞이하다', question:'실패를 딛고 _______난 선수였다.', options:['앞서','뒤처지','거듭나','이루'], correct:2, example:"'거듭나다'는 완전히 새롭게 바뀌는 것이에요." },
+    { round:2, type:'multiple', word:'이루다', context:'보기 · 앞서다 / 뒤처지다 / 거듭나다 / 이루다 / 맞이하다', question:'꿈을 _______기 위해 노력했다.', options:['앞서','뒤처지','거듭나','이루'], correct:3, example:"'이루다'는 목표나 목적을 완성하는 것이에요." },
+    { round:2, type:'multiple', word:'맞이하다', context:'보기 · 앞서다 / 뒤처지다 / 거듭나다 / 이루다 / 맞이하다', question:'새 학기를 설레는 마음으로 _______했다.', options:['앞서','혁신','맞이','성장'], correct:2, example:"'맞이하다'는 새로운 것을 받아들이는 것이에요." },
+    { round:3, type:'multiple', word:'혁신', question:"'혁신'이 필요한 상황으로 알맞은 것은?", options:['모든 것이 완벽하게 잘 되고 있을 때','낡은 방식이 더 이상 효과가 없을 때','전통을 그대로 지켜야 할 때','변화 없이 안정이 필요할 때','규칙을 어기고 싶을 때'], correct:1, example:"'혁신'은 낡은 것을 바꿔 새롭게 하는 것이에요." },
+    { round:3, type:'multiple', word:'도전', question:"'도전'과 '적응'의 순서로 알맞은 것은?", options:['둘은 순서가 없다','적응을 먼저 하고 나서 도전한다','도전을 하고 나서 새로운 환경에 적응한다','둘은 전혀 관계없다','동시에 일어난다'], correct:2, example:"새로운 것에 '도전'한 뒤 그 환경에 '적응'하는 과정이 자연스러워요." },
+    { round:4, type:'ox', word:'혁신', question:"'혁신'은 낡은 것을 바꿔 새롭게 하는 것이다.", correct:true, example:'예: 회사는 끊임없는 혁신으로 성장했다.' },
+    { round:4, type:'ox', word:'발전', question:"'발전'은 더 나쁜 상태로 나아가는 것이다.", correct:false, example:"'발전'은 더 나은 상태로 나아가는 것이에요." },
+    { round:4, type:'ox', word:'적응', question:"'적응'은 새로운 환경에 맞게 변화하는 것이다.", correct:true, example:'예: 새 학교에 빠르게 적응했다.' },
+    { round:4, type:'ox', word:'앞서다', question:"'앞서다'와 '뒤처지다'는 반대 뜻이다.", correct:true, example:"'앞서다'는 먼저 나아가는 것, '뒤처지다'는 뒤에 처지는 것으로 반대예요." },
+    { round:4, type:'ox', word:'성장', question:"'성장'은 몸이나 능력이 자라고 발전하는 것이다.", correct:true, example:'예: 아이의 성장을 지켜보는 것이 기쁘다.' }
+  ],
+  14: [
+    { round:1, type:'multiple', word:'관점', question:"'관점'의 뜻으로 알맞은 것은?", options:['복잡한 것을 나누어 자세히 살펴봄','어떤 것을 바라보는 입장이나 각도','말이나 글에서 앞뒤가 맞는 생각의 흐름','상대의 주장에 반대하여 따지는 것'], correct:1, example:'예문: 다양한 관점에서 생각해야 한다.' },
+    { round:1, type:'multiple', word:'논리', question:"'논리'의 뜻으로 알맞은 것은?", options:['어떤 것을 바라보는 입장이나 각도','두 가지 이상을 견주어 살펴봄','말이나 글에서 앞뒤가 맞는 생각의 흐름','복잡한 것을 나누어 자세히 살펴봄'], correct:2, example:'예문: 논리적으로 주장을 펼쳤다.' },
+    { round:1, type:'multiple', word:'분석', question:"'분석'의 뜻으로 알맞은 것은?", options:['상대의 주장에 반대하여 따지는 것','두 가지 이상을 견주어 살펴봄','복잡한 것을 나누어 자세히 살펴봄','말이나 글에서 앞뒤가 맞는 생각의 흐름'], correct:2, example:'예문: 데이터를 분석하여 결론을 냈다.' },
+    { round:1, type:'multiple', word:'반론', question:"'반론'의 뜻으로 알맞은 것은?", options:['어떤 것을 바라보는 입장이나 각도','복잡한 것을 나누어 자세히 살펴봄','두 가지 이상을 견주어 살펴봄','상대의 주장에 반대하여 따지는 것'], correct:3, example:'예문: 상대의 의견에 반론을 제기했다.' },
+    { round:1, type:'multiple', word:'비교', question:"'비교'의 뜻으로 알맞은 것은?", options:['복잡한 것을 나누어 자세히 살펴봄','두 가지 이상을 견주어 살펴봄','말이나 글에서 앞뒤가 맞는 생각의 흐름','어떤 것을 바라보는 입장이나 각도'], correct:1, example:'예문: 두 나라의 문화를 비교했다.' },
+    { round:2, type:'multiple', word:'따지다', context:'보기 · 따지다 / 헤아리다 / 견주다 / 짚어보다 / 옳다', question:'조건을 꼼꼼히 _______보았다.', options:['따져','헤아려','견주어','짚어'], correct:0, example:"'따지다'는 옳고 그름을 꼼꼼히 살피는 것이에요." },
+    { round:2, type:'multiple', word:'헤아리다', context:'보기 · 따지다 / 헤아리다 / 견주다 / 짚어보다 / 옳다', question:'친구의 마음을 _______주었다.', options:['따져','헤아려','견주어','짚어'], correct:1, example:"'헤아리다'는 상황이나 마음을 잘 생각해 보는 것이에요." },
+    { round:2, type:'multiple', word:'견주다', context:'보기 · 따지다 / 헤아리다 / 견주다 / 짚어보다 / 옳다', question:'두 작품을 _______어 분석했다.', options:['따져','헤아려','견주어','짚어'], correct:2, example:"'견주다'는 서로 비교하는 것이에요." },
+    { round:2, type:'multiple', word:'짚어보다', context:'보기 · 따지다 / 헤아리다 / 견주다 / 짚어보다 / 옳다', question:'문제점을 하나씩 _______보았다.', options:['따져','헤아려','견주어','짚어'], correct:3, example:"'짚어보다'는 하나하나 살펴보는 것이에요." },
+    { round:2, type:'multiple', word:'옳다', context:'보기 · 따지다 / 헤아리다 / 견주다 / 짚어보다 / 옳다', question:'그의 판단이 _______음이 밝혀졌다.', options:['따진','헤아린','견준','옳'], correct:3, example:"'옳다'는 바르고 맞다는 뜻이에요." },
+    { round:3, type:'multiple', word:'논리', question:"논리적인 글의 특징으로 알맞은 것은?", options:['앞뒤 내용이 일관되게 연결된다','감정이 풍부하게 담겨 있다','꾸미는 말이 많이 사용된다','결론이 없어도 괜찮다','주장이 없어도 된다'], correct:0, example:"'논리'는 말이나 글에서 앞뒤가 맞는 생각의 흐름이에요." },
+    { round:3, type:'multiple', word:'관점', question:"같은 사건을 다른 '관점'으로 보면 어떻게 되나요?", options:['항상 같은 결론이 나온다','다른 해석이나 이해가 생긴다','논리가 없어진다','반론이 불가능해진다','분석이 어려워진다'], correct:1, example:"'관점'은 바라보는 입장이라 관점에 따라 해석이 달라져요." },
+    { round:4, type:'ox', word:'관점', question:"'관점'은 어떤 것을 바라보는 입장이나 각도이다.", correct:true, example:'예: 다양한 관점에서 생각해야 한다.' },
+    { round:4, type:'ox', word:'논리', question:"'논리적이다'는 말은 앞뒤가 맞지 않는다는 뜻이다.", correct:false, example:"'논리적이다'는 앞뒤가 맞는 생각의 흐름이 있다는 뜻이에요." },
+    { round:4, type:'ox', word:'분석', question:"'분석'은 복잡한 것을 나누어 자세히 살펴보는 것이다.", correct:true, example:'예: 데이터를 분석하여 결론을 냈다.' },
+    { round:4, type:'ox', word:'반론', question:"'반론'은 상대의 주장에 동의하는 것이다.", correct:false, example:"'반론'은 상대의 주장에 반대하여 따지는 것이에요." },
+    { round:4, type:'ox', word:'비교', question:"'비교'와 '분석'은 둘 다 자세히 살펴보는 방법이다.", correct:true, example:"'비교'는 두 가지를 견주는 것, '분석'은 나누어 살펴보는 것으로 둘 다 탐구 방법이에요." }
+  ],
+  15: [
+    { round:1, type:'multiple', word:'지층', question:"'지층'의 뜻으로 알맞은 것은?", options:['땅속 마그마가 지표면으로 터져 나오는 것','바람·물 등이 땅이나 바위를 깎아 없애는 것','자갈·모래·진흙 등이 쌓여 층을 이루는 것','땅이 흔들리는 자연현상'], correct:2, example:'예문: 지층을 보면 지구의 역사를 알 수 있다.' },
+    { round:1, type:'multiple', word:'화산', question:"'화산'의 뜻으로 알맞은 것은?", options:['땅이 흔들리는 자연현상','땅속 마그마가 지표면으로 터져 나오는 것','모래·흙 등이 쌓이는 것','바람·물 등이 땅을 깎는 것'], correct:1, example:'예문: 화산 폭발로 마을이 피해를 입었다.' },
+    { round:1, type:'multiple', word:'침식', question:"'침식'의 뜻으로 알맞은 것은?", options:['모래·흙 등이 물이나 바람에 의해 쌓이는 것','바람·물 등이 땅이나 바위를 깎아 없애는 것','땅이 흔들리는 자연현상','고체가 열을 받아 액체로 변하는 것'], correct:1, example:'예문: 강물의 침식으로 협곡이 생겼다.' },
+    { round:1, type:'multiple', word:'퇴적', question:"'퇴적'의 뜻으로 알맞은 것은?", options:['바람·물 등이 땅이나 바위를 깎아 없애는 것','모래·흙 등이 물이나 바람에 의해 쌓이는 것','땅이 흔들리는 자연현상','땅속 마그마가 터져 나오는 것'], correct:1, example:'예문: 강 하류에는 퇴적 작용이 활발하다.' },
+    { round:1, type:'multiple', word:'지진', question:"'지진'의 뜻으로 알맞은 것은?", options:['바람·물 등이 땅을 깎는 것','모래·흙 등이 쌓이는 것','땅속 마그마가 터져 나오는 것','땅이 흔들리는 자연현상'], correct:3, example:'예문: 지진으로 건물이 흔들렸다.' },
+    { round:2, type:'multiple', word:'녹다', context:'보기 · 품다 / 녹다 / 솟아오르다 / 뒤덮다 / 깎이다', question:'빙하가 _______아 해수면이 높아진다.', options:['품','녹','솟아오르','뒤덮'], correct:1, example:"'녹다'는 고체가 열을 받아 액체로 변하는 것이에요." },
+    { round:2, type:'multiple', word:'솟아오르다', context:'보기 · 품다 / 녹다 / 솟아오르다 / 뒤덮다 / 깎이다', question:'화산에서 마그마가 _______았다.', options:['품','녹','솟아올르','뒤덮'], correct:2, example:"'솟아오르다'는 위로 힘차게 올라오는 것이에요." },
+    { round:2, type:'multiple', word:'뒤덮다', context:'보기 · 품다 / 녹다 / 솟아오르다 / 뒤덮다 / 깎이다', question:'화산재가 마을을 _______었다.', options:['품','녹','솟아오르','뒤덮'], correct:3, example:"'뒤덮다'는 온통 덮어 가리는 것이에요." },
+    { round:2, type:'multiple', word:'깎이다', context:'보기 · 품다 / 녹다 / 솟아오르다 / 뒤덮다 / 깎이다', question:'바위가 오랜 세월에 _______어 모양이 바뀌었다.', options:['품','녹','솟아오르','깎'], correct:3, example:"'깎이다'는 바람이나 물에 의해 조금씩 닳아 없어지는 것이에요." },
+    { round:2, type:'multiple', word:'품다', context:'보기 · 품다 / 녹다 / 솟아오르다 / 뒤덮다 / 깎이다', question:'산이 깊은 비밀을 _______고 있었다.', options:['품','녹','솟아오르','뒤덮'], correct:0, example:"'품다'는 안에 담아 간직하는 것이에요." },
+    { round:3, type:'multiple', word:'침식', question:"'침식'과 '퇴적'의 관계로 알맞은 것은?", options:['침식은 쌓이는 것, 퇴적은 깎이는 것이다','침식은 깎이는 것, 퇴적은 쌓이는 것이다','둘은 같은 뜻이다','둘은 화산과만 관련 있다','지진이 일어날 때만 생긴다'], correct:1, example:"'침식'은 깎아 없애는 것, '퇴적'은 쌓이는 것으로 반대 과정이에요." },
+    { round:3, type:'multiple', word:'화산', question:"화산 활동으로 일어날 수 있는 일이 아닌 것은?", options:['마그마가 지표면으로 나온다','화산재가 주변을 뒤덮는다','지층이 새로 만들어진다','강물이 흘러 협곡이 생긴다','주변이 뜨거워진다'], correct:3, example:"협곡은 강물의 '침식'으로 생기는 것으로 화산 활동과 직접 관련 없어요." },
+    { round:4, type:'ox', word:'지층', question:"'지층'을 보면 오래전 지구의 환경을 알 수 있다.", correct:true, example:'예: 지층을 보면 지구의 역사를 알 수 있다.' },
+    { round:4, type:'ox', word:'침식', question:"'침식'은 모래나 흙이 쌓이는 현상이다.", correct:false, example:"'침식'은 바람·물 등이 땅이나 바위를 깎아 없애는 것이에요." },
+    { round:4, type:'ox', word:'화산', question:"'화산'은 땅속 마그마가 지표면으로 터져 나오는 것이다.", correct:true, example:'예: 화산 폭발로 마을이 피해를 입었다.' },
+    { round:4, type:'ox', word:'퇴적', question:"'퇴적'과 '침식'은 모두 땅의 변화를 일으킨다.", correct:true, example:"'퇴적'은 쌓이고 '침식'은 깎이는 과정으로 모두 지형 변화를 만들어요." },
+    { round:4, type:'ox', word:'지진', question:"'지진'은 땅이 흔들리는 자연현상이다.", correct:true, example:'예: 지진으로 건물이 흔들렸다.' }
+  ],
+  16: [
+    { round:1, type:'multiple', word:'관찰', question:"'관찰'의 뜻으로 알맞은 것은?", options:['아직 증명되지 않은 설명이나 추측','어떤 것을 알아내기 위해 직접 해보는 것','자연 현상을 주의 깊게 살펴봄','어떤 사실을 뒷받침하는 자료나 물건'], correct:2, example:'예문: 식물의 성장을 관찰했다.' },
+    { round:1, type:'multiple', word:'가설', question:"'가설'의 뜻으로 알맞은 것은?", options:['생각이나 연구 끝에 내리는 판단','자연 현상을 주의 깊게 살펴봄','어떤 것을 알아내기 위해 직접 해보는 것','아직 증명되지 않은 설명이나 추측'], correct:3, example:'예문: 가설을 세우고 실험을 시작했다.' },
+    { round:1, type:'multiple', word:'증거', question:"'증거'의 뜻으로 알맞은 것은?", options:['어떤 사실을 뒷받침하는 자료나 물건','아직 증명되지 않은 설명이나 추측','자연 현상을 주의 깊게 살펴봄','생각이나 연구 끝에 내리는 판단'], correct:0, example:'예문: 주장을 뒷받침하는 증거를 제시했다.' },
+    { round:1, type:'multiple', word:'결론', question:"'결론'의 뜻으로 알맞은 것은?", options:['자연 현상을 주의 깊게 살펴봄','어떤 것을 알아내기 위해 직접 해보는 것','생각이나 연구 끝에 내리는 판단','어떤 사실을 뒷받침하는 자료나 물건'], correct:2, example:'예문: 실험 결과를 바탕으로 결론을 내렸다.' },
+    { round:1, type:'multiple', word:'실험', question:"'실험'의 뜻으로 알맞은 것은?", options:['아직 증명되지 않은 설명이나 추측','어떤 것을 알아내기 위해 직접 해보는 것','자연 현상을 주의 깊게 살펴봄','어떤 사실을 뒷받침하는 자료나 물건'], correct:1, example:'예문: 물의 끓는점을 실험으로 확인했다.' },
+    { round:2, type:'multiple', word:'살피다', context:'보기 · 살피다 / 밝혀내다 / 따져보다 / 되풀이하다 / 이끌어내다', question:'주변을 꼼꼼하게 _______았다.', options:['살피','밝혀내','따져보','되풀이'], correct:0, example:"'살피다'는 자세히 들여다보는 것이에요." },
+    { round:2, type:'multiple', word:'밝혀내다', context:'보기 · 살피다 / 밝혀내다 / 따져보다 / 되풀이하다 / 이끌어내다', question:'사건의 원인을 _______었다.', options:['살피','밝혀내','따져보','되풀이'], correct:1, example:"'밝혀내다'는 숨겨진 것을 알아내는 것이에요." },
+    { round:2, type:'multiple', word:'되풀이하다', context:'보기 · 살피다 / 밝혀내다 / 따져보다 / 되풀이하다 / 이끌어내다', question:'실험을 여러 번 _______했다.', options:['살피','밝혀내','따져보','되풀이'], correct:3, example:"'되풀이하다'는 같은 것을 반복하는 것이에요." },
+    { round:2, type:'multiple', word:'이끌어내다', context:'보기 · 살피다 / 밝혀내다 / 따져보다 / 되풀이하다 / 이끌어내다', question:'실험을 통해 결론을 _______었다.', options:['살피','밝혀내','따져보','이끌어내'], correct:3, example:"'이끌어내다'는 결론이나 결과를 만들어내는 것이에요." },
+    { round:2, type:'multiple', word:'따져보다', context:'보기 · 살피다 / 밝혀내다 / 따져보다 / 되풀이하다 / 이끌어내다', question:'결과를 꼼꼼히 _______았다.', options:['살피','밝혀내','따져보','되풀이'], correct:2, example:"'따져보다'는 이유나 원인을 꼼꼼히 생각해 보는 것이에요." },
+    { round:3, type:'multiple', word:'가설', question:"과학 탐구의 올바른 순서로 알맞은 것은?", options:['결론→가설→실험→관찰','가설→실험→관찰→결론','실험→가설→결론→관찰','관찰→가설→실험→결론','증거→관찰→가설→결론'], correct:3, example:"'관찰'로 시작해 '가설'을 세우고 '실험'으로 확인 후 '결론'을 내려요." },
+    { round:3, type:'multiple', word:'증거', question:"주장을 펼칠 때 '증거'가 필요한 이유는?", options:['글을 길게 쓰기 위해','주장을 믿을 수 있게 뒷받침하기 위해','이야기를 재미있게 만들기 위해','반론을 막기 위해','결론을 내리지 않아도 되기 위해'], correct:1, example:"'증거'는 주장이 사실임을 뒷받침하는 자료예요." },
+    { round:4, type:'ox', word:'관찰', question:"'관찰'은 자연 현상을 주의 깊게 살펴보는 것이다.", correct:true, example:'예: 식물의 성장을 관찰했다.' },
+    { round:4, type:'ox', word:'가설', question:"'가설'은 이미 증명이 완료된 사실이다.", correct:false, example:"'가설'은 아직 증명되지 않은 설명이나 추측이에요." },
+    { round:4, type:'ox', word:'실험', question:"'실험'은 어떤 것을 알아내기 위해 직접 해보는 것이다.", correct:true, example:'예: 물의 끓는점을 실험으로 확인했다.' },
+    { round:4, type:'ox', word:'결론', question:"'결론'은 연구나 생각의 시작 부분에 나온다.", correct:false, example:"'결론'은 생각이나 연구 끝에 내리는 판단이에요. 마지막에 나와요." },
+    { round:4, type:'ox', word:'증거', question:"'증거'는 어떤 사실을 뒷받침하는 자료나 물건이다.", correct:true, example:'예: 주장을 뒷받침하는 증거를 제시했다.' }
+  ],
+  17: [
+    { round:1, type:'multiple', word:'발명', question:"'발명'의 뜻으로 알맞은 것은?", options:['기계가 스스로 작동하게 만드는 것','없던 것을 새로 만들어냄','멀리 떨어진 곳과 정보를 주고받는 것','어떤 것에 대해 알려주는 내용이나 지식'], correct:1, example:'예문: 에디슨은 전구를 발명했다.' },
+    { round:1, type:'multiple', word:'인공지능', question:"'인공지능'의 뜻으로 알맞은 것은?", options:['멀리 떨어진 곳과 정보를 주고받는 것','기계가 스스로 작동하게 만드는 것','컴퓨터가 인간처럼 생각하고 학습하는 기술','없던 것을 새로 만들어냄'], correct:2, example:'예문: 인공지능이 빠르게 발전하고 있다.' },
+    { round:1, type:'multiple', word:'자동화', question:"'자동화'의 뜻으로 알맞은 것은?", options:['컴퓨터가 인간처럼 생각하고 학습하는 기술','없던 것을 새로 만들어냄','기계가 스스로 작동하게 만드는 것','어떤 것에 대해 알려주는 내용이나 지식'], correct:2, example:'예문: 공장의 자동화로 생산이 빨라졌다.' },
+    { round:1, type:'multiple', word:'통신', question:"'통신'의 뜻으로 알맞은 것은?", options:['없던 것을 새로 만들어냄','어떤 것에 대해 알려주는 내용이나 지식','기계가 스스로 작동하게 만드는 것','멀리 떨어진 곳과 정보를 주고받는 것'], correct:3, example:'예문: 통신 기술의 발달로 세상이 좁아졌다.' },
+    { round:1, type:'multiple', word:'정보', question:"'정보'의 뜻으로 알맞은 것은?", options:['어떤 것에 대해 알려주는 내용이나 지식','멀리 떨어진 곳과 정보를 주고받는 것','기계가 스스로 작동하게 만드는 것','없던 것을 새로 만들어냄'], correct:0, example:'예문: 정확한 정보를 찾는 것이 중요하다.' },
+    { round:2, type:'multiple', word:'앞당기다', context:'보기 · 앞당기다 / 내다보다 / 넓히다 / 이어주다 / 만들어내다', question:'출발 시간을 _______겼다.', options:['앞당기','내다보','넓히','이어주'], correct:0, example:"'앞당기다'는 정해진 때보다 일찍 하는 것이에요." },
+    { round:2, type:'multiple', word:'내다보다', context:'보기 · 앞당기다 / 내다보다 / 넓히다 / 이어주다 / 만들어내다', question:'미래를 _______는 안목이 필요하다.', options:['앞당기','내다보','넓히','이어주'], correct:1, example:"'내다보다'는 앞날을 미리 생각하는 것이에요." },
+    { round:2, type:'multiple', word:'넓히다', context:'보기 · 앞당기다 / 내다보다 / 넓히다 / 이어주다 / 만들어내다', question:'지식의 범위를 _______었다.', options:['앞당기','내다보','넓히','이어주'], correct:2, example:"'넓히다'는 범위나 영역을 크게 하는 것이에요." },
+    { round:2, type:'multiple', word:'이어주다', context:'보기 · 앞당기다 / 내다보다 / 넓히다 / 이어주다 / 만들어내다', question:'인터넷이 세계를 _______다.', options:['앞당기','내다보','넓혀','이어준'], correct:3, example:"'이어주다'는 서로 연결시켜 주는 것이에요." },
+    { round:2, type:'multiple', word:'만들어내다', context:'보기 · 앞당기다 / 내다보다 / 넓히다 / 이어주다 / 만들어내다', question:'새로운 기술을 _______었다.', options:['앞당기','내다보','넓히','만들어내'], correct:3, example:"'만들어내다'는 새로운 것을 창조하는 것이에요." },
+    { round:3, type:'multiple', word:'인공지능', question:"'인공지능'을 활용하는 예로 알맞지 않은 것은?", options:['스마트폰이 목소리를 인식한다','컴퓨터가 바둑을 두고 이긴다','자동차가 스스로 운전한다','책을 손으로 직접 쓴다','번역 프로그램이 외국어를 해석한다'], correct:3, example:"'인공지능'은 컴퓨터가 인간처럼 생각하고 학습하는 기술이에요." },
+    { round:3, type:'multiple', word:'발명', question:"'발명'과 '발견'의 차이로 알맞은 것은?", options:['발명은 원래 있던 것을 찾는 것, 발견은 새로 만드는 것','발명은 새로 만드는 것, 발견은 원래 있던 것을 찾는 것','둘은 같은 뜻이다','발명은 과학, 발견은 예술이다','발견이 발명보다 중요하다'], correct:1, example:"'발명'은 없던 것을 만들어내는 것, '발견'은 있었지만 몰랐던 것을 찾는 것이에요." },
+    { round:4, type:'ox', word:'발명', question:"'발명'은 없던 것을 새로 만들어내는 것이다.", correct:true, example:'예: 에디슨은 전구를 발명했다.' },
+    { round:4, type:'ox', word:'인공지능', question:"'인공지능'은 컴퓨터가 인간처럼 생각하고 학습하는 기술이다.", correct:true, example:'예: 인공지능이 빠르게 발전하고 있다.' },
+    { round:4, type:'ox', word:'자동화', question:"'자동화'는 사람이 더 많이 일해야 한다는 뜻이다.", correct:false, example:"'자동화'는 기계가 스스로 작동하게 만드는 것으로 사람의 일을 줄여줘요." },
+    { round:4, type:'ox', word:'통신', question:"'통신'은 멀리 떨어진 곳과 정보를 주고받는 것이다.", correct:true, example:'예: 통신 기술의 발달로 세상이 좁아졌다.' },
+    { round:4, type:'ox', word:'정보', question:"'정보'는 어떤 것에 대해 알려주는 내용이나 지식이다.", correct:true, example:'예: 정확한 정보를 찾는 것이 중요하다.' }
+  ],
+  18: [
+    { round:1, type:'multiple', word:'공감', question:"'공감'의 뜻으로 알맞은 것은?", options:['이야기를 전달하는 시각이나 위치','작품을 보거나 읽고 느끼는 것','남의 감정이나 생각을 같이 느끼는 것','어떤 것이 다른 것을 대표하여 나타냄'], correct:2, example:'예문: 주인공의 슬픔에 공감했다.' },
+    { round:1, type:'multiple', word:'시점', question:"'시점'의 뜻으로 알맞은 것은?", options:['이야기를 전달하는 시각이나 위치','글에서 말하고자 하는 중심 생각','어떤 것이 다른 것을 대표하여 나타냄','남의 감정이나 생각을 같이 느끼는 것'], correct:0, example:'예문: 1인칭 시점으로 쓰인 소설이다.' },
+    { round:1, type:'multiple', word:'상징', question:"'상징'의 뜻으로 알맞은 것은?", options:['글에서 말하고자 하는 중심 생각','이야기를 전달하는 시각이나 위치','어떤 것이 다른 것을 대표하여 나타냄','남의 감정이나 생각을 같이 느끼는 것'], correct:2, example:'예문: 비둘기는 평화의 상징이다.' },
+    { round:1, type:'multiple', word:'주제', question:"'주제'의 뜻으로 알맞은 것은?", options:['이야기를 전달하는 시각이나 위치','글에서 말하고자 하는 중심 생각','어떤 것이 다른 것을 대표하여 나타냄','작품을 보거나 읽고 느끼는 것'], correct:1, example:'예문: 이 소설의 주제는 우정이다.' },
+    { round:1, type:'multiple', word:'감상', question:"'감상'의 뜻으로 알맞은 것은?", options:['남의 감정이나 생각을 같이 느끼는 것','글에서 말하고자 하는 중심 생각','이야기를 전달하는 시각이나 위치','작품을 보거나 읽고 느끼는 것'], correct:3, example:'예문: 그림을 감상하며 생각에 잠겼다.' },
+    { round:2, type:'multiple', word:'되새기다', context:'보기 · 되새기다 / 녹아들다 / 빠져들다 / 살아나다 / 엿보다', question:'시의 의미를 _______며 읽었다.', options:['되새기','녹아들','빠져들','살아나'], correct:0, example:"'되새기다'는 읽은 내용을 다시 생각하며 음미하는 것이에요." },
+    { round:2, type:'multiple', word:'녹아들다', context:'보기 · 되새기다 / 녹아들다 / 빠져들다 / 살아나다 / 엿보다', question:'이야기가 마음속에 _______었다.', options:['되새기','녹아들','빠져들','살아나'], correct:1, example:"'녹아들다'는 내용이나 감동이 마음속 깊이 스며드는 것이에요." },
+    { round:2, type:'multiple', word:'빠져들다', context:'보기 · 되새기다 / 녹아들다 / 빠져들다 / 살아나다 / 엿보다', question:'소설에 _______어 시간 가는 줄 몰랐다.', options:['되새기','녹아들','빠져들','살아나'], correct:2, example:"'빠져들다'는 흥미로운 것에 깊이 열중하는 것이에요." },
+    { round:2, type:'multiple', word:'살아나다', context:'보기 · 되새기다 / 녹아들다 / 빠져들다 / 살아나다 / 엿보다', question:'글 속 인물이 생생하게 _______았다.', options:['되새기','녹아들','빠져들','살아나'], correct:3, example:"'살아나다'는 글 속 장면이나 인물이 생생하게 느껴지는 것이에요." },
+    { round:2, type:'multiple', word:'엿보다', context:'보기 · 되새기다 / 녹아들다 / 빠져들다 / 살아나다 / 엿보다', question:'작가의 마음을 _______볼 수 있었다.', options:['되새겨','녹아들어','빠져들어','엿'], correct:3, example:"'엿보다'는 은밀하게 들여다보는 것이에요." },
+    { round:3, type:'multiple', word:'상징', question:"'상징'의 예로 알맞은 것은?", options:['소설의 배경이 조선 시대이다','주인공이 1인칭으로 이야기한다','하얀 비둘기가 평화를 나타낸다','이야기의 결말이 해피엔딩이다','글의 주제가 우정이다'], correct:2, example:"'상징'은 어떤 것이 다른 것을 대표하여 나타내는 것이에요." },
+    { round:3, type:'multiple', word:'시점', question:"'1인칭 시점'으로 쓰인 글의 특징은?", options:['등장인물 모두의 생각을 알 수 있다','이야기를 전달하는 사람이 보이지 않는다','\'나\'가 직접 이야기를 들려준다','주인공이 없다','배경이 드러나지 않는다'], correct:2, example:"'1인칭 시점'은 '나'가 직접 이야기를 전달하는 방식이에요." },
+    { round:4, type:'ox', word:'공감', question:"'공감'은 남의 감정이나 생각을 같이 느끼는 것이다.", correct:true, example:'예: 주인공의 슬픔에 공감했다.' },
+    { round:4, type:'ox', word:'상징', question:"'상징'은 어떤 것이 다른 것을 대표하여 나타내는 것이다.", correct:true, example:'예: 비둘기는 평화의 상징이다.' },
+    { round:4, type:'ox', word:'주제', question:"'주제'는 글에서 가장 중요한 중심 생각이다.", correct:true, example:'예: 이 소설의 주제는 우정이다.' },
+    { round:4, type:'ox', word:'시점', question:"모든 소설은 1인칭 시점으로 쓰인다.", correct:false, example:"소설은 '1인칭'과 '3인칭' 등 다양한 시점으로 쓰일 수 있어요." },
+    { round:4, type:'ox', word:'감상', question:"'감상'은 작품을 보거나 읽고 느끼는 것이다.", correct:true, example:'예: 그림을 감상하며 생각에 잠겼다.' }
+  ],
+  19: [
+    { round:1, type:'multiple', word:'설득', question:"'설득'의 뜻으로 알맞은 것은?", options:['중요한 내용만 골라 짧게 정리하는 것','구체적인 예를 들어 설명하는 것','다른 사람을 말로 납득시키는 것','주장을 뒷받침하는 이유나 근거'], correct:2, example:'예문: 논리적인 말로 친구를 설득했다.' },
+    { round:1, type:'multiple', word:'요약', question:"'요약'의 뜻으로 알맞은 것은?", options:['중요한 내용만 골라 짧게 정리하는 것','다른 사람을 말로 납득시키는 것','주장을 뒷받침하는 이유나 근거','글의 구성이나 짜여진 형태'], correct:0, example:'예문: 긴 글을 세 줄로 요약했다.' },
+    { round:1, type:'multiple', word:'논거', question:"'논거'의 뜻으로 알맞은 것은?", options:['글의 구성이나 짜여진 형태','구체적인 예를 들어 설명하는 것','다른 사람을 말로 납득시키는 것','주장을 뒷받침하는 이유나 근거'], correct:3, example:'예문: 충분한 논거로 주장을 강화했다.' },
+    { round:1, type:'multiple', word:'예시', question:"'예시'의 뜻으로 알맞은 것은?", options:['주장을 뒷받침하는 이유나 근거','구체적인 예를 들어 설명하는 것','다른 사람을 말로 납득시키는 것','중요한 내용만 골라 짧게 정리하는 것'], correct:1, example:'예문: 예시를 들어 쉽게 설명했다.' },
+    { round:1, type:'multiple', word:'논설', question:"'논설'의 뜻으로 알맞은 것은?", options:['구체적인 예를 들어 설명하는 것','중요한 내용만 골라 짧게 정리하는 것','어떤 주제에 대해 주장하고 이유를 밝히는 글','글의 구성이나 짜여진 형태'], correct:2, example:'예문: 환경 보호에 관한 논설을 썼다.' },
+    { round:2, type:'multiple', word:'내세우다', context:'보기 · 내세우다 / 뒷받침하다 / 풀어쓰다 / 끌어들이다 / 짜임새', question:'자신의 의견을 강하게 _______었다.', options:['내세우','뒷받침하','풀어쓰','끌어들이'], correct:0, example:"'내세우다'는 주장이나 의견을 강하게 드러내는 것이에요." },
+    { round:2, type:'multiple', word:'뒷받침하다', context:'보기 · 내세우다 / 뒷받침하다 / 풀어쓰다 / 끌어들이다 / 짜임새', question:'자료로 주장을 _______했다.', options:['내세우','뒷받침','풀어쓰','끌어들이'], correct:1, example:"'뒷받침하다'는 근거나 증거로 주장을 강화하는 것이에요." },
+    { round:2, type:'multiple', word:'풀어쓰다', context:'보기 · 내세우다 / 뒷받침하다 / 풀어쓰다 / 끌어들이다 / 짜임새', question:'어려운 내용을 쉽게 _______었다.', options:['내세우','뒷받침하','풀어쓰','끌어들이'], correct:2, example:"'풀어쓰다'는 어렵거나 복잡한 것을 쉽게 설명하는 것이에요." },
+    { round:2, type:'multiple', word:'끌어들이다', context:'보기 · 내세우다 / 뒷받침하다 / 풀어쓰다 / 끌어들이다 / 짜임새', question:'실제 사례를 _______어 설명했다.', options:['내세우','뒷받침하','풀어쓰','끌어들이'], correct:3, example:"'끌어들이다'는 예시나 사례를 가져와 사용하는 것이에요." },
+    { round:2, type:'multiple', word:'짜임새', context:'보기 · 내세우다 / 뒷받침하다 / 풀어쓰다 / 끌어들이다 / 짜임새', question:'_______있는 글이 읽기 좋다.', options:['내세우','뒷받침하','풀어쓴','짜임새'], correct:3, example:"'짜임새'는 글의 구성이나 짜여진 형태예요." },
+    { round:3, type:'multiple', word:'설득', question:"'설득'이 잘 되려면 필요한 것은?", options:['감정적인 호소만 하기','충분한 근거와 논리적인 말하기','상대방의 말을 무시하기','자신의 주장만 반복하기','큰 소리로 말하기'], correct:1, example:"'설득'은 다른 사람을 말로 납득시키는 것으로 논거가 중요해요." },
+    { round:3, type:'multiple', word:'논설', question:"'논설문'에 꼭 들어가야 할 요소는?", options:['줄거리와 배경','주장과 근거','감상과 공감','시점과 상징','어원과 방언'], correct:1, example:"'논설'은 주장하고 이유를 밝히는 글이라 '주장'과 '근거'가 필수예요." },
+    { round:4, type:'ox', word:'설득', question:"'설득'은 다른 사람을 말로 납득시키는 것이다.", correct:true, example:'예: 논리적인 말로 친구를 설득했다.' },
+    { round:4, type:'ox', word:'요약', question:"'요약'은 중요하지 않은 내용을 더 길게 쓰는 것이다.", correct:false, example:"'요약'은 중요한 내용만 골라 짧게 정리하는 것이에요." },
+    { round:4, type:'ox', word:'논거', question:"'논거'는 주장을 뒷받침하는 이유나 근거이다.", correct:true, example:'예: 충분한 논거로 주장을 강화했다.' },
+    { round:4, type:'ox', word:'예시', question:"'예시'는 구체적인 예를 들어 설명하는 것이다.", correct:true, example:'예: 예시를 들어 쉽게 설명했다.' },
+    { round:4, type:'ox', word:'논설', question:"'논설문'에는 주장과 그에 대한 근거가 포함된다.", correct:true, example:"'논설'은 어떤 주제에 대해 주장하고 이유를 밝히는 글이에요." }
+  ],
+  20: [
+    { round:1, type:'multiple', word:'표준어', question:"'표준어'의 뜻으로 알맞은 것은?", options:['특정 지역에서만 쓰이는 말','다른 나라에서 들어와 우리말처럼 쓰이는 말','전 국민이 공통으로 쓰도록 정한 말','우리나라 고유의 순우리말'], correct:2, example:'예문: "맞아"는 표준어이다.' },
+    { round:1, type:'multiple', word:'방언', question:"'방언'의 뜻으로 알맞은 것은?", options:['전 국민이 공통으로 쓰도록 정한 말','특정 지역에서만 쓰이는 말','다른 나라에서 들어와 우리말처럼 쓰이는 말','우리나라 고유의 순우리말'], correct:1, example:'예문: 제주도 방언은 독특하다.' },
+    { round:1, type:'multiple', word:'외래어', question:"'외래어'의 뜻으로 알맞은 것은?", options:['우리나라 고유의 순우리말','전 국민이 공통으로 쓰도록 정한 말','특정 지역에서만 쓰이는 말','다른 나라에서 들어와 우리말처럼 쓰이는 말'], correct:3, example:'예문: "버스"는 외래어이다.' },
+    { round:1, type:'multiple', word:'고유어', question:"'고유어'의 뜻으로 알맞은 것은?", options:['다른 나라에서 들어와 우리말처럼 쓰이는 말','특정 지역에서만 쓰이는 말','전 국민이 공통으로 쓰도록 정한 말','우리나라 고유의 순우리말'], correct:3, example:'예문: "하늘"은 고유어이다.' },
+    { round:1, type:'multiple', word:'어원', question:"'어원'의 뜻으로 알맞은 것은?", options:['낱말이 처음 생겨난 유래','말이나 글을 더 좋게 고치는 것','여러 가지가 마구 섞이는 것','실력이나 능력을 꾸준히 키우는 것'], correct:0, example:'예문: "별"의 어원을 찾아보았다.' },
+    { round:2, type:'multiple', word:'다듬다', context:'보기 · 다듬다 / 헷갈리다 / 펼치다 / 뒤섞이다 / 갈고닦다', question:'글을 여러 번 _______었다.', options:['다듬','헷갈리','펼치','뒤섞이'], correct:0, example:"'다듬다'는 말이나 글을 더 좋게 고치는 것이에요." },
+    { round:2, type:'multiple', word:'헷갈리다', context:'보기 · 다듬다 / 헷갈리다 / 펼치다 / 뒤섞이다 / 갈고닦다', question:'비슷한 단어가 _______렸다.', options:['다듬','헷갈리','펼치','뒤섞이'], correct:1, example:"'헷갈리다'는 무엇이 무엇인지 분간하기 어려운 것이에요." },
+    { round:2, type:'multiple', word:'펼치다', context:'보기 · 다듬다 / 헷갈리다 / 펼치다 / 뒤섞이다 / 갈고닦다', question:'이야기를 생생하게 _______었다.', options:['다듬','헷갈리','펼치','뒤섞이'], correct:2, example:"'펼치다'는 내용이나 이야기를 넓게 전개하는 것이에요." },
+    { round:2, type:'multiple', word:'갈고닦다', context:'보기 · 다듬다 / 헷갈리다 / 펼치다 / 뒤섞이다 / 갈고닦다', question:'오랫동안 글쓰기 실력을 _______았다.', options:['다듬','헷갈리','펼치','갈고닦'], correct:3, example:"'갈고닦다'는 실력이나 능력을 꾸준히 키우는 것이에요." },
+    { round:2, type:'multiple', word:'뒤섞이다', context:'보기 · 다듬다 / 헷갈리다 / 펼치다 / 뒤섞이다 / 갈고닦다', question:'사투리와 표준어가 _______었다.', options:['다듬','헷갈리','펼치','뒤섞이'], correct:3, example:"'뒤섞이다'는 여러 가지가 마구 섞이는 것이에요." },
+    { round:3, type:'multiple', word:'고유어', question:"고유어의 예로 알맞은 것은?", options:['버스','피자','컴퓨터','하늘','카메라'], correct:3, example:"'하늘'은 우리나라 고유의 순우리말이에요." },
+    { round:3, type:'multiple', word:'방언', question:"'방언'을 사용하면 좋은 점은?", options:['전국 어디서나 이해하기 쉽다','그 지역의 문화와 정서를 담고 있다','외국인과 소통이 쉬워진다','표준어보다 더 정확하다','모든 사람이 똑같이 쓸 수 있다'], correct:1, example:"'방언'은 특정 지역의 문화와 정서를 담고 있어 소중한 언어 자원이에요." },
+    { round:4, type:'ox', word:'표준어', question:"'표준어'는 전 국민이 공통으로 쓰도록 정한 말이다.", correct:true, example:'예: "맞아"는 표준어이다.' },
+    { round:4, type:'ox', word:'방언', question:"'방언'은 전국 어디서나 같은 말이다.", correct:false, example:"'방언'은 특정 지역에서만 쓰이는 말이에요." },
+    { round:4, type:'ox', word:'고유어', question:"'하늘'은 고유어이다.", correct:true, example:"'하늘'은 우리나라 고유의 순우리말이에요." },
+    { round:4, type:'ox', word:'외래어', question:"'버스'는 외래어이다.", correct:true, example:"'버스'는 영어 'bus'에서 들어온 외래어예요." },
+    { round:4, type:'ox', word:'어원', question:"'어원'은 낱말이 처음 생겨난 유래이다.", correct:true, example:'예: "별"의 어원을 찾아보았다.' }
+  ],
+  21: [
+    { round:1, type:'multiple', word:'호우', question:"'호우'의 뜻으로 알맞은 것은?", options:['강한 바람과 비를 동반하는 열대성 폭풍','오랫동안 비가 내리지 않는 것','짧은 시간에 많은 비가 내리는 것','위험을 피해 안전한 곳으로 이동하는 것'], correct:2, example:'예문: 호우 경보가 발령되었다.' },
+    { round:1, type:'multiple', word:'태풍', question:"'태풍'의 뜻으로 알맞은 것은?", options:['짧은 시간에 많은 비가 내리는 것','오랫동안 비가 내리지 않는 것','강한 바람과 비를 동반하는 열대성 폭풍','앞으로 일어날 일을 미리 알리는 것'], correct:2, example:'예문: 태풍이 상륙하여 큰 피해를 주었다.' },
+    { round:1, type:'multiple', word:'가뭄', question:"'가뭄'의 뜻으로 알맞은 것은?", options:['강한 바람과 비를 동반하는 열대성 폭풍','짧은 시간에 많은 비가 내리는 것','위험을 피해 안전한 곳으로 이동하는 것','오랫동안 비가 내리지 않는 것'], correct:3, example:'예문: 가뭄으로 농작물이 말라버렸다.' },
+    { round:1, type:'multiple', word:'예보', question:"'예보'의 뜻으로 알맞은 것은?", options:['위험을 피해 안전한 곳으로 이동하는 것','앞으로 일어날 일을 미리 알리는 것','오랫동안 비가 내리지 않는 것','짧은 시간에 많은 비가 내리는 것'], correct:1, example:'예문: 기상 예보를 확인하고 우산을 챙겼다.' },
+    { round:1, type:'multiple', word:'대피', question:"'대피'의 뜻으로 알맞은 것은?", options:['앞으로 일어날 일을 미리 알리는 것','짧은 시간에 많은 비가 내리는 것','강한 바람과 비를 동반하는 열대성 폭풍','위험을 피해 안전한 곳으로 이동하는 것'], correct:3, example:'예문: 태풍에 대비해 대피 훈련을 했다.' },
+    { round:2, type:'multiple', word:'몰아치다', context:'보기 · 몰아치다 / 걷히다 / 뒤흔들다 / 할퀴다 / 잠기다', question:'폭풍이 세차게 _______었다.', options:['몰아치','걷히','뒤흔들','할퀴'], correct:0, example:"'몰아치다'는 바람이나 비가 세차게 덮치는 것이에요." },
+    { round:2, type:'multiple', word:'걷히다', context:'보기 · 몰아치다 / 걷히다 / 뒤흔들다 / 할퀴다 / 잠기다', question:'안개가 _______고 하늘이 맑아졌다.', options:['몰아치','걷히','뒤흔들','할퀴'], correct:1, example:"'걷히다'는 구름이나 안개가 사라지는 것이에요." },
+    { round:2, type:'multiple', word:'뒤흔들다', context:'보기 · 몰아치다 / 걷히다 / 뒤흔들다 / 할퀴다 / 잠기다', question:'지진이 건물을 _______었다.', options:['몰아치','걷히','뒤흔들','할퀴'], correct:2, example:"'뒤흔들다'는 세게 흔들어 놓는 것이에요." },
+    { round:2, type:'multiple', word:'잠기다', context:'보기 · 몰아치다 / 걷히다 / 뒤흔들다 / 할퀴다 / 잠기다', question:'홍수로 도로가 물에 _______었다.', options:['몰아치','걷히','뒤흔들','잠기'], correct:3, example:"'잠기다'는 물에 완전히 덮이는 것이에요." },
+    { round:2, type:'multiple', word:'할퀴다', context:'보기 · 몰아치다 / 걷히다 / 뒤흔들다 / 할퀴다 / 잠기다', question:'태풍이 해안가를 _______고 지나갔다.', options:['몰아치','걷히','뒤흔들','할퀴'], correct:3, example:"'할퀴다'는 날카롭게 긁어 상처를 내는 것이에요." },
+    { round:3, type:'multiple', word:'태풍', question:"태풍에 대비하는 방법으로 알맞지 않은 것은?", options:['창문을 단단히 닫는다','대피 경로를 미리 확인한다','바닷가로 구경하러 간다','비상 물품을 준비한다','기상 예보를 확인한다'], correct:2, example:"태풍이 올 때는 안전한 곳으로 '대피'해야 해요. 바닷가는 위험해요." },
+    { round:3, type:'multiple', word:'가뭄', question:"'가뭄'이 계속되면 생기는 문제로 알맞은 것은?", options:['홍수가 난다','도로가 물에 잠긴다','농작물이 말라 식량이 부족해진다','안개가 많이 낀다','태풍이 자주 온다'], correct:2, example:"'가뭄'은 오랫동안 비가 내리지 않아 물 부족과 농작물 피해가 생겨요." },
+    { round:4, type:'ox', word:'호우', question:"'호우'는 짧은 시간에 많은 비가 내리는 것이다.", correct:true, example:'예: 호우 경보가 발령되었다.' },
+    { round:4, type:'ox', word:'가뭄', question:"'가뭄'은 비가 너무 많이 내리는 것이다.", correct:false, example:"'가뭄'은 오랫동안 비가 내리지 않는 것이에요." },
+    { round:4, type:'ox', word:'대피', question:"'대피'는 위험을 피해 안전한 곳으로 이동하는 것이다.", correct:true, example:'예: 태풍에 대비해 대피 훈련을 했다.' },
+    { round:4, type:'ox', word:'예보', question:"기상 '예보'를 미리 확인하면 재해를 대비하는 데 도움이 된다.", correct:true, example:"'예보'는 앞으로 일어날 일을 미리 알려주므로 대비에 도움이 돼요." },
+    { round:4, type:'ox', word:'태풍', question:"'태풍'과 '호우'는 모두 비와 관련된 자연 현상이다.", correct:true, example:"'태풍'은 강한 바람+비, '호우'는 많은 비로 둘 다 비와 관련 있어요." }
+  ]
+};
+
+const QUESTIONS = ALL_QUESTIONS[weekNum] || ALL_QUESTIONS[1];
+const state = {
+  name: '',
+  grade: '',
+  currentQuestion: 0,
+  totalScore: 0,
+  roundScores: [0, 0, 0, 0],
+  correctCount: 0,
+  wrongQuestions: [],
+  combo: 0,
+  maxCombo: 0,
+  startTime: 0,
+  timeTaken: 0,
+  isPracticeMode: false,
+  practiceQuestions: [],
+};
+
+let timerInterval = null;
+let remainingMs = 0;
+let answered = false;
+
+const ROUND_NAMES = ['새싹', '잎사귀', '꽃', '큰 나무'];
+const ROUND_EMOJIS = ['🌱', '🌿', '🌸', '🌳'];
+const ROUND_POINTS = [5, 5, 10, 6]; // 라운드별 1문제당 점수 (총 100점 만점)
+const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤'];
+
+// ============================================================
+// 🔧 유틸 함수
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.hidden = true);
+  document.getElementById(id).hidden = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function getGrade(score) {
+  if (score >= 95) return { emoji: '🌳', name: '큰 나무', msg: '완벽해요! 어휘 마스터!' };
+  if (score >= 85) return { emoji: '🍎', name: '열매', msg: '아주 잘했어요!' };
+  if (score >= 70) return { emoji: '🌸', name: '꽃', msg: '잘하고 있어요!' };
+  if (score >= 50) return { emoji: '🌿', name: '잎사귀', msg: '한 걸음 더 자라요!' };
+  return { emoji: '🌱', name: '새싹', msg: '천천히 더 익혀봐요!' };
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}분 ${sec}초` : `${sec}초`;
+}
+
+// ============================================================
+// 🎯 시작 화면
+// ============================================================
+function initStartScreen() {
+  // 주차·강의명 동적 업데이트
+  document.getElementById('display-week').textContent = LESSON.week;
+  document.getElementById('display-lesson').textContent = LESSON.lesson.replace(/(\d+강)/, '$1 ·');
+
+  const nameInput = document.getElementById('name-input');
+  nameInput.addEventListener('input', e => {
+    state.name = e.target.value.trim();
+    updateStartButton();
+  });
+
+  document.querySelectorAll('.grade-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.grade = btn.dataset.grade;
+      document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateStartButton();
+    });
+  });
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('view-records-btn').addEventListener('click', showRecords);
+}
+
+function updateStartButton() {
+  document.getElementById('start-btn').disabled = !(state.name && state.grade);
+}
+
+
+// ============================================================
+// 🎮 게임 시작
+// ============================================================
+function startGame() {
+  state.currentQuestion = 0;
+  state.totalScore = 0;
+  state.roundScores = [0, 0, 0, 0];
+  state.correctCount = 0;
+  state.wrongQuestions = [];
+  state.combo = 0;
+  state.maxCombo = 0;
+  state.startTime = Date.now();
+  state.isPracticeMode = false;
+  showScreen('quiz-screen');
+  showQuestion(0);
+}
+
+function showQuestion(idx) {
+  const questions = state.isPracticeMode ? state.practiceQuestions : QUESTIONS;
+  if (idx >= questions.length) {
+    if (state.isPracticeMode) {
+      finishPractice();
+    } else {
+      finishGame();
+    }
+    return;
+  }
+
+  answered = false;
+  const q = questions[idx];
+
+  // 헤더 업데이트
+  document.getElementById('round-badge').textContent =
+    `${ROUND_EMOJIS[q.round - 1]} ${q.round}라운드 · ${ROUND_NAMES[q.round - 1]}`;
+  document.getElementById('question-counter').textContent = `${idx + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((idx + 1) / questions.length) * 100}%`;
+  document.getElementById('score-value').textContent = state.totalScore.toLocaleString();
+  document.getElementById('correct-value').textContent = state.correctCount;
+  document.getElementById('combo-value').textContent = state.combo;
+
+  // 컨텍스트 (보기)
+  const ctxEl = document.getElementById('question-context');
+  if (q.context) {
+    ctxEl.textContent = q.context;
+    ctxEl.hidden = false;
+  } else {
+    ctxEl.hidden = true;
+  }
+
+  document.getElementById('question-text').textContent = q.question;
+
+  // 선택지
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+
+  if (q.type === 'ox') {
+    optionsEl.className = 'ox-options';
+    const oBtn = document.createElement('button');
+    oBtn.className = 'ox-option';
+    oBtn.textContent = 'O';
+    oBtn.addEventListener('click', () => answerQuestion(true));
+    optionsEl.appendChild(oBtn);
+
+    const xBtn = document.createElement('button');
+    xBtn.className = 'ox-option';
+    xBtn.textContent = 'X';
+    xBtn.addEventListener('click', () => answerQuestion(false));
+    optionsEl.appendChild(xBtn);
+  } else {
+    optionsEl.className = 'options';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = `${CIRCLE_NUMS[i]} ${opt}`;
+      btn.addEventListener('click', () => answerQuestion(i));
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  // 피드백 숨김
+  document.getElementById('feedback').hidden = true;
+  document.getElementById('next-btn-wrap').hidden = true;
+
+  startTimer(20);
+}
+
+function startTimer(seconds) {
+  if (timerInterval) clearInterval(timerInterval);
+
+  const totalMs = seconds * 1000;
+  remainingMs = totalMs;
+
+  const timerFill = document.getElementById('timer-fill');
+  timerFill.classList.remove('warning', 'danger');
+  timerFill.style.width = '100%';
+
+  const tickMs = 100;
+  timerInterval = setInterval(() => {
+    if (answered) {
+      clearInterval(timerInterval);
+      return;
+    }
+    remainingMs -= tickMs;
+    const pct = Math.max(0, (remainingMs / totalMs) * 100);
+    timerFill.style.width = `${pct}%`;
+
+    if (pct < 25) {
+      timerFill.classList.add('danger');
+      timerFill.classList.remove('warning');
+    } else if (pct < 50) {
+      timerFill.classList.add('warning');
+    }
+
+    if (remainingMs <= 0) {
+      clearInterval(timerInterval);
+      answerQuestion(null); // 시간 초과
+    }
+  }, tickMs);
+}
+
+function answerQuestion(answer) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const questions = state.isPracticeMode ? state.practiceQuestions : QUESTIONS;
+  const idx = state.currentQuestion;
+  const q = questions[idx];
+
+  let isCorrect = false;
+  if (q.type === 'ox') {
+    isCorrect = answer === q.correct;
+  } else {
+    isCorrect = answer === q.correct;
+  }
+
+  // 시각화
+  const optionEls = document.querySelectorAll('#options > *');
+  optionEls.forEach(el => el.disabled = true);
+
+  if (q.type === 'ox') {
+    const correctIdx = q.correct ? 0 : 1;
+    optionEls[correctIdx].classList.add('correct');
+    if (!isCorrect && answer !== null) {
+      const wrongIdx = answer ? 0 : 1;
+      optionEls[wrongIdx].classList.add('wrong');
+    }
+  } else {
+    optionEls[q.correct].classList.add('correct');
+    if (!isCorrect && answer !== null && optionEls[answer]) {
+      optionEls[answer].classList.add('wrong');
+    }
+  }
+
+  // 점수 계산 (일반 모드에서만)
+  if (!state.isPracticeMode) {
+    if (isCorrect) {
+      state.combo++;
+      const pts = ROUND_POINTS[q.round - 1];
+
+      state.totalScore += pts;
+      state.roundScores[q.round - 1] += pts;
+      state.correctCount++;
+
+      if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+      if (state.combo >= 3) showComboPopup(state.combo);
+    } else {
+      state.combo = 0;
+      state.wrongQuestions.push(idx);
+    }
+  } else {
+    if (!isCorrect) {
+      // 연습 모드에서도 어떤 문제 틀렸는지는 트래킹하지 않음 (이미 틀렸던 문제니까)
+    }
+  }
+
+  // 통계 업데이트
+  document.getElementById('score-value').textContent = state.totalScore.toLocaleString();
+  document.getElementById('correct-value').textContent = state.correctCount;
+  document.getElementById('combo-value').textContent = state.combo;
+
+  // 피드백 표시
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  let title;
+  if (isCorrect) {
+    title = '✨ 정답이에요!';
+  } else if (answer === null) {
+    title = '⏰ 시간 초과!';
+  } else {
+    title = '💧 아쉬워요!';
+  }
+
+  let body = '';
+  if (!isCorrect) {
+    if (q.type === 'ox') {
+      body = `<strong>정답: ${q.correct ? 'O' : 'X'}</strong><br>${q.example || ''}`;
+    } else {
+      body = `<strong>정답: ${CIRCLE_NUMS[q.correct]} ${q.options[q.correct]}</strong><br>${q.example || ''}`;
+    }
+  } else {
+    body = q.example || '';
+  }
+
+  fb.innerHTML = `
+    <div class="feedback-title">${title}</div>
+    <div class="feedback-explanation">${body}</div>
+  `;
+  fb.hidden = false;
+
+  const isLast = (idx + 1) >= questions.length;
+  document.getElementById('next-btn').textContent = isLast ? '결과 보기 →' : '다음 문제 →';
+  document.getElementById('next-btn-wrap').hidden = false;
+}
+
+function showComboPopup(combo) {
+  const el = document.createElement('div');
+  el.className = 'combo-display';
+  el.textContent = `🔥 ${combo} 콤보!`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function nextQuestion() {
+  state.currentQuestion++;
+  showQuestion(state.currentQuestion);
+}
+
+// ============================================================
+// 🏁 게임 종료 & 결과
+// ============================================================
+function finishGame() {
+  state.timeTaken = Math.round((Date.now() - state.startTime) / 1000);
+  showResults();
+  submitToSheets();
+  saveLocalRecord();
+}
+
+function showResults() {
+  const grade = getGrade(state.totalScore);
+
+  document.getElementById('result-emoji').textContent = grade.emoji;
+  document.getElementById('result-grade').textContent = grade.name;
+  document.getElementById('result-score').textContent = state.totalScore.toLocaleString();
+  document.getElementById('result-correct').textContent = `${state.correctCount} / ${QUESTIONS.length}`;
+  document.getElementById('result-time').textContent = formatTime(state.timeTaken);
+  document.getElementById('result-combo').textContent = state.maxCombo;
+
+  // 라운드별 점수
+  const breakdown = document.getElementById('round-breakdown');
+  breakdown.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const row = document.createElement('div');
+    row.className = 'round-row';
+    row.innerHTML = `
+      <span>${ROUND_EMOJIS[i]} ${i + 1}라운드 · ${ROUND_NAMES[i]}</span>
+      <strong>${state.roundScores[i].toLocaleString()}점</strong>
+    `;
+    breakdown.appendChild(row);
+  }
+
+  // 틀린 어휘
+  const wrongSection = document.getElementById('wrong-words-section');
+  const reviewBtn = document.getElementById('btn-review-cards');
+  const retryBtn = document.getElementById('btn-retry-wrong');
+
+  if (state.wrongQuestions.length === 0) {
+    wrongSection.innerHTML = `<div class="perfect-banner">🎉 모든 문제를 맞혔어요! 완벽해요!</div>`;
+    reviewBtn.style.display = 'none';
+    retryBtn.style.display = 'none';
+  } else {
+    const uniqueWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+    wrongSection.innerHTML = `
+      <h3>🌧️ 다시 살펴볼 어휘 (${uniqueWords.length}개)</h3>
+      <div>${uniqueWords.map(w => `<span class="wrong-word-chip">${w}</span>`).join('')}</div>
+    `;
+    reviewBtn.style.display = '';
+    retryBtn.style.display = '';
+  }
+
+  showScreen('result-screen');
+}
+
+// ============================================================
+// 📤 구글 시트로 점수 전송
+// ============================================================
+async function submitToSheets() {
+  const statusEl = document.getElementById('submit-status');
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    statusEl.hidden = true;
+    return;
+  }
+
+  statusEl.className = 'submit-status sending';
+  statusEl.textContent = '📤 성적을 기록하는 중...';
+  statusEl.hidden = false;
+
+  const gradeInfo = getGrade(state.totalScore);
+  const uniqueWrongWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+
+  const data = {
+    name: state.name,
+    grade: state.grade,
+    lesson: `${LESSON.week} - ${LESSON.lesson}`,
+    totalScore: state.totalScore,
+    correctCount: `${state.correctCount}/${QUESTIONS.length}`,
+    gradeLevel: `${gradeInfo.emoji} ${gradeInfo.name}`,
+    roundScores: state.roundScores.map((s, i) => `R${i + 1}:${s}`).join(' / '),
+    wrongWords: uniqueWrongWords.join(', ') || '없음',
+    timeTaken: state.timeTaken,
+    maxCombo: state.maxCombo
+  };
+
+  try {
+    const params = new URLSearchParams(data);
+    const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (response.ok) {
+      statusEl.className = 'submit-status success';
+      statusEl.textContent = '✅ 성적이 기록되었어요!';
+    } else {
+      throw new Error('Submit failed');
+    }
+  } catch (err) {
+    statusEl.className = 'submit-status error';
+    statusEl.textContent = '⚠️ 성적 기록 실패. 인터넷 연결을 확인해 주세요.';
+    console.error('Submission error:', err);
+  }
+}
+
+// ============================================================
+// 💾 로컬 기록 저장 (학생 본인용)
+// ============================================================
+async function saveLocalRecord() {
+  try {
+    const record = {
+      name: state.name,
+      grade: state.grade,
+      score: state.totalScore,
+      correct: state.correctCount,
+      total: QUESTIONS.length,
+      timestamp: Date.now(),
+      timeTaken: state.timeTaken,
+      maxCombo: state.maxCombo
+    };
+    const key = `record:${Date.now()}`;
+    localStorage.setItem(key, JSON.stringify(record));
+  } catch (e) {
+    console.warn('로컬 저장 실패', e);
+  }
+}
+
+async function showRecords() {
+  const listEl = document.getElementById('record-list');
+  listEl.innerHTML = '<div class="empty-state">불러오는 중...</div>';
+  showScreen('records-screen');
+
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('record:'));
+    if (keys.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>게임을 한 번 도전해 보세요! 🌱</div>';
+      return;
+    }
+
+    const records = [];
+    for (const key of keys) {
+      try {
+        const item = localStorage.getItem(key);
+        if (item) records.push(JSON.parse(item));
+      } catch (e) { /* skip */ }
+    }
+
+    records.sort((a, b) => b.timestamp - a.timestamp);
+    const recent = records.slice(0, 20);
+
+    listEl.innerHTML = recent.map(r => {
+      const d = new Date(r.timestamp);
+      const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      return `
+        <div class="record-item">
+          <div>
+            <div class="record-name">${r.name} (${r.grade}학년)</div>
+            <div class="record-info">${dateStr} · 정답 ${r.correct}/${r.total} · ${formatTime(r.timeTaken)}</div>
+          </div>
+          <div class="record-score">${r.score.toLocaleString()}</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    listEl.innerHTML = '<div class="empty-state" style="color: var(--error);">기록을 불러올 수 없어요.</div>';
+    console.error(e);
+  }
+}
+
+// ============================================================
+// 📚 어휘 카드 복습
+// ============================================================
+let reviewCards = [];
+let currentCardIdx = 0;
+
+function startReview() {
+  const uniqueWords = [...new Set(state.wrongQuestions.map(i => QUESTIONS[i].word))];
+  reviewCards = uniqueWords.map(word => {
+    const v = LESSON.vocab.find(x => x.word === word) ||
+             LESSON.vocab.find(x => word.includes(x.word.slice(0, 2))) ||
+             { word, meaning: '뜻 정보를 찾을 수 없어요.', example: '' };
+    return v;
+  });
+  if (reviewCards.length === 0) return;
+  currentCardIdx = 0;
+  renderCard();
+  showScreen('review-screen');
+}
+
+function renderCard() {
+  const c = reviewCards[currentCardIdx];
+  document.getElementById('review-word').textContent = c.word;
+  document.getElementById('review-meaning').textContent = c.meaning;
+  document.getElementById('review-example').textContent = c.example ? `예: ${c.example}` : '';
+  document.getElementById('card-counter').textContent = `${currentCardIdx + 1} / ${reviewCards.length}`;
+  document.getElementById('prev-card-btn').disabled = currentCardIdx === 0;
+  document.getElementById('next-card-btn').disabled = currentCardIdx === reviewCards.length - 1;
+}
+
+// ============================================================
+// 🔄 틀린 문제 다시 풀기 (연습 모드)
+// ============================================================
+function retryWrong() {
+  state.practiceQuestions = state.wrongQuestions.map(i => QUESTIONS[i]);
+  state.currentQuestion = 0;
+  state.isPracticeMode = true;
+  showScreen('quiz-screen');
+  showQuestion(0);
+}
+
+function finishPractice() {
+  alert('🌿 복습 완료! 잘 익혔어요.\n결과 화면으로 돌아갈게요.');
+  state.isPracticeMode = false;
+  showScreen('result-screen');
+}
+
+// ============================================================
+// 🚀 초기화
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initStartScreen();
+
+  document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+  document.getElementById('btn-review-cards').addEventListener('click', startReview);
+  document.getElementById('btn-retry-wrong').addEventListener('click', retryWrong);
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    state.isPracticeMode = false;
+    showScreen('start-screen');
+  });
+
+  document.getElementById('prev-card-btn').addEventListener('click', () => {
+    if (currentCardIdx > 0) { currentCardIdx--; renderCard(); }
+  });
+  document.getElementById('next-card-btn').addEventListener('click', () => {
+    if (currentCardIdx < reviewCards.length - 1) { currentCardIdx++; renderCard(); }
+  });
+
+  document.getElementById('btn-back-from-review').addEventListener('click', () => {
+    showScreen('result-screen');
+  });
+
+  document.getElementById('btn-back-from-records').addEventListener('click', () => {
+    showScreen('start-screen');
+  });
+});
+</script>
+</body>
+</html>

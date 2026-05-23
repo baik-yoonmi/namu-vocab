@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나무 어휘 레벨업 · 나무국어논술</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAF6EC; --card: #FFFFFF;
+    --primary: #5C8A4A; --primary-dark: #4A7239;
+    --secondary: #E8B547; --secondary-dark: #C99732;
+    --brown: #7A5530; --success: #7FB069; --error: #D8704D;
+    --text: #2E1F12; --text-light: #6B5742; --border: #E5DCC8;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Noto Sans KR', sans-serif;
+    background:
+      radial-gradient(circle at top right, #E8DCC0 0%, transparent 40%),
+      radial-gradient(circle at bottom left, #D8E5C5 0%, transparent 40%),
+      linear-gradient(135deg, #FAF6EC 0%, #F0E6D0 100%);
+    color: var(--text); min-height: 100vh; line-height: 1.6; padding: 24px 20px;
+  }
+  #app { max-width: 960px; margin: 0 auto; }
+  .header { text-align: center; padding: 40px 20px 24px; }
+  .logo {
+    font-size: 72px; line-height: 1; display: inline-block;
+    animation: gentleSway 4s ease-in-out infinite;
+  }
+  @keyframes gentleSway {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+  .brand { font-size: 13px; color: var(--brown); font-weight: 700; letter-spacing: 0.1em; margin-top: 8px; }
+  .title { font-size: 34px; font-weight: 900; color: var(--primary-dark); margin-top: 4px; letter-spacing: -0.02em; }
+  .tagline { color: var(--text-light); font-size: 15px; margin-top: 8px; }
+  .section {
+    background: var(--card); border-radius: 24px; padding: 32px 28px;
+    margin-bottom: 24px; box-shadow: 0 8px 32px rgba(122, 85, 48, 0.10);
+    border: 2px solid var(--border); animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-header { margin-bottom: 24px; }
+  .section-title { font-size: 22px; font-weight: 800; color: var(--text); }
+  .section-subtitle { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+  [hidden] { display: none !important; }
+  .category-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+  }
+  .category-card {
+    position: relative; border-radius: 20px; padding: 24px 22px;
+    cursor: pointer; transition: all 0.3s ease; text-align: left;
+    border: 2px solid; overflow: hidden; color: inherit;
+  }
+  .category-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.4) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .category-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+  .cat-self { background: linear-gradient(135deg, #E8F5DC 0%, #C8E5BC 100%); border-color: #7FB069; }
+  .cat-society { background: linear-gradient(135deg, #D8E5C0 0%, #B5C9A0 100%); border-color: #5C8A4A; }
+  .cat-nature { background: linear-gradient(135deg, #FFF0C8 0%, #FFE0A0 100%); border-color: #E8B547; }
+  .cat-inquiry { background: linear-gradient(135deg, #F0DCC0 0%, #DCC0A0 100%); border-color: #7A5530; }
+  .category-emoji { font-size: 52px; line-height: 1; margin-bottom: 12px; }
+  .category-range { font-size: 12px; font-weight: 700; color: var(--brown); letter-spacing: 0.05em; }
+  .category-title { font-size: 22px; font-weight: 800; color: var(--text); margin-top: 4px; }
+  .category-desc { font-size: 14px; color: var(--text-light); margin-top: 8px; line-height: 1.5; }
+  .category-progress {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px dashed rgba(122, 85, 48, 0.25);
+  }
+  .progress-text { font-size: 13px; font-weight: 700; color: var(--brown); }
+  .progress-bar-wrap { width: 80px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .progress-bar-fill { height: 100%; background: var(--primary-dark); border-radius: 3px; transition: width 0.4s ease; }
+  .category-arrow { font-size: 22px; color: var(--primary-dark); transition: transform 0.2s; }
+  .category-card:hover .category-arrow { transform: translateX(4px); }
+  .back-btn {
+    background: white; border: 2px solid var(--border); color: var(--text);
+    padding: 10px 18px; border-radius: 20px; font-size: 14px;
+    font-weight: 700; cursor: pointer; transition: all 0.2s;
+    margin-bottom: 20px; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .back-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateX(-4px); }
+  .cat-detail-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 20px 24px; border-radius: 16px; margin-bottom: 24px;
+    background: linear-gradient(135deg, #FFF8E6 0%, #FFE9B0 100%);
+    border: 2px solid var(--secondary);
+  }
+  .cat-detail-emoji { font-size: 48px; line-height: 1; }
+  .cat-detail-title { font-size: 24px; font-weight: 800; color: var(--text); }
+  .cat-detail-desc { font-size: 14px; color: var(--text-light); margin-top: 2px; }
+  .week-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+  }
+  .week-card {
+    position: relative; background: linear-gradient(135deg, #FFFCF5 0%, #FFF4DC 100%);
+    border: 2px solid var(--border); border-radius: 16px; padding: 20px 18px;
+    transition: all 0.25s ease; cursor: pointer; text-decoration: none;
+    color: inherit; display: flex; flex-direction: column; min-height: 180px;
+  }
+  .week-card.available {
+    border-color: var(--secondary);
+    background: linear-gradient(135deg, #FFF8E6 0%, #FFE9B0 100%);
+  }
+  .week-card.available:hover {
+    transform: translateY(-3px); box-shadow: 0 8px 24px rgba(232, 181, 71, 0.25);
+    border-color: var(--secondary-dark);
+  }
+  .week-card.locked { opacity: 0.55; cursor: not-allowed; }
+  .week-emoji { font-size: 32px; line-height: 1; margin-bottom: 8px; }
+  .week-number { font-size: 12px; font-weight: 800; color: var(--brown); letter-spacing: 0.05em; }
+  .week-title { font-size: 15px; font-weight: 800; color: var(--text); margin-top: 4px; line-height: 1.35; flex: 1; }
+  .week-meta { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .week-tag { background: rgba(255,255,255,0.7); color: var(--brown); padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .week-tag.coming { background: rgba(122, 85, 48, 0.15); }
+  .week-cta {
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px dashed rgba(122, 85, 48, 0.2);
+    font-size: 13px; font-weight: 800; color: var(--primary-dark);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .week-card.locked .week-cta { color: var(--text-light); }
+  .welcome {
+    background: linear-gradient(135deg, #FFFCF5 0%, #FFF8E6 100%);
+    border-radius: 16px; padding: 20px 22px;
+    margin-bottom: 24px; border: 2px dashed var(--secondary);
+  }
+  .welcome h3 { color: var(--brown); font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .welcome p { font-size: 14px; color: var(--text); }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .info-card {
+    background: linear-gradient(135deg, #F0F5EC 0%, #E0EBD8 100%);
+    border-radius: 12px; padding: 16px 14px; text-align: center;
+    border: 1px solid #C8D7BD;
+  }
+  .info-card .icon { font-size: 24px; margin-bottom: 4px; }
+  .info-card .label { font-size: 12px; color: var(--text-light); font-weight: 600; }
+  .info-card .value { font-size: 20px; font-weight: 800; color: var(--primary-dark); margin-top: 2px; }
+  .footer { text-align: center; padding: 32px 20px 16px; color: var(--text-light); font-size: 13px; }
+  .footer-brand { font-weight: 700; color: var(--brown); }
+  @media (max-width: 480px) {
+    body { padding: 16px 12px; }
+    .section { padding: 24px 20px; }
+    .header { padding: 24px 12px 16px; }
+    .title { font-size: 28px; }
+    .logo { font-size: 60px; }
+    .category-grid, .week-grid { grid-template-columns: 1fr; }
+    .week-card { min-height: auto; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <span class="logo">🌳</span>
+    <div class="brand">나무국어논술</div>
+    <h1 class="title">나무 어휘 레벨업</h1>
+    <p class="tagline">매주 새로운 어휘로 우리 함께 자라요</p>
+  </header>
+
+  <div id="home-view">
+    <div class="welcome">
+      <h3>🌱 안녕, 나무 친구들!</h3>
+      <p>4개 영역, 21주차 어휘 게임이에요. 관심 있는 주제를 골라 들어가 보세요.</p>
+    </div>
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">📚 영역별 어휘 게임</div>
+        <div class="section-subtitle">관심 있는 영역을 선택해 보세요</div>
+      </div>
+      <div class="category-grid" id="category-grid"></div>
+    </section>
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">📊 우리 학원 현황</div>
+        <div class="section-subtitle">함께 자라는 나무 가족들</div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="icon">📚</div>
+          <div class="label">영역</div>
+          <div class="value" id="info-categories">4</div>
+        </div>
+        <div class="info-card">
+          <div class="icon">🌿</div>
+          <div class="label">공개된 게임</div>
+          <div class="value" id="info-available">0</div>
+        </div>
+        <div class="info-card">
+          <div class="icon">📖</div>
+          <div class="label">전체 주차</div>
+          <div class="value" id="info-total">21</div>
+        </div>
+        <div class="info-card">
+          <div class="icon">📝</div>
+          <div class="label">공개된 어휘</div>
+          <div class="value" id="info-vocab">0</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="category-view" hidden>
+    <button class="back-btn" onclick="goHome()">← 영역 목록으로</button>
+    <section class="section">
+      <div class="cat-detail-header" id="cat-detail-header"></div>
+      <div class="week-grid" id="week-grid"></div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand">🌳 나무국어논술</div>
+    <div style="margin-top: 6px;">어휘력은 표현의 깊이를 결정합니다</div>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// 📚 21주차 영역별 분류 (실제 커리큘럼 기반)
+// 새 주차 공개 시: available을 true로 바꾸기만 하면 됨
+// ============================================================
+const CATEGORIES = [
+  {
+    id: 'self',
+    cssClass: 'cat-self',
+    emoji: '🌱',
+    title: '자기 이해',
+    description: '나의 감각·감정·성격·표현·행동을 배우는 어휘',
+    weeks: [
+      { number: 1, title: '01강 오감으로 느끼는 세상', vocabCount: 10, available: true, emoji: '🌱' },
+      { number: 2, title: '02강 마음의 날씨', vocabCount: 10, available: true, emoji: '🌱' },
+      { number: 3, title: '03강 마음의 결', vocabCount: 10, available: true, emoji: '🌱' },
+      { number: 4, title: '04강 나는 어떤 사람일까?', vocabCount: 10, available: true, emoji: '🌱' },
+      { number: 5, title: '05강 몸이 말한다', vocabCount: 10, available: true, emoji: '🌱' }
+    ]
+  },
+  {
+    id: 'society',
+    cssClass: 'cat-society',
+    emoji: '🌿',
+    title: '사람과 사회',
+    description: '인물·이야기·공동체·역사·시민의 어휘',
+    weeks: [
+      { number: 6, title: '06강 말과 글의 힘', vocabCount: 10, available: true, emoji: '🌿' },
+      { number: 7, title: '07강 이야기 속으로', vocabCount: 10, available: true, emoji: '🌿' },
+      { number: 8, title: '08강 함께 사는 우리', vocabCount: 10, available: true, emoji: '🌿' },
+      { number: 9, title: '09강 역사의 흔적', vocabCount: 10, available: true, emoji: '🌿' },
+      { number: 10, title: '10강 나라와 사회', vocabCount: 10, available: true, emoji: '🌿' }
+    ]
+  },
+  {
+    id: 'nature',
+    cssClass: 'cat-nature',
+    emoji: '🌸',
+    title: '자연과 사고',
+    description: '문화·자연·변화·사고·지구의 어휘',
+    weeks: [
+      { number: 11, title: '11강 우리 문화', vocabCount: 10, available: true, emoji: '🌸' },
+      { number: 12, title: '12강 자연과 인간', vocabCount: 10, available: true, emoji: '🌸' },
+      { number: 13, title: '13강 변화의 바람', vocabCount: 10, available: true, emoji: '🌸' },
+      { number: 14, title: '14강 다양한 생각', vocabCount: 10, available: true, emoji: '🌸' },
+      { number: 15, title: '15강 지구 이야기', vocabCount: 10, available: true, emoji: '🌸' }
+    ]
+  },
+  {
+    id: 'inquiry',
+    cssClass: 'cat-inquiry',
+    emoji: '🌳',
+    title: '탐구와 언어',
+    description: '과학·기술·문학·설득·언어·자연재해 어휘',
+    weeks: [
+      { number: 16, title: '16강 과학의 눈', vocabCount: 10, available: true, emoji: '🌳' },
+      { number: 17, title: '17강 기술과 미래', vocabCount: 10, available: true, emoji: '🌳' },
+      { number: 18, title: '18강 문학을 읽는 눈', vocabCount: 10, available: true, emoji: '🌳' },
+      { number: 19, title: '19강 설득하고 설명하기', vocabCount: 10, available: true, emoji: '🌳' },
+      { number: 20, title: '20강 우리말 탐구', vocabCount: 10, available: true, emoji: '🌳' },
+      { number: 21, title: '21강 날씨와 재해', vocabCount: 10, available: true, emoji: '🌳' }
+    ]
+  }
+];
+
+function renderHome() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const available = cat.weeks.filter(w => w.available).length;
+    const total = cat.weeks.length;
+    const firstNum = cat.weeks[0]?.number || 0;
+    const lastNum = cat.weeks[cat.weeks.length - 1]?.number || 0;
+    const progressPct = total > 0 ? (available / total) * 100 : 0;
+    const card = document.createElement('div');
+    card.className = `category-card ${cat.cssClass}`;
+    card.onclick = () => goToCategory(cat.id);
+    card.innerHTML = `
+      <div class="category-emoji">${cat.emoji}</div>
+      <div class="category-range">${firstNum}~${lastNum}주차</div>
+      <div class="category-title">${cat.title}</div>
+      <div class="category-desc">${cat.description}</div>
+      <div class="category-progress">
+        <div>
+          <div class="progress-text">${available} / ${total} 공개</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width: ${progressPct}%"></div>
+          </div>
+        </div>
+        <div class="category-arrow">→</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const totalAvailable = CATEGORIES.reduce((sum, c) => sum + c.weeks.filter(w => w.available).length, 0);
+  const totalVocab = CATEGORIES.reduce((sum, c) =>
+    sum + c.weeks.filter(w => w.available).reduce((s, w) => s + (w.vocabCount || 0), 0), 0);
+  document.getElementById('info-available').textContent = totalAvailable;
+  document.getElementById('info-vocab').textContent = totalVocab;
+}
+
+function renderCategory(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) { goHome(); return; }
+  const header = document.getElementById('cat-detail-header');
+  header.innerHTML = `
+    <div class="cat-detail-emoji">${cat.emoji}</div>
+    <div>
+      <div class="cat-detail-title">${cat.title}</div>
+      <div class="cat-detail-desc">${cat.description}</div>
+    </div>
+  `;
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  cat.weeks.forEach(week => {
+    const card = document.createElement(week.available ? 'a' : 'div');
+    card.className = 'week-card ' + (week.available ? 'available' : 'locked');
+    if (week.available) {
+      card.href = `game.html?week=${week.number}`;
+    }
+    const metaHTML = week.available && week.vocabCount
+      ? `<div class="week-meta"><span class="week-tag">어휘 ${week.vocabCount}개</span></div>`
+      : `<div class="week-meta"><span class="week-tag coming">준비 중</span></div>`;
+    const ctaHTML = week.available
+      ? `<div class="week-cta"><span>시작하기</span><span>→</span></div>`
+      : `<div class="week-cta"><span>준비 중</span><span>🔒</span></div>`;
+    card.innerHTML = `
+      <div class="week-emoji">${week.emoji || cat.emoji}</div>
+      <div class="week-number">${week.number}주차</div>
+      <div class="week-title">${week.title}</div>
+      ${metaHTML}
+      ${ctaHTML}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function goHome() { window.location.hash = ''; }
+function goToCategory(catId) { window.location.hash = catId; }
+
+function handleNav() {
+  const hash = window.location.hash.replace('#', '').trim();
+  if (!hash) {
+    document.getElementById('home-view').hidden = false;
+    document.getElementById('category-view').hidden = true;
+    renderHome();
+  } else {
+    document.getElementById('home-view').hidden = true;
+    document.getElementById('category-view').hidden = false;
+    renderCategory(hash);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('hashchange', handleNav);
+document.addEventListener('DOMContentLoaded', handleNav);
+</script>
+</body>
+</html>
