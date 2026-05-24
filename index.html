@@ -46,6 +46,15 @@
   .section-header { margin-bottom: 24px; }
   .section-title { font-size: 22px; font-weight: 800; color: var(--text); }
   .section-subtitle { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+
+  .stage-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stage-tab {
+    padding: 10px 20px; border-radius: 50px; border: 2px solid var(--border);
+    background: var(--card); color: var(--text-light); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .stage-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .stage-tab.coming { opacity: 0.45; cursor: default; }
   [hidden] { display: none !important; }
   .category-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
@@ -171,7 +180,14 @@
       <p>4개 영역, 21주차 어휘 게임이에요. 관심 있는 주제를 골라 들어가 보세요.</p>
     </div>
     <section class="section">
-      <div class="section-header">
+      <div class="section-header">      <div class="stage-tabs">
+        <button class="stage-tab active" onclick="switchStage('general')">📚 1단계 일반 어휘</button>
+        <button class="stage-tab" onclick="switchStage('social')" id="tab-social">🏛️ 2단계 사회 어휘</button>
+        <button class="stage-tab coming">🔬 3단계 과학 어휘</button>
+        <button class="stage-tab" onclick="switchStage('hanja')" id="tab-hanja">🈳 4단계 한자 어휘</button>
+        <button class="stage-tab coming">📖 중등 어휘</button>
+      </div>
+
         <div class="section-title">📚 영역별 어휘 게임</div>
         <div class="section-subtitle">관심 있는 영역을 선택해 보세요</div>
       </div>
@@ -286,7 +302,134 @@ const CATEGORIES = [
   }
 ];
 
-function renderHome() {
+
+function switchStage(stage) {
+  document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
+  if (stage === 'general') {
+    document.querySelectorAll('.stage-tab')[0].classList.add('active');
+    renderHome();
+  } else if (stage === 'social') {
+    document.querySelectorAll('.stage-tab')[1].classList.add('active');
+    renderSocialHome();
+  } else if (stage === 'hanja') {
+    document.querySelectorAll('.stage-tab')[3].classList.add('active');
+    renderHanjaHome();
+  }
+}
+
+const SOCIAL_CATEGORIES = [
+  { id: 'history', cssClass: 'cat-self', emoji: '🏛️', title: '역사와 나라', description: '건국·왕권·외교·신분의 어휘',
+    weeks: [
+      { number: 1, title: '01강 역사와 나라', available: true },
+      { number: 2, title: '02강 왕과 신하', available: true },
+      { number: 3, title: '03강 문화와 기록', available: true },
+      { number: 4, title: '04강 전쟁과 외교', available: true },
+      { number: 5, title: '05강 나라의 변화', available: true }
+    ]
+  },
+  { id: 'geo', cssClass: 'cat-society', emoji: '🗺️', title: '지리와 세계', description: '지형·기후·자원·도시·국제의 어휘',
+    weeks: [
+      { number: 6, title: '06강 땅의 모양', available: true },
+      { number: 7, title: '07강 날씨와 기후', available: true },
+      { number: 8, title: '08강 자원과 환경', available: true },
+      { number: 9, title: '09강 도시와 인구', available: true },
+      { number: 10, title: '10강 나라와 세계', available: true }
+    ]
+  },
+  { id: 'politics', cssClass: 'cat-nature', emoji: '⚖️', title: '정치와 권리', description: '민주주의·인권·다문화·경제의 어휘',
+    weeks: [
+      { number: 11, title: '11강 민주주의와 정치', available: true },
+      { number: 12, title: '12강 법과 권리', available: true },
+      { number: 13, title: '13강 인권과 평등', available: true },
+      { number: 14, title: '14강 함께 사는 사회', available: true },
+      { number: 15, title: '15강 경제 기초', available: true }
+    ]
+  },
+  { id: 'economy', cssClass: 'cat-inquiry', emoji: '💰', title: '경제와 생활', description: '시장·무역·노동·금융의 어휘',
+    weeks: [
+      { number: 16, title: '16강 생산과 소비', available: true },
+      { number: 17, title: '17강 시장과 가격', available: true },
+      { number: 18, title: '18강 무역과 교류', available: true },
+      { number: 19, title: '19강 직업과 노동', available: true },
+      { number: 20, title: '20강 금융과 경제생활', available: true }
+    ]
+  }
+];
+
+function renderSocialHome() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  SOCIAL_CATEGORIES.forEach(cat => {
+    const available = cat.weeks.filter(w => w.available).length;
+    const total = cat.weeks.length;
+    const firstNum = cat.weeks[0]?.number || 0;
+    const lastNum = cat.weeks[cat.weeks.length - 1]?.number || 0;
+    const progressPct = total > 0 ? (available / total) * 100 : 0;
+    const card = document.createElement('div');
+    card.className = `category-card ${cat.cssClass}`;
+    card.onclick = () => goToSocialCategory(cat.id);
+    card.innerHTML = `
+      <div class="category-emoji">${cat.emoji}</div>
+      <div class="category-range">${firstNum}~${lastNum}주차</div>
+      <div class="category-title">${cat.title}</div>
+      <div class="category-desc">${cat.description}</div>
+      <div class="category-progress">
+        <span>${available} / ${total} 공개</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+      </div>
+      <div style="text-align:right;margin-top:12px"><span class="category-arrow">→</span></div>
+    `;
+    grid.appendChild(card);
+  });
+  document.querySelector('.section-title').textContent = '🏛️ 사회 어휘 게임';
+  document.querySelector('.section-subtitle').textContent = '영역을 선택해 보세요';
+}
+
+function goToSocialCategory(catId) {
+  const cat = SOCIAL_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  showWeekList(cat, true);
+}
+
+function showWeekList(cat, isSocial = false) {
+  document.getElementById('home-view').hidden = true;
+  document.getElementById('category-view').hidden = false;
+  document.getElementById('cat-title').textContent = cat.title;
+  document.getElementById('cat-desc').textContent = cat.description;
+  const weekGrid = document.getElementById('week-grid');
+  weekGrid.innerHTML = '';
+  cat.weeks.forEach(week => {
+    const card = document.createElement('div');
+    card.className = `week-card ${week.available ? '' : 'locked'}`;
+    if (week.available) {
+      card.onclick = () => {
+        const base = isSocial ? 'game-social.html' : 'game.html';
+        window.location.href = `${base}?week=${week.number}`;
+      };
+    }
+    card.innerHTML = `
+      <div class="week-number">${week.number}주차</div>
+      <div class="week-title">${week.title}</div>
+      ${week.available ? '<div class="week-status available">시작하기 →</div>' : '<div class="week-status locked">🔒 준비중</div>'}
+    `;
+    weekGrid.appendChild(card);
+  });
+}
+
+function renderHanjaHome() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-light);">
+      <div style="font-size:56px;margin-bottom:16px;">🈳</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">4단계 한자 어휘</div>
+      <div style="font-size:15px;">커리큘럼 설계 중이에요. 곧 만나요! 🌱</div>
+    </div>
+  `;
+  document.querySelector('.section-title').textContent = '🈳 한자 어휘 게임';
+  document.querySelector('.section-subtitle').textContent = '준비 중이에요';
+}
+
+
   const grid = document.getElementById('category-grid');
   grid.innerHTML = '';
   CATEGORIES.forEach(cat => {
