@@ -303,10 +303,14 @@ const CATEGORIES = [
 ];
 
 
+let currentStage = 'general';
+
 function switchStage(stage) {
+  currentStage = stage;
   document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
   if (stage === 'general') {
     document.querySelectorAll('.stage-tab')[0].classList.add('active');
+    window.location.hash = '';
     renderHome();
   } else if (stage === 'social') {
     document.querySelectorAll('.stage-tab')[1].classList.add('active');
@@ -514,7 +518,9 @@ function handleNav() {
   if (!hash) {
     document.getElementById('home-view').hidden = false;
     document.getElementById('category-view').hidden = true;
-    renderHome();
+    if (currentStage === 'social') renderSocialHome();
+    else if (currentStage === 'hanja') renderHanjaHome();
+    else renderHome();
   } else {
     document.getElementById('home-view').hidden = true;
     document.getElementById('category-view').hidden = false;
