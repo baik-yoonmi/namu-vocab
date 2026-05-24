@@ -357,6 +357,8 @@ const SOCIAL_CATEGORIES = [
 ];
 
 function renderSocialHome() {
+  document.getElementById('home-view').hidden = false;
+  document.getElementById('category-view').hidden = true;
   const grid = document.getElementById('category-grid');
   grid.innerHTML = '';
   SOCIAL_CATEGORIES.forEach(cat => {
@@ -417,6 +419,8 @@ function showWeekList(cat, isSocial = false) {
 }
 
 function renderHanjaHome() {
+  document.getElementById('home-view').hidden = false;
+  document.getElementById('category-view').hidden = true;
   const grid = document.getElementById('category-grid');
   grid.innerHTML = `
     <div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-light);">
