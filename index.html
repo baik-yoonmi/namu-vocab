@@ -480,14 +480,8 @@ function renderHanjaHome() {
 function renderCategory(catId) {
   const cat = CATEGORIES.find(c => c.id === catId);
   if (!cat) { goHome(); return; }
-  const header = document.getElementById('cat-detail-header');
-  header.innerHTML = `
-    <div class="cat-detail-emoji">${cat.emoji}</div>
-    <div>
-      <div class="cat-detail-title">${cat.title}</div>
-      <div class="cat-detail-desc">${cat.description}</div>
-    </div>
-  `;
+  document.getElementById('cat-title').textContent = cat.title;
+  document.getElementById('cat-desc').textContent = cat.description;
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
   cat.weeks.forEach(week => {
@@ -515,24 +509,46 @@ function renderCategory(catId) {
 
 function goHome() { showView('home'); }
 function goToCategory(catId) { showView('category', catId); }
+function goToSocialCategory(catId) { showView('category', catId); }
 
 let appState = { view: 'home', stage: 'general', catId: null };
 
 function showView(view, catId = null) {
   appState.view = view;
   appState.catId = catId;
+
   if (view === 'home') {
     document.getElementById('home-view').hidden = false;
     document.getElementById('category-view').hidden = true;
     if (appState.stage === 'social') renderSocialHome();
     else if (appState.stage === 'hanja') renderHanjaHome();
     else renderHome();
+
   } else if (view === 'category') {
     document.getElementById('home-view').hidden = true;
     document.getElementById('category-view').hidden = false;
+
     if (appState.stage === 'social') {
       const cat = SOCIAL_CATEGORIES.find(c => c.id === catId);
-      if (cat) showWeekList(cat, true);
+      if (!cat) { goHome(); return; }
+      document.getElementById('cat-title').textContent = cat.title;
+      document.getElementById('cat-desc').textContent = cat.description;
+      const weekGrid = document.getElementById('week-grid');
+      weekGrid.innerHTML = '';
+      cat.weeks.forEach(week => {
+        const card = document.createElement('div');
+        card.className = `week-card ${week.available ? 'available' : 'locked'}`;
+        if (week.available) {
+          card.onclick = () => { window.location.href = `game-social.html?week=${week.number}`; };
+        }
+        card.innerHTML = `
+          <div class="week-number">${week.number}주차</div>
+          <div class="week-title">${week.title}</div>
+          ${week.available ? '<div class="week-cta"><span>시작하기</span><span>→</span></div>' : '<div class="week-cta"><span>준비 중</span><span>🔒</span></div>'}
+        `;
+        weekGrid.appendChild(card);
+      });
+
     } else {
       renderCategory(catId);
     }
