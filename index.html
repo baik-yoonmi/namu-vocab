@@ -444,7 +444,7 @@ function showWeekList(cat, isSocial = false) {
   weekGrid.innerHTML = '';
   cat.weeks.forEach(week => {
     const card = document.createElement('div');
-    card.className = `week-card ${week.available ? '' : 'locked'}`;
+    card.className = `week-card ${week.available ? 'available' : 'locked'}`;
     if (week.available) {
       card.onclick = () => {
         const base = isSocial ? 'game-social.html' : 'game.html';
