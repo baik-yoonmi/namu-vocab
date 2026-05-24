@@ -307,10 +307,10 @@ let currentStage = 'general';
 
 function switchStage(stage) {
   currentStage = stage;
+  appState.stage = stage;
   document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
   if (stage === 'general') {
     document.querySelectorAll('.stage-tab')[0].classList.add('active');
-    window.location.hash = '';
     renderHome();
   } else if (stage === 'social') {
     document.querySelectorAll('.stage-tab')[1].classList.add('active');
@@ -359,6 +359,41 @@ const SOCIAL_CATEGORIES = [
     ]
   }
 ];
+
+function renderHome() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const available = cat.weeks.filter(w => w.available).length;
+    const total = cat.weeks.length;
+    const firstNum = cat.weeks[0]?.number || 0;
+    const lastNum = cat.weeks[cat.weeks.length - 1]?.number || 0;
+    const progressPct = total > 0 ? (available / total) * 100 : 0;
+    const card = document.createElement('div');
+    card.className = `category-card ${cat.cssClass}`;
+    card.onclick = () => goToCategory(cat.id);
+    card.innerHTML = `
+      <div class="category-emoji">${cat.emoji}</div>
+      <div class="category-range">${firstNum}~${lastNum}주차</div>
+      <div class="category-title">${cat.title}</div>
+      <div class="category-desc">${cat.description}</div>
+      <div class="category-progress">
+        <span>${available} / ${total} 공개</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+      </div>
+      <div style="text-align:right;margin-top:12px"><span class="category-arrow">→</span></div>
+    `;
+    grid.appendChild(card);
+  });
+  document.querySelector('.section-title').textContent = '📚 영역별 어휘 게임';
+  document.querySelector('.section-subtitle').textContent = '관심 있는 영역을 선택해 보세요';
+
+  const totalAvailable = CATEGORIES.reduce((sum, c) => sum + c.weeks.filter(w => w.available).length, 0);
+  const totalVocab = CATEGORIES.reduce((sum, c) =>
+    sum + c.weeks.filter(w => w.available).reduce((s, w) => s + (w.vocabCount || 0), 0), 0);
+  document.getElementById('info-available').textContent = totalAvailable;
+  document.getElementById('info-vocab').textContent = totalVocab;
+}
 
 function renderSocialHome() {
   document.getElementById('home-view').hidden = false;
@@ -438,41 +473,6 @@ function renderHanjaHome() {
 }
 
 
-  const grid = document.getElementById('category-grid');
-  grid.innerHTML = '';
-  CATEGORIES.forEach(cat => {
-    const available = cat.weeks.filter(w => w.available).length;
-    const total = cat.weeks.length;
-    const firstNum = cat.weeks[0]?.number || 0;
-    const lastNum = cat.weeks[cat.weeks.length - 1]?.number || 0;
-    const progressPct = total > 0 ? (available / total) * 100 : 0;
-    const card = document.createElement('div');
-    card.className = `category-card ${cat.cssClass}`;
-    card.onclick = () => goToCategory(cat.id);
-    card.innerHTML = `
-      <div class="category-emoji">${cat.emoji}</div>
-      <div class="category-range">${firstNum}~${lastNum}주차</div>
-      <div class="category-title">${cat.title}</div>
-      <div class="category-desc">${cat.description}</div>
-      <div class="category-progress">
-        <div>
-          <div class="progress-text">${available} / ${total} 공개</div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width: ${progressPct}%"></div>
-          </div>
-        </div>
-        <div class="category-arrow">→</div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  const totalAvailable = CATEGORIES.reduce((sum, c) => sum + c.weeks.filter(w => w.available).length, 0);
-  const totalVocab = CATEGORIES.reduce((sum, c) =>
-    sum + c.weeks.filter(w => w.available).reduce((s, w) => s + (w.vocabCount || 0), 0), 0);
-  document.getElementById('info-available').textContent = totalAvailable;
-  document.getElementById('info-vocab').textContent = totalVocab;
-}
 
 function renderCategory(catId) {
   const cat = CATEGORIES.find(c => c.id === catId);
@@ -510,27 +510,34 @@ function renderCategory(catId) {
   });
 }
 
-function goHome() { window.location.hash = ''; }
-function goToCategory(catId) { window.location.hash = catId; }
+function goHome() { showView('home'); }
+function goToCategory(catId) { showView('category', catId); }
 
-function handleNav() {
-  const hash = window.location.hash.replace('#', '').trim();
-  if (!hash) {
+let appState = { view: 'home', stage: 'general', catId: null };
+
+function showView(view, catId = null) {
+  appState.view = view;
+  appState.catId = catId;
+  if (view === 'home') {
     document.getElementById('home-view').hidden = false;
     document.getElementById('category-view').hidden = true;
-    if (currentStage === 'social') renderSocialHome();
-    else if (currentStage === 'hanja') renderHanjaHome();
+    if (appState.stage === 'social') renderSocialHome();
+    else if (appState.stage === 'hanja') renderHanjaHome();
     else renderHome();
-  } else {
+  } else if (view === 'category') {
     document.getElementById('home-view').hidden = true;
     document.getElementById('category-view').hidden = false;
-    renderCategory(hash);
+    if (appState.stage === 'social') {
+      const cat = SOCIAL_CATEGORIES.find(c => c.id === catId);
+      if (cat) showWeekList(cat, true);
+    } else {
+      renderCategory(catId);
+    }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-window.addEventListener('hashchange', handleNav);
-document.addEventListener('DOMContentLoaded', handleNav);
+document.addEventListener('DOMContentLoaded', () => showView('home'));
 </script>
 </body>
 </html>
